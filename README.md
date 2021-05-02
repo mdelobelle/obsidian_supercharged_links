@@ -3,6 +3,7 @@
 Internal links adds attributes to <a.internal-link> HTMLElements with the attributes and values of the target file's frontmatter.
 Combined with css snippets, it allows a very flexible way to customize the links
 
+![](https://github.com/mdelobelle/obsidian_supercharged_links/blob/master/images/superchargeLink.gif)
 
 ### Usage
 
