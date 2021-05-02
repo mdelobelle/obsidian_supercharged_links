@@ -3,7 +3,7 @@
 	"name": "Internal Links",
 	"version": "0.0.1",
 	"minAppVersion": "0.12.1",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
+	"description": "Adds attributes to internal links with the values of target note's frontmatter attributes",
 	"author": "mdelobelle",
 	"authorUrl": "https://github.com/mdelobelle/mdelobelle/tree/main",
 	"isDesktopOnly": false
