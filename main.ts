@@ -1,5 +1,5 @@
 import { privateDecrypt } from 'crypto';
-import { App, Modal, Notice, parseFrontMatterEntry, Plugin, PluginSettingTab, Setting, ViewState, TFile, WorkspaceLeaf } from 'obsidian';
+import { App, Modal, Notice, parseFrontMatterEntry, Plugin, PluginSettingTab, Setting, ViewState, TFile, WorkspaceLeaf, MarkdownPreviewView } from 'obsidian';
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -8,8 +8,6 @@ interface MyPluginSettings {
 const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: 'default'
 }
-
-
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
@@ -64,7 +62,7 @@ export default class MyPlugin extends Plugin {
 	async onload() {
 		console.log('loading plugin');
 		await this.loadSettings();
-
+		
 		this.app.workspace.on('active-leaf-change', () => {
 			this.updateLinks()
 		})
