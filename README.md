@@ -1,4 +1,4 @@
-## Obsidian Sample Plugin
+## Obsidian Internal Links supercharger
 
 Internal links adds attributes to <a.internal-link> HTMLElements with the attributes and values of the target file's frontmatter.
 Combined with css snippets, it allows a very flexible way to customize the links
@@ -7,7 +7,10 @@ Combined with css snippets, it allows a very flexible way to customize the links
 
 ### Usage
 
-Adding a frontmatter key: value in a note automatically adds the key as a new attribute to the a.internal-link HTMLElements linking to this note.
+Set the targetted frontmatter attributes in the settings of the plugin "Internal Links", comma separated.
+
+Then, adding a frontmatter key: value in a note automatically adds the key as a new attribute to the a.internal-link HTMLElements linking to this note.
+This works only if the value of the frontmatter attribute is a string
 
 in target.md
 ```

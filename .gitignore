@@ -8,6 +8,7 @@ package-lock.json
 
 # build
 *.js.map
+main.js
 
 # Mac OS
 .DS_Store
