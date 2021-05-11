@@ -1,5 +1,4 @@
 import { App, parseFrontMatterEntry, Plugin, PluginSettingTab, Setting, TFile, MarkdownPostProcessorContext, MarkdownView } from 'obsidian';
-import { stringify } from 'querystring';
 
 interface InternalLinksSuperchargerSettings {
 	targetAttributes: Array<string>;
