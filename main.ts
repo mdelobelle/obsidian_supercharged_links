@@ -1,5 +1,5 @@
-import { privateDecrypt } from 'crypto';
-import { App, Modal, Notice, parseFrontMatterEntry, Plugin, PluginSettingTab, Setting, ViewState, TFile, WorkspaceLeaf, MarkdownPreviewView, MarkdownPostProcessorContext, MarkdownView } from 'obsidian';
+import { App, parseFrontMatterEntry, Plugin, PluginSettingTab, Setting, TFile, MarkdownPostProcessorContext, MarkdownView } from 'obsidian';
+import { stringify } from 'querystring';
 
 interface InternalLinksSuperchargerSettings {
 	targetAttributes: Array<string>;
@@ -9,44 +9,26 @@ const DEFAULT_SETTINGS: InternalLinksSuperchargerSettings = {
 	targetAttributes: []
 }
 
-interface TargetProp {
-	key: string;
-	value: string;
-}
-
-class TargetProp {
-	key: string;
-	value: string;
-
-	constructor(key: string, value: string){
-		this.key = key;
-		this.value = value
-	}
-}
-
 export default class InternalLinksSupercharger extends Plugin {
 	settings: InternalLinksSuperchargerSettings;
-	coreAttributes = ["data-href", "href", "class", "target", "rel"]
 
 	clearLinkExtraAttributes(link: HTMLElement){
 		Object.values(link.attributes).forEach(attr =>{
-			if(!this.coreAttributes.contains(attr.name)){
+			if(attr.name.startsWith("data-link")){
 				link.removeAttribute(attr.name)
 			}
 		})
 	}
 
-	fetchFrontmatterTargetAttributes(dest: TFile): Array<TargetProp>{
+	fetchFrontmatterTargetAttributes(dest: TFile): Record<string, string>{
 		const targetCachedFile = this.app.metadataCache.getFileCache(dest)
-		let new_props: Array<TargetProp> = []
+		let new_props: Record<string, string> = {}
 		if(targetCachedFile.frontmatter){
 			Object.keys(targetCachedFile.frontmatter).forEach((key: string) => {
 				if(this.settings.targetAttributes.contains(key)) {
 					const value = parseFrontMatterEntry(targetCachedFile.frontmatter, key)
 					if(typeof value === 'string'){
-						const targetProp = new TargetProp(key, value);
-						console.log(new_props)
-						new_props.push(targetProp)
+						new_props[key] = value
 					}
 				}
 			})
@@ -54,9 +36,9 @@ export default class InternalLinksSupercharger extends Plugin {
 		return new_props
 	}
 
-	setLinkNewProps(link: HTMLElement, new_props: Array<TargetProp>){
-		new_props.forEach(targetProp => {
-			link.setAttribute(targetProp.key, targetProp.value)
+	setLinkNewProps(link: HTMLElement, new_props: Record<string, string>){
+		Object.keys(new_props).forEach(key => {
+			link.setAttribute("data-link-"+key, new_props[key])
 		})
 	}
 
@@ -81,7 +63,7 @@ export default class InternalLinksSupercharger extends Plugin {
 	updateVisibleLinks() {
 		fishAll("a.internal-link").forEach(internalLink => this.clearLinkExtraAttributes(internalLink))
 		this.app.workspace.iterateRootLeaves((leaf) => {
-			if(leaf.view instanceof MarkdownView){
+			if(leaf.view instanceof MarkdownView && leaf.view.file){
 				const file: TFile = leaf.view.file;
 				const cachedFile = this.app.metadataCache.getFileCache(file)
 				if(cachedFile.links){

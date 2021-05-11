@@ -23,12 +23,12 @@ in note.md when including a link to target like this:
 ```
 ### Some cool stuff about [[target]]
 ```
-will result in a "supercharged" a.internal-link HTMLElement `<a data-href="target" href="target" class="internal-link" target="_blank" rel="noopener" foo="bar">target</a>`
+will result in a "supercharged" a.internal-link HTMLElement with new properties prefixed with `data-link-`: `<a data-href="target" href="target" class="internal-link" target="_blank" rel="noopener" data-link-foo="bar">target</a>`
 
 Therefore you can customize this type of links with custom css
 e.g.
 ```css
-a.internal-link[foo="bar"]{
+a.internal-link[data-link-foo="bar"]{
     text-decoration: none
 }
 ```
