@@ -28,7 +28,7 @@ export default class SuperchargedLinks extends Plugin {
 					const value = parseFrontMatterEntry(targetCachedFile.frontmatter, key)
 					if(typeof value === 'string'){
 						new_props[key] = value
-					} else if (typeof value === 'boolean'){
+					} else if (typeof value === 'boolean' || typeof value === 'number'){
 						new_props[key] = value.toString()
 					} else if (Array.isArray(value)) {
 						new_props[key] = value.join(', ')
