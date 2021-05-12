@@ -1,15 +1,15 @@
 import { App, parseFrontMatterEntry, Plugin, PluginSettingTab, Setting, TFile, MarkdownPostProcessorContext, MarkdownView } from 'obsidian';
 
-interface InternalLinksSuperchargerSettings {
+interface SuperchargedLinksSettings {
 	targetAttributes: Array<string>;
 }
 
-const DEFAULT_SETTINGS: InternalLinksSuperchargerSettings = {
+const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	targetAttributes: []
 }
 
-export default class InternalLinksSupercharger extends Plugin {
-	settings: InternalLinksSuperchargerSettings;
+export default class SuperchargedLinks extends Plugin {
+	settings: SuperchargedLinksSettings;
 
 	clearLinkExtraAttributes(link: HTMLElement){
 		Object.values(link.attributes).forEach(attr =>{
@@ -81,15 +81,15 @@ export default class InternalLinksSupercharger extends Plugin {
 	}
 
 	async onload():Promise <void> {
-		console.log('Internal Link Supercharger loaded');
+		console.log('Supercharged links loaded');
 		await this.loadSettings();
-		this.addSettingTab(new InternalLinksSuperchargerSettingTab(this.app, this));
+		this.addSettingTab(new SuperchargedLinksSettingTab(this.app, this));
 		this.registerMarkdownPostProcessor((el, ctx) => this.updateElLinks(el, ctx));
 		this.app.metadataCache.on('changed', (_file) => this.updateVisibleLinks());
 	}
 
 	onunload() {
-		console.log('Internal Link Supercharger unloaded');
+		console.log('Supercharged links unloaded');
 	}
 
 	async loadSettings() {
@@ -101,10 +101,10 @@ export default class InternalLinksSupercharger extends Plugin {
 	}
 }
 
-class InternalLinksSuperchargerSettingTab extends PluginSettingTab {
-	plugin: InternalLinksSupercharger;
+class SuperchargedLinksSettingTab extends PluginSettingTab {
+	plugin: SuperchargedLinks;
 
-	constructor(app: App, plugin: InternalLinksSupercharger) {
+	constructor(app: App, plugin: SuperchargedLinks) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -114,7 +114,7 @@ class InternalLinksSuperchargerSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Settings for Internal Links supercharger.'});
+		containerEl.createEl('h2', {text: 'Settings for Supercharged Links.'});
 
 		new Setting(containerEl)
 			.setName('Target Attributes')
