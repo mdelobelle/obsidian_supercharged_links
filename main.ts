@@ -30,6 +30,8 @@ export default class SuperchargedLinks extends Plugin {
 						new_props[key] = value
 					} else if (typeof value === 'boolean'){
 						new_props[key] = value.toString()
+					} else if (Array.isArray(value)) {
+						new_props[key] = value.join(', ')
 					}
 				}
 			})
