@@ -122,13 +122,16 @@ class SuperchargedLinksSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Target Attributes')
-			.setDesc('Frontmatter attributes to target')
-			.addText(text => text
+			.setDesc('Frontmatter attributes to target, comma separated')
+			.addTextArea((text) => {text
 				.setPlaceholder('Enter attributes as string, comma separated')
 				.setValue(this.plugin.settings.targetAttributes.join(', '))
 				.onChange(async (value) => {
 					this.plugin.settings.targetAttributes = value.replace(/\s/g,'').split(',');
 					await this.plugin.saveSettings();
-				}));
+				})
+				text.inputEl.rows = 6;
+				text.inputEl.cols = 25;
+			});
 	}
 }
