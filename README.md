@@ -10,7 +10,7 @@ Combined with css snippets, it allows a very flexible way to customize the links
 Set the targetted frontmatter attributes in the settings of the plugin "Internal Links", comma separated.
 
 Then, adding a frontmatter key: value in a note automatically adds the key as a new attribute to the a.internal-link HTMLElements linking to this note.
-This works only if the value of the frontmatter attribute is a string
+This works only if the value of the frontmatter attribute is a string, an array, a number or a boolean
 
 in target.md
 ```
