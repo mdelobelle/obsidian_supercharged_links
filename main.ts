@@ -28,6 +28,10 @@ export default class SuperchargedLinks extends Plugin {
 					const value = parseFrontMatterEntry(targetCachedFile.frontmatter, key)
 					if(typeof value === 'string'){
 						new_props[key] = value
+					} else if (typeof value === 'boolean' || typeof value === 'number'){
+						new_props[key] = value.toString()
+					} else if (Array.isArray(value)) {
+						new_props[key] = value.join(', ')
 					}
 				}
 			})
@@ -118,13 +122,16 @@ class SuperchargedLinksSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Target Attributes')
-			.setDesc('Frontmatter attributes to target')
-			.addText(text => text
+			.setDesc('Frontmatter attributes to target, comma separated')
+			.addTextArea((text) => {text
 				.setPlaceholder('Enter attributes as string, comma separated')
 				.setValue(this.plugin.settings.targetAttributes.join(', '))
 				.onChange(async (value) => {
 					this.plugin.settings.targetAttributes = value.replace(/\s/g,'').split(',');
 					await this.plugin.saveSettings();
-				}));
+				})
+				text.inputEl.rows = 6;
+				text.inputEl.cols = 25;
+			});
 	}
 }
