@@ -31,7 +31,7 @@ export default class SuperchargedLinks extends Plugin {
 					} else if (typeof value === 'boolean' || typeof value === 'number'){
 						new_props[key] = value.toString()
 					} else if (Array.isArray(value)) {
-						new_props[key] = value.join(', ')
+						new_props[key] = value.join(' ')
 					}
 				}
 			})
