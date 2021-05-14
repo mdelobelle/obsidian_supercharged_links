@@ -1,7 +1,7 @@
 {
 	"id": "supercharged-links-obsidian",
 	"name": "Supercharged Links",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"minAppVersion": "0.12.1",
 	"description": "Adds properties to internal links with the values of target note's frontmatter attributes",
 	"author": "mdelobelle",
