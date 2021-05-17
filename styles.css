@@ -1,0 +1,34 @@
+.frontmatter-prompt-div {
+    display: flex;
+}
+
+.frontmatter-prompt-form {
+    width: 100%;
+}
+.frontmatter-prompt-container {
+    margin-top: 10px;
+}
+
+.frontmatter-prompt-container > input{
+    margin-right: 10px;
+    margin-bottom: 8px
+}
+
+.frontmatter-prompt-input {
+    flex-grow: 1;
+    width: 100%
+}
+
+.frontmatter-prompt-checkbox {
+    display: none;
+}
+
+.frontmatter-checkbox-toggler {
+    text-align: center;
+    display: inline-block;
+}
+
+.frontmatter-separator {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
