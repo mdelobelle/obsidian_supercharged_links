@@ -2,6 +2,7 @@ import {App, PluginSettingTab, Setting, ButtonComponent} from "obsidian"
 import SuperchargedLinks from "main"
 import FrontmatterPropertySettingsModal from "src/settings/FrontmatterPropertySettingsModal"
 import FrontMatterProperty from "src/FrontMatterProperty"
+import FrontmatterPropertySetting from "src/settings/FrontmatterPropertySetting"
 
 export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 	plugin: SuperchargedLinks;
@@ -53,29 +54,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 		this.plugin.initialProperties.forEach(prop => {
             const property = new FrontMatterProperty("", {}, "")
             Object.assign(property, prop)
-			let setting = new Setting(containerEl)
-			setting.infoEl.textContent = 
-                `${property.propertyName}: [${Object.keys(property.presetValues).map(k => property.presetValues[k]).join(', ')}]`
-			setting.addButton((b) => {
-                b.setIcon("pencil")
-                    .setTooltip("Edit")
-                    .onClick(() => {
-                        let modal = new FrontmatterPropertySettingsModal(this.app, this.plugin, containerEl, setting, property);
-                        modal.open();
-                    });
-            });
-            setting.addButton((b) => {
-                b.setIcon("trash")
-                    .setTooltip("Delete")
-                    .onClick(() => {
-                        const currentExistingProperty = this.plugin.initialProperties.filter(p => p.propertyId == property.propertyId)[0]
-						if(currentExistingProperty){
-							this.plugin.initialProperties.remove(currentExistingProperty)
-						}
-						setting.settingEl.parentElement.removeChild(setting.settingEl)
-						this.plugin.saveSettings()
-                });
-            });
+			new FrontmatterPropertySetting(containerEl, property, this.app, this.plugin)
 		})
 	}
 }

@@ -1,17 +1,18 @@
-import {App, Modal, Setting, TextComponent, Notice, ButtonComponent} from "obsidian"
+import {App, Modal, Setting, TextComponent, Notice, ButtonComponent, ExtraButtonComponent} from "obsidian"
 import SuperchargedLinks from "main"
 import FrontMatterProperty from "src/FrontMatterProperty"
+import FrontmatterPropertySetting from "src/settings/FrontmatterPropertySetting"
 
 export default class FrontmatterPropertySettingsModal extends Modal {
-	private propertyNamePromptEl: TextComponent;
-	private presetValuesPromptEls: Array<TextComponent> = [];
-    private saved: boolean = false;
-	private property: FrontMatterProperty
-    private plugin : SuperchargedLinks
-    private initialProperty: FrontMatterProperty
-    private parentSetting: Setting
-    private new: boolean = true
-    private parentSettingContainer: HTMLElement
+	propertyNamePromptEl: TextComponent;
+	presetValuesPromptEls: Array<TextComponent> = [];
+    saved: boolean = false;
+	property: FrontMatterProperty
+    plugin : SuperchargedLinks
+    initialProperty: FrontMatterProperty
+    parentSetting: Setting
+    new: boolean = true
+    parentSettingContainer: HTMLElement
 
 
 	constructor(app: App, plugin: SuperchargedLinks, parentSettingContainer: HTMLElement, parentSetting?: Setting, property?: FrontMatterProperty){
@@ -40,19 +41,6 @@ export default class FrontmatterPropertySettingsModal extends Modal {
 		}
 	}
 
-    static copyProperty(target: FrontMatterProperty, source: FrontMatterProperty){
-        target.propertyId = source.propertyId
-        target.propertyName = source.propertyName
-        Object.keys(source.presetValues).forEach(k => {
-            target.presetValues[k] = source.presetValues[k]
-        })
-        Object.keys(target.presetValues).forEach(k => {
-            if(!Object.keys(source.presetValues).includes(k)){
-                delete target.presetValues[k]
-            }
-        })
-    }
-
 	onOpen(): void {
         if(this.property.propertyName == ""){
             this.titleEl.setText(`Add a property and set predefined`)
@@ -68,24 +56,7 @@ export default class FrontmatterPropertySettingsModal extends Modal {
             this.parentSetting.infoEl.textContent = 
                 `${this.property.propertyName}: [${Object.keys(this.property.presetValues).map(k => this.property.presetValues[k]).join(', ')}]`
         } else if(this.saved) {
-            let setting = new Setting(this.parentSettingContainer)
-            setting.infoEl.textContent = 
-                `${this.property.propertyName}: [${Object.keys(this.property.presetValues).map(k => this.property.presetValues[k]).join(', ')}]`
-                setting.addButton((b) => {
-                b.setIcon("pencil")
-                    .setTooltip("Edit")
-                    .onClick(() => {
-                        let modal = new FrontmatterPropertySettingsModal(this.app, this.plugin, this.parentSettingContainer, setting, this.property);
-                        modal.open();
-                    });
-            });
-            setting.addButton((b) => {
-                b.setIcon("trash")
-                    .setTooltip("Delete")
-                    .onClick(() => {
-                        console.log(this.property.propertyId)
-                    });
-            });
+            new FrontmatterPropertySetting(this.parentSettingContainer, this.property, this.app, this.plugin)
         }
     }
 
@@ -186,19 +157,7 @@ export default class FrontmatterPropertySettingsModal extends Modal {
         const footerEl = this.contentEl.createDiv()
         const footerButtons = new Setting(footerEl)
         footerButtons.addButton((b) => this.createSaveButton(b))
-        footerButtons.addExtraButton((b) => {
-            b.setIcon("cross")
-                .setTooltip("Cancel")
-                .onClick(() => {
-                    this.saved = false;
-                    /* reset values from settings */
-                    if(this.initialProperty.propertyName != "") {
-                        Object.assign(this.property, this.initialProperty)
-                    }
-                    this.close();
-                });
-            return b;
-        });
+        footerButtons.addExtraButton((b) => this.createCancelButton(b));
 	}
 
     createSaveButton(b: ButtonComponent): ButtonComponent{
@@ -243,7 +202,7 @@ export default class FrontmatterPropertySettingsModal extends Modal {
                 this.saved = true;
                 const currentExistingProperty = this.plugin.initialProperties.filter(p => p.propertyId == this.property.propertyId)[0]
                 if(currentExistingProperty){
-                    FrontmatterPropertySettingsModal.copyProperty(currentExistingProperty, this.property)
+                    FrontMatterProperty.copyProperty(currentExistingProperty, this.property)
                 } else {
                     this.plugin.initialProperties.push(this.property)
                 }
@@ -254,7 +213,21 @@ export default class FrontmatterPropertySettingsModal extends Modal {
         return b
     }
 
-    /* validation functions */
+    createCancelButton(b: ExtraButtonComponent): ExtraButtonComponent{
+        b.setIcon("cross")
+                .setTooltip("Cancel")
+                .onClick(() => {
+                    this.saved = false;
+                    /* reset values from settings */
+                    if(this.initialProperty.propertyName != "") {
+                        Object.assign(this.property, this.initialProperty)
+                    }
+                    this.close();
+                });
+        return b;
+    }
+
+    /* utils functions */
 
     static setValidationError(textInput: TextComponent, insertAfter: Element, message?: string) {
         textInput.inputEl.addClass("is-invalid");

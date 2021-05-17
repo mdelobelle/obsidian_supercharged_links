@@ -26,6 +26,19 @@ class FrontMatterProperty{
         this.presetValues[newKey.toString()] = value
         return newKey.toString()
     }
+
+    static copyProperty(target: FrontMatterProperty, source: FrontMatterProperty){
+        target.propertyId = source.propertyId
+        target.propertyName = source.propertyName
+        Object.keys(source.presetValues).forEach(k => {
+            target.presetValues[k] = source.presetValues[k]
+        })
+        Object.keys(target.presetValues).forEach(k => {
+            if(!Object.keys(source.presetValues).includes(k)){
+                delete target.presetValues[k]
+            }
+        })
+    }
 }
 
 export default FrontMatterProperty
