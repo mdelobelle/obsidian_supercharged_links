@@ -83,7 +83,7 @@ a.internal-link[data-link-category$="People" i]::before{
     content: "👤 "
 }
 ```
-![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-in-note.png!)
+![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-in-note.png)
 
 to highlight the link in a tag-like blue rounded rectangle when there is a property next-actions in the target file:
 
