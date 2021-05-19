@@ -1,41 +1,48 @@
 interface FrontMatterProperty{
-    propertyId: string
-	propertyName: string
-	presetValues: Record<string, string>
+    id: string
+	name: string
+	values: Record<string, string>
+    isCycle: boolean
+    isMulti: boolean
 }
 
 class FrontMatterProperty{
-    public propertyId: string
-	public propertyName: string
-	public presetValues: Record<string, string>
 
-	constructor(propertyName: string, presetValues: Record<string, string>, propertyId: string){
-		this.propertyName = propertyName
-		this.presetValues = presetValues
-        this.propertyId = propertyId
+	constructor(name: string = "", 
+                values: Record<string, string> = {}, 
+                id: string = "", 
+                isMulti: boolean = false, 
+                isCycle: boolean = false){
+		this.name = name
+		this.values = values
+        this.id = id
+        this.isCycle = isCycle
+        this.isMulti = isMulti
         this.insertNewValue.bind(this)
 	}
 
     public async insertNewValue(value:string): Promise<string>{
         let newKey = 1
-        Object.keys(this.presetValues).forEach(key => {
+        Object.keys(this.values).forEach(key => {
             if(parseInt(key) && parseInt(key) >= newKey){
                 newKey = parseInt(key) + 1
             }
         })
-        this.presetValues[newKey.toString()] = value
+        this.values[newKey.toString()] = value
         return newKey.toString()
     }
 
     static copyProperty(target: FrontMatterProperty, source: FrontMatterProperty){
-        target.propertyId = source.propertyId
-        target.propertyName = source.propertyName
-        Object.keys(source.presetValues).forEach(k => {
-            target.presetValues[k] = source.presetValues[k]
+        target.id = source.id
+        target.name = source.name
+        target.isCycle = source.isCycle
+        target.isMulti = source.isMulti
+        Object.keys(source.values).forEach(k => {
+            target.values[k] = source.values[k]
         })
-        Object.keys(target.presetValues).forEach(k => {
-            if(!Object.keys(source.presetValues).includes(k)){
-                delete target.presetValues[k]
+        Object.keys(target.values).forEach(k => {
+            if(!Object.keys(source.values).includes(k)){
+                delete target.values[k]
             }
         })
     }

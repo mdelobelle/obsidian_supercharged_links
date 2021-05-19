@@ -15,15 +15,15 @@ export default class FrontmatterPropertySetting extends Setting {
         this.property = property
         this.app = app
         this.plugin = plugin
-        this.setTextContentWithPropertyName()
+        this.setTextContentWithname()
         this.addEditButton()
         this.addDeleteButton()
 
     }
     
-    setTextContentWithPropertyName(): void{
+    setTextContentWithname(): void{
         this.infoEl.textContent = 
-        `${this.property.propertyName}: [${Object.keys(this.property.presetValues).map(k => this.property.presetValues[k]).join(', ')}]`
+        `${this.property.name}: [${Object.keys(this.property.values).map(k => this.property.values[k]).join(', ')}]`
     }
     
 
@@ -43,7 +43,7 @@ export default class FrontmatterPropertySetting extends Setting {
             b.setIcon("trash")
                 .setTooltip("Delete")
                 .onClick(() => {
-                    const currentExistingProperty = this.plugin.initialProperties.filter(p => p.propertyId == this.property.propertyId)[0]
+                    const currentExistingProperty = this.plugin.initialProperties.filter(p => p.id == this.property.id)[0]
                     if(currentExistingProperty){
                         this.plugin.initialProperties.remove(currentExistingProperty)
                     }

@@ -1,12 +1,14 @@
-import {App, Modal, Setting, TextComponent, Notice, ButtonComponent, ExtraButtonComponent} from "obsidian"
+import {App, Modal, Setting, TextComponent, Notice, ButtonComponent, ExtraButtonComponent, ToggleComponent} from "obsidian"
 import SuperchargedLinks from "main"
 import FrontMatterProperty from "src/FrontMatterProperty"
 import FrontmatterPropertySetting from "src/settings/FrontmatterPropertySetting"
 
 export default class FrontmatterPropertySettingsModal extends Modal {
-	propertyNamePromptEl: TextComponent;
-	presetValuesPromptEls: Array<TextComponent> = [];
-    saved: boolean = false;
+	namePromptComponent: TextComponent
+	valuesPromptComponents: Array<TextComponent> = []
+    isMultiTogglerComponent: ToggleComponent
+    isCycleTogglerComponent: ToggleComponent
+    saved: boolean = false
 	property: FrontMatterProperty
     plugin : SuperchargedLinks
     initialProperty: FrontMatterProperty
@@ -19,33 +21,34 @@ export default class FrontmatterPropertySettingsModal extends Modal {
 		super(app)
         this.plugin = plugin
         this.parentSetting = parentSetting
-        this.initialProperty = new FrontMatterProperty("", {}, "")
+        this.initialProperty = new FrontMatterProperty()
         this.parentSettingContainer = parentSettingContainer
 		if(property){
             this.new = false
 			this.property = property
-            this.initialProperty.propertyName = property.propertyName
-            this.initialProperty.propertyId = property.propertyId
-            Object.keys(property.presetValues).forEach(k => {
-                this.initialProperty.presetValues[k] =  property.presetValues[k]
+            this.initialProperty.name = property.name
+            this.initialProperty.id = property.id
+            Object.keys(property.values).forEach(k => {
+                this.initialProperty.values[k] =  property.values[k]
             })
 		} else {
             let newId = 1
             this.plugin.initialProperties.forEach(prop => {
-                if(parseInt(prop.propertyId) && parseInt(prop.propertyId) >= newId){
-                    newId = parseInt(prop.propertyId) + 1
+                if(parseInt(prop.id) && parseInt(prop.id) >= newId){
+                    newId = parseInt(prop.id) + 1
                 }
             })
-			this.property = new FrontMatterProperty("", {}, newId.toString())
-            this.initialProperty.propertyId = newId.toString()
+			this.property = new FrontMatterProperty()
+            this.property.id = newId.toString()
+            this.initialProperty.id = newId.toString()
 		}
 	}
 
 	onOpen(): void {
-        if(this.property.propertyName == ""){
+        if(this.property.name == ""){
             this.titleEl.setText(`Add a property and set predefined`)
         }else{
-            this.titleEl.setText(`Manage predefined values for ${this.property.propertyName}`)
+            this.titleEl.setText(`Manage settings values for ${this.property.name}`)
         }
 		this.createForm()
 	}
@@ -54,62 +57,93 @@ export default class FrontmatterPropertySettingsModal extends Modal {
         Object.assign(this.property, this.initialProperty)
         if(!this.new){
             this.parentSetting.infoEl.textContent = 
-                `${this.property.propertyName}: [${Object.keys(this.property.presetValues).map(k => this.property.presetValues[k]).join(', ')}]`
+                `${this.property.name}: [${Object.keys(this.property.values).map(k => this.property.values[k]).join(', ')}]`
         } else if(this.saved) {
             new FrontmatterPropertySetting(this.parentSettingContainer, this.property, this.app, this.plugin)
         }
     }
 
     setValueListText(header: HTMLDivElement): void{
-        header.setText(`Preset values: ${Object.values(this.property.presetValues).join(', ')}`)
+        header.setText(`Preset values: ${Object.values(this.property.values).join(', ')}`)
     }
 
-    createPropertyNameInputContainer(parentNode: HTMLDivElement): TextComponent {
+    createnameInputContainer(parentNode: HTMLDivElement): TextComponent {
+		const propertyNameContainerLabel = parentNode.createDiv()
+		propertyNameContainerLabel.setText(`Property Name:`)
         const input = new TextComponent(parentNode)
-        const propertyName = this.property.propertyName
-        input.setValue(propertyName)
+        const name = this.property.name
+        input.setValue(name)
         input.setPlaceholder("Name of the property")
         input.onChange(value => {
-            this.property.propertyName = value
-            this.titleEl.setText(`Manage predefined values for ${this.property.propertyName}`)
-            FrontmatterPropertySettingsModal.removeValidationError(input, 2)
+            this.property.name = value
+            this.titleEl.setText(`Manage predefined values for ${this.property.name}`)
+            FrontmatterPropertySettingsModal.removeValidationError(input)
         })
         return input
     }
 	
+    createTogglerContainer(parentNode: HTMLDivElement, label: string): ToggleComponent {
+        const propertyContainerLabel = parentNode.createDiv({
+            cls: 'frontmatter-checkbox-toggler'
+        })
+        propertyContainerLabel.setText(label)
+        const toggler = new ToggleComponent(parentNode)
+        toggler.setTooltip("Can this property have multiple values?")
+        return toggler
+    }
+
 	removePresetValue(key: string): void{
         let newValues: Record<string, string> = {}
-        for(let _key in this.property.presetValues){
+        for(let _key in this.property.values){
             if(key !== _key){
-                newValues[_key] = this.property.presetValues[_key]
+                newValues[_key] = this.property.values[_key]
             }
         }
-		this.property.presetValues = newValues
+		this.property.values = newValues
 	}
 
 	createValueContainer(parentNode: HTMLDivElement, header: HTMLDivElement, key: string): TextComponent {
-        const presetValue = this.property.presetValues[key]
+        const values = this.property.values
+        const presetValue = values[key]
 		const valueContainer = parentNode.createDiv({
 			cls: 'frontmatter-prompt-container',
 		})
 		const input = new TextComponent(valueContainer)
 		input.setValue(presetValue)
 		input.onChange(value => {
-            this.property.presetValues[key] = value
+            this.property.values[key] = value
             this.setValueListText(header)
-            FrontmatterPropertySettingsModal.removeValidationError(input, 2)
+            FrontmatterPropertySettingsModal.removeValidationError(input)
         })
-		const inputRemove = valueContainer.createEl("button")
-		inputRemove.type = "button"
-		inputRemove.textContent = "Delete"
-		inputRemove.onClickEvent((evt: MouseEvent) => {
-			evt.preventDefault
-			this.removePresetValue(key)
-			this.setValueListText(header)
-			parentNode.removeChild(valueContainer)
-            this.presetValuesPromptEls.remove(input)
-				
-		})
+        const valueRemoveButton = new ButtonComponent(valueContainer)
+        valueRemoveButton.setIcon("trash")
+            .onClick((evt: MouseEvent) => {
+                evt.preventDefault
+                this.removePresetValue(key)
+                this.setValueListText(header)
+                parentNode.removeChild(valueContainer)
+                this.valuesPromptComponents.remove(input)
+                    
+            })
+        if(key != Object.keys(this.property.values)[0]){
+            const valueUpgradeButton = new ButtonComponent(valueContainer)
+            valueUpgradeButton.setButtonText("▲")
+            valueUpgradeButton.onClick((evt: MouseEvent) => {
+                const thisValue = values[key]
+                const upperComponent = this.valuesPromptComponents[this.valuesPromptComponents.indexOf(input)-1]
+                if(upperComponent){
+                    const upperValue = upperComponent.inputEl.value
+                    const upperKey = Object.keys(values).filter(k => values[k] == upperValue)[0]
+                    if(upperKey){
+                        upperComponent.setValue(thisValue)
+                        values[upperKey] = thisValue
+                        input.setValue(upperValue)
+                        values[key] = upperValue
+                    }
+                }
+            })
+        }
+
 		return input
 	}
 
@@ -121,22 +155,48 @@ export default class FrontmatterPropertySettingsModal extends Modal {
             cls: "frontmatter-prompt-form"
         })
         /* Property Name Section */
-		const propertyNameContainer = mainDiv.createDiv()
-		const propertyContainerLabel = propertyNameContainer.createDiv()
-		propertyContainerLabel.setText(`Property Name:`)
-        this.propertyNamePromptEl = this.createPropertyNameInputContainer(propertyNameContainer)
+		const nameContainer = mainDiv.createDiv()
+        this.namePromptComponent = this.createnameInputContainer(nameContainer)
 		
+		mainDiv.createDiv({cls: 'frontmatter-separator'}).createEl("hr")
+
+        /* Property is Multi section*/
+
+        const multiContainer = mainDiv.createDiv()
+        this.isMultiTogglerComponent = this.createTogglerContainer(multiContainer, "Is Multi: ")
+        this.isMultiTogglerComponent.setValue(this.property.isMulti)
+        this.isMultiTogglerComponent.onChange(value => {
+            this.property.isMulti = value
+            if(this.property.isCycle && this.property.isMulti){
+                this.property.isCycle = false
+                this.isCycleTogglerComponent.setValue(false)}
+        })
 
 		mainDiv.createDiv({cls: 'frontmatter-separator'}).createEl("hr")
 
+        /* Property is Cycle section*/
+
+        const cycleContainer = mainDiv.createDiv()
+        this.isCycleTogglerComponent = this.createTogglerContainer(cycleContainer, "Is Cycle: ")
+        this.isCycleTogglerComponent.setValue(this.property.isCycle)
+        this.isCycleTogglerComponent.onChange(value => {
+            this.property.isCycle = value
+            if(this.property.isCycle && this.property.isMulti){
+                this.property.isMulti = false
+                this.isMultiTogglerComponent.setValue(false)
+            }
+        })
+
+		mainDiv.createDiv({cls: 'frontmatter-separator'}).createEl("hr")
+        
         /* Property Values */
 		const valuesList = mainDiv.createDiv()
 		const valuesListHeader = valuesList.createDiv()
 		valuesListHeader.createEl("h2")
-		valuesListHeader.setText(`Preset values: ${Object.values(this.property.presetValues).join(', ')}`)
+		valuesListHeader.setText(`Preset values: ${Object.values(this.property.values).join(', ')}`)
 		const valuesListBody = valuesList.createDiv()
-		Object.keys(this.property.presetValues).forEach(key => {
-			this.presetValuesPromptEls.push(this.createValueContainer(valuesListBody, valuesListHeader, key))
+		Object.keys(this.property.values).forEach(key => {
+			this.valuesPromptComponents.push(this.createValueContainer(valuesListBody, valuesListHeader, key))
 		})
 
         /* Add a new Values */
@@ -165,32 +225,39 @@ export default class FrontmatterPropertySettingsModal extends Modal {
             .setIcon("checkmark")
             .onClick(async () => {
                 let error = false
-                if(/[^A-Za-z0-9]/.test(this.property.propertyName)){
+                if(/^[#>-]/.test(this.property.name)){
                     FrontmatterPropertySettingsModal.setValidationError(
-                        this.propertyNamePromptEl, this.propertyNamePromptEl.inputEl,
-                        "Frontmatter property name can only contain a-z, A-Z, 0-9 characters."
+                        this.namePromptComponent, this.namePromptComponent.inputEl,
+                        "Property name cannot start with #, >, -"
                     );
                     error = true;
                 }
-                if(this.property.propertyName == ""){
+                if(this.property.name == ""){
                     FrontmatterPropertySettingsModal.setValidationError(
-                        this.propertyNamePromptEl, this.propertyNamePromptEl.inputEl,
-                        "Frontmatter property name can not be Empty."
+                        this.namePromptComponent, this.namePromptComponent.inputEl,
+                        "Property name can not be Empty"
                     );
                     error = true
                 }
-                this.presetValuesPromptEls.forEach(input => {
-                    if(/[^A-Za-z0-9]/.test(input.inputEl.value)){
+                this.valuesPromptComponents.forEach(input => {
+                    if(/^[#>-]/.test(input.inputEl.value)){
                         FrontmatterPropertySettingsModal.setValidationError(
-                            input, input.inputEl.nextElementSibling,
-                            "Frontmatter values can only contain a-z, A-Z, 0-9 characters."
+                            input, input.inputEl.parentElement.lastElementChild,
+                            "Values cannot cannot start with #, >, -"
+                        );
+                        error = true;
+                    }
+                    if(/[,]/gu.test(input.inputEl.value)){
+                        FrontmatterPropertySettingsModal.setValidationError(
+                            input, input.inputEl.parentElement.lastElementChild,
+                            "Values cannot contain a comma"
                         );
                         error = true;
                     }
                     if(input.inputEl.value == ""){
                         FrontmatterPropertySettingsModal.setValidationError(
-                            input, input.inputEl.nextElementSibling,
-                            "Frontmatter values can't be null."
+                            input, input.inputEl.parentElement.lastElementChild,
+                            "Values can't be null."
                         );
                         error = true;
                     }
@@ -200,7 +267,7 @@ export default class FrontmatterPropertySettingsModal extends Modal {
                     return;
                 }
                 this.saved = true;
-                const currentExistingProperty = this.plugin.initialProperties.filter(p => p.propertyId == this.property.propertyId)[0]
+                const currentExistingProperty = this.plugin.initialProperties.filter(p => p.id == this.property.id)[0]
                 if(currentExistingProperty){
                     FrontMatterProperty.copyProperty(currentExistingProperty, this.property)
                 } else {
@@ -219,7 +286,7 @@ export default class FrontmatterPropertySettingsModal extends Modal {
                 .onClick(() => {
                     this.saved = false;
                     /* reset values from settings */
-                    if(this.initialProperty.propertyName != "") {
+                    if(this.initialProperty.name != "") {
                         Object.assign(this.property, this.initialProperty)
                     }
                     this.close();
@@ -244,13 +311,12 @@ export default class FrontmatterPropertySettingsModal extends Modal {
             mDiv.insertAfter(insertAfter);
         }
     }
-    static removeValidationError(textInput: TextComponent, messagePosition: number) {
-        textInput.inputEl.removeClass("is-invalid");
-
-        if (textInput.inputEl.parentElement.children[2]) {
+    static removeValidationError(textInput: TextComponent) {
+        if(textInput.inputEl.hasClass("is-invalid")){
+            textInput.inputEl.removeClass("is-invalid")
             textInput.inputEl.parentElement.removeChild(
-                textInput.inputEl.parentElement.children[messagePosition]
-            );
+                textInput.inputEl.parentElement.lastElementChild
+            )
         }
     }
 }

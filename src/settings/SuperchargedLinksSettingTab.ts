@@ -52,7 +52,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 
         /* Managed properties that currently have preset values */
 		this.plugin.initialProperties.forEach(prop => {
-            const property = new FrontMatterProperty("", {}, "")
+            const property = new FrontMatterProperty()
             Object.assign(property, prop)
 			new FrontmatterPropertySetting(containerEl, property, this.app, this.plugin)
 		})
