@@ -3,7 +3,7 @@
 Internal links adds attributes to <a.internal-link> HTMLElements with the attributes and values of the target file's frontmatter.
 Combined with css snippets, it allows a very flexible way to customize the links
 
-![](https://github.com/mdelobelle/obsidian_supercharged_links/blob/master/images/superchargeLink.gif)
+![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/e147ac10179d2c351d9a9f222e4637ee7fe32aed/images/superchargeLink.gif)
 
 ## Basic link styling
 
@@ -31,14 +31,14 @@ Jim is one of my colleagues
 
 ```
 
-Let's say that I want to have a specific display of the internal-links linking to Jim's note to display a blue tag-like rounded rectangle ![[bdbd87363cc2356992eaead22e490f2760b69a1c.png]]  and display ![[b6dc9857802b333641d72df340cebad1d1209eb6.png]]  when hovering the link
+Let's say that I want to have a specific display of the internal-links linking to Jim's note to display a blue tag-like rounded rectangle ![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling.png)  and display ![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling-hover.png)  when hovering the link
 
 ### Settings
 
 First you'll have to tell the plugin which front-matter kind of properties you want your internal-link to be supercharged with.
 
 here are my settings
-![[aa10fe0728e6e1873dc1ab66d4eeddd7e87088fe.png]]
+![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-settings.png)
 
 So in this case the plugin will only include `category`, `next-actions` and `tags` in the internal-links
 
@@ -83,7 +83,7 @@ a.internal-link[data-link-category$="People" i]::before{
     content: "👤 "
 }
 ```
-![[2f2dd6808b27a47e3bb5c0ed1af716cb2551c1e0.png]]
+![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-in-note.png!)
 
 to highlight the link in a tag-like blue rounded rectangle when there is a property next-actions in the target file:
 
@@ -96,7 +96,7 @@ a.internal-link[data-link-next-actions]{
 }
 ```
 
-![[15501d2830b3b391fb15390a4e5303050a9c27b0.png]]
+![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-tag-in-note.png)
 
 to display the next actions contained in the next-actions property of the target file when hovering the link:
 
@@ -106,7 +106,7 @@ a.internal-link[data-link-next-actions]:hover::after{
 }
 ```
 
-![[f0af7fd223a50a075985e5963abf8e3510ed4524.png]]
+![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-hover-in-note.png)
 
 ## Roadmap
 
