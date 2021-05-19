@@ -31,7 +31,7 @@ export default class valueTextInputModal extends Modal {
             this.close()
         }
         const inputEl = new TextComponent(form)
-        inputEl.setValue(this.value.toString())
+        inputEl.setValue(this.value ? this.value.toString() : "")
         inputEl.inputEl.addClass("frontmatter-prompt-input")
     }
 }
