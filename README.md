@@ -114,10 +114,13 @@ a.internal-link[data-link-next-actions]:hover::after{
 ### Some videos examples
 
 #### Internal link simple styling
+https://youtu.be/tyEdsmAQb_4
 
 #### Multiple properties
+https://youtu.be/Ofm6gIRP-7o
 
 #### Multiple values for a preperty
+https://youtu.be/aaSZnkEuH4w
 
 ## Link context menu extra options
 
@@ -131,6 +134,7 @@ Right click on a link will automatically display an item per target note's front
 1. Type `enter` to save or click X or `esc` to cancel
 
 example: 
+https://youtu.be/qhtPKstdnhI
 
 ### Update boolean property
 
@@ -139,6 +143,7 @@ example:
 1. Press `esc` to leave the modal
 
 example: 
+https://youtu.be/iwL-HqvoNOs
 
 ### Update multiple values property
 
@@ -149,6 +154,7 @@ example:
 **this doesn't work with indented lists YAML format**
 
 example:
+https://youtu.be/WaW6xElq0T4
 
 ### Preset values for property
 
@@ -164,6 +170,7 @@ Back in a note Right-click on the link
 7. Click on the save button to save or click X or `esc` to cancel
 
 example:
+https://youtu.be/GryvvJ6qIg4
 
 ### Multi select preset values for property
 
@@ -178,6 +185,7 @@ Back in a note Right-click on the link
 6. Click on the save button to save or click X or `esc` to cancel
 
 example:
+https://youtu.be/iyIG6LmCcuc
 
 ### Cycle through preset values
 
@@ -188,6 +196,8 @@ Back in a note Right-click on the link
 
 3. Click on " .. > .. " to change the property's value for the next one in the settings list
 
+example:
+https://youtu.be/7BqG4sG15jc
 
 ## Roadmap
 
