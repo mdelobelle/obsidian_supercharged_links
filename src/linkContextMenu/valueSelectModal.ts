@@ -38,12 +38,12 @@ export default class valueToggleModal extends Modal {
         if(Object.values(values).includes(this.value)){
             selectEl.setValue(this.value)
         }
-        selectEl.onChange(value => this.newValue = value)
+        selectEl.onChange(value => this.newValue = value != "--Empty--" ? value : "")
         const submitButton = new ButtonComponent(inputDiv)
         submitButton.setTooltip("Save")
             .setIcon("checkmark")
             .onClick(async () => {
-                if(this.newValue){
+                if(this.newValue || this.newValue == ""){
                     linkContextMenu.replaceFrontmatterAttribute(this.app, this.file, this.name, this.newValue)
                 }
                 this.close()

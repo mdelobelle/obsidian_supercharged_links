@@ -1,5 +1,4 @@
 import {Plugin} from 'obsidian';
-import FrontMatterPropertyUpdateModal from "src/FrontMatterPropertyUpdateModal"
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {updateElLinks, updateVisibleLinks} from "src/linkAttributes/linkAttributes"
 import {SuperchargedLinksSettings, DEFAULT_SETTINGS} from "src/settings/SuperchargedLinksSettings"

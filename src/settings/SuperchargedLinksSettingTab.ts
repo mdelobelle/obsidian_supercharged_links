@@ -36,11 +36,11 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
         /* Managing predefined values for properties */
         /* Add new property for which we want to preset values*/
 		new Setting(containerEl)
-			.setName("Add New")
+			.setName("Add New Property Manager")
 			.setDesc("Add a new Frontmatter property for which you want preset values.")
 			.addButton((button: ButtonComponent): ButtonComponent => {
 				let b = button
-					.setTooltip("Add Additional")
+					.setTooltip("Add New Property Manager")
 					.setButtonText("+")
 					.onClick(async () => {
 						let modal = new FrontmatterPropertySettingsModal(this.app, this.plugin, containerEl);

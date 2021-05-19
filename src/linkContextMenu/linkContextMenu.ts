@@ -55,7 +55,7 @@ class linkContextMenu {
 			} else if(isBoolean(value)){
 				this.addToggleMenuOption(menu, key, value)
 			} else {
-				this.addTextInputMenuOption(menu, key, value)
+				this.addTextInputMenuOption(menu, key, value ? value.toString() : "")
 			}
 		});
 	}

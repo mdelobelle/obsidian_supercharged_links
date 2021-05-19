@@ -3,7 +3,9 @@
 Internal links adds attributes to <a.internal-link> HTMLElements with the attributes and values of the target file's frontmatter.
 Combined with css snippets, it allows a very flexible way to customize the links
 
-![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/e147ac10179d2c351d9a9f222e4637ee7fe32aed/images/superchargeLink.gif)
+It also adds context menu items to modifiy target note's frontmatter properties by right-clicking on the link
+
+<img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/e147ac10179d2c351d9a9f222e4637ee7fe32aed/images/superchargeLink.gif alt="drawing" style="width:600px;"/>
 
 ## Basic link styling
 
@@ -31,14 +33,15 @@ Jim is one of my colleagues
 
 ```
 
-Let's say that I want to have a specific display of the internal-links linking to Jim's note to display a blue tag-like rounded rectangle ![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling.png)  and display ![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling-hover.png)  when hovering the link
+Let's say that I want to have a specific display of the internal-links linking to Jim's note to display a blue tag-like rounded rectangle <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling.png" style="height:30px;vertical-align:bottom">  and display <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling-hover.png" style="height:30px;vertical-align:bottom">  when hovering the link
 
 ### Settings
 
-First you'll have to tell the plugin which front-matter kind of properties you want your internal-link to be supercharged with.
+First you'll have to tell the plugin which front-matter kind of properties you want your internal-link to be supercharged with in the `Target Attributes for Styling` section of the plugin's settings
 
 here are my settings
-![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-settings.png)
+
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-settings.png" alt="drawing" style="width:400px;"/>
 
 So in this case the plugin will only include `category`, `next-actions` and `tags` in the internal-links
 
@@ -83,7 +86,7 @@ a.internal-link[data-link-category$="People" i]::before{
     content: "👤 "
 }
 ```
-![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-in-note.png)
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-in-note.png" style="width:500px">
 
 to highlight the link in a tag-like blue rounded rectangle when there is a property next-actions in the target file:
 
@@ -96,7 +99,7 @@ a.internal-link[data-link-next-actions]{
 }
 ```
 
-![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-tag-in-note.png)
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-tag-in-note.png" style="width:500px">
 
 to display the next actions contained in the next-actions property of the target file when hovering the link:
 
@@ -106,8 +109,88 @@ a.internal-link[data-link-next-actions]:hover::after{
 }
 ```
 
-![](https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-hover-in-note.png)
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-hover-in-note.png" style="width:500px">
+
+### Some videos examples
+
+#### Internal link simple styling
+
+#### Multiple properties
+
+#### Multiple values for a preperty
+
+## Link context menu extra options
+
+Right click on a link will automatically display an item per target note's frontmatter property
+
+### Update text property
+
+1. Right-click on the link
+1. Click on "Update .... " to change the property's value
+1. Change the value in the modal's prompt
+1. Type `enter` to save or click X or `esc` to cancel
+
+example: 
+
+### Update boolean property
+
+1. Right-click on the link
+1. Toggle the swith in the modal to change the value 
+1. Press `esc` to leave the modal
+
+example: 
+
+### Update multiple values property
+
+1. Right-click on the link
+1. Change values comma-separated
+1. 1. Press `enter`, the values will be displayed as an array of values in the target note's frontmatter property
+
+**this doesn't work with indented lists YAML format**
+
+example:
+
+### Preset values for property
+
+1. Add a new Property Manager in the settings
+2. Enter the property name
+3. Add preset values (you can order them once the property has been created)
+
+Back in a note Right-click on the link
+
+4. Click on "Update .... " to change the property's value
+5. The modal will display a dropdown list with preset values
+6. Change the value in the modal's dropdown
+7. Click on the save button to save or click X or `esc` to cancel
+
+example:
+
+### Multi select preset values for property
+
+1. In the settings, follow the steps 1 to 3 of previous section
+2. Toggle the `isMulti` switch
+
+Back in a note Right-click on the link
+
+3. Click on "Update .... " to change the property's value
+4. The modal will display a grid of switches for preset values
+5. Change the values by toggling the switches in the modal
+6. Click on the save button to save or click X or `esc` to cancel
+
+example:
+
+### Cycle through preset values
+
+1. In the settings, follow the steps 1 to 3 of previous section
+2. Toggle the `isCycle` switch
+
+Back in a note Right-click on the link
+
+3. Click on " .. > .. " to change the property's value for the next one in the settings list
+
 
 ## Roadmap
 
-- [ ] link context menu to modify frontmatter attributes
+- [X] link context menu to modify frontmatter attributes
+- [ ] manage indented lists multi-values frontmatter property
+- [ ] extend options management to iinline-fields
