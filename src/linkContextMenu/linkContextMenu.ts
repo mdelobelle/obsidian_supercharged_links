@@ -142,8 +142,8 @@ class linkContextMenu {
 				} else {
 					newContent.push(`${line}`)
 				}
-				app.vault.modify(file, newContent.join('\n'))
 			})
+			app.vault.modify(file, newContent.join('\n'))
 		})
 	}
 }
