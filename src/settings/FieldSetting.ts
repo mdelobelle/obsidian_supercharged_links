@@ -1,15 +1,15 @@
 import { timeStamp } from "console"
 import {App, Setting, Plugin} from "obsidian"
 import SuperchargedLinks from "main"
-import FrontMatterProperty from "src/FrontMatterProperty"
-import FrontmatterPropertySettingsModal from "src/settings/FrontmatterPropertySettingsModal"
+import Field from "src/Field"
+import FieldSettingsModal from "src/settings/FieldSettingsModal"
 
-export default class FrontmatterPropertySetting extends Setting {
-    property: FrontMatterProperty
+export default class FieldSetting extends Setting {
+    property: Field
     app: App
     plugin: SuperchargedLinks
     containerEl: HTMLElement
-    constructor(containerEl: HTMLElement, property: FrontMatterProperty, app: App, plugin: SuperchargedLinks){
+    constructor(containerEl: HTMLElement, property: Field, app: App, plugin: SuperchargedLinks){
         super(containerEl)
         this.containerEl = containerEl
         this.property = property
@@ -32,7 +32,7 @@ export default class FrontmatterPropertySetting extends Setting {
             b.setIcon("pencil")
                     .setTooltip("Edit")
                     .onClick(() => {
-                        let modal = new FrontmatterPropertySettingsModal(this.app, this.plugin, this.containerEl, this, this.property);
+                        let modal = new FieldSettingsModal(this.app, this.plugin, this.containerEl, this, this.property);
                         modal.open();
                     });
         })

@@ -1,5 +1,5 @@
 import {App, Modal, DropdownComponent, TFile, ButtonComponent} from "obsidian"
-import FrontMatterProperty from "src/FrontMatterProperty"
+import Field from "src/Field"
 import linkContextMenu from "src/linkContextMenu/linkContextMenu"
 
 export default class valueToggleModal extends Modal {
@@ -7,10 +7,10 @@ export default class valueToggleModal extends Modal {
     file: TFile
     name: string
     value: string
-    settings: FrontMatterProperty
+    settings: Field
     newValue: string
 
-    constructor(app: App, file: TFile, name: string, value: string, settings: FrontMatterProperty){
+    constructor(app: App, file: TFile, name: string, value: string, settings: Field){
         super(app)
         this.app = app
         this.file = file

@@ -1,8 +1,8 @@
 import {App, PluginSettingTab, Setting, ButtonComponent} from "obsidian"
 import SuperchargedLinks from "main"
-import FrontmatterPropertySettingsModal from "src/settings/FrontmatterPropertySettingsModal"
-import FrontMatterProperty from "src/FrontMatterProperty"
-import FrontmatterPropertySetting from "src/settings/FrontmatterPropertySetting"
+import FieldSettingsModal from "src/settings/FieldSettingsModal"
+import Field from "src/Field"
+import FieldSetting from "src/settings/FieldSetting"
 
 export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 	plugin: SuperchargedLinks;
@@ -43,7 +43,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 					.setTooltip("Add New Property Manager")
 					.setButtonText("+")
 					.onClick(async () => {
-						let modal = new FrontmatterPropertySettingsModal(this.app, this.plugin, containerEl);
+						let modal = new FieldSettingsModal(this.app, this.plugin, containerEl);
 						modal.open();
 					});
 
@@ -52,9 +52,9 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 
         /* Managed properties that currently have preset values */
 		this.plugin.initialProperties.forEach(prop => {
-            const property = new FrontMatterProperty()
+            const property = new Field()
             Object.assign(property, prop)
-			new FrontmatterPropertySetting(containerEl, property, this.app, this.plugin)
+			new FieldSetting(containerEl, property, this.app, this.plugin)
 		})
 	}
 }

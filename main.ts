@@ -2,20 +2,20 @@ import {Plugin} from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {updateElLinks, updateVisibleLinks} from "src/linkAttributes/linkAttributes"
 import {SuperchargedLinksSettings, DEFAULT_SETTINGS} from "src/settings/SuperchargedLinksSettings"
-import FrontMatterProperty from 'src/FrontMatterProperty';
+import Field from 'src/Field';
 import linkContextMenu from "src/linkContextMenu/linkContextMenu"
 
 export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
-	initialProperties: Array<FrontMatterProperty> = []
+	initialProperties: Array<Field> = []
 	settingTab: SuperchargedLinksSettingTab
 
 	async onload():Promise <void> {
 		console.log('Supercharged links loaded');
 		await this.loadSettings();
 
-		this.settings.presetFrontmatterProperties.forEach(prop => {
-			const property = new FrontMatterProperty()
+		this.settings.presetFields.forEach(prop => {
+			const property = new Field()
 			Object.assign(property, prop)
 			this.initialProperties.push(property)
 		}) 
@@ -34,7 +34,7 @@ export default class SuperchargedLinks extends Plugin {
 	}
 
 	async saveSettings() {
-		this.settings.presetFrontmatterProperties = this.initialProperties
+		this.settings.presetFields = this.initialProperties
 		await this.saveData(this.settings);
 	}
 }

@@ -1,4 +1,4 @@
-interface FrontMatterProperty{
+interface Field{
     id: string
 	name: string
 	values: Record<string, string>
@@ -6,7 +6,7 @@ interface FrontMatterProperty{
     isMulti: boolean
 }
 
-class FrontMatterProperty{
+class Field{
 
 	constructor(name: string = "", 
                 values: Record<string, string> = {}, 
@@ -32,7 +32,7 @@ class FrontMatterProperty{
         return newKey.toString()
     }
 
-    static copyProperty(target: FrontMatterProperty, source: FrontMatterProperty){
+    static copyProperty(target: Field, source: Field){
         target.id = source.id
         target.name = source.name
         target.isCycle = source.isCycle
@@ -48,4 +48,4 @@ class FrontMatterProperty{
     }
 }
 
-export default FrontMatterProperty
+export default Field

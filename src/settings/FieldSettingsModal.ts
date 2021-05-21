@@ -1,27 +1,27 @@
 import {App, Modal, Setting, TextComponent, Notice, ButtonComponent, ExtraButtonComponent, ToggleComponent} from "obsidian"
 import SuperchargedLinks from "main"
-import FrontMatterProperty from "src/FrontMatterProperty"
-import FrontmatterPropertySetting from "src/settings/FrontmatterPropertySetting"
+import Field from "src/Field"
+import FieldSetting from "src/settings/FieldSetting"
 
-export default class FrontmatterPropertySettingsModal extends Modal {
+export default class FieldSettingsModal extends Modal {
 	namePromptComponent: TextComponent
 	valuesPromptComponents: Array<TextComponent> = []
     isMultiTogglerComponent: ToggleComponent
     isCycleTogglerComponent: ToggleComponent
     saved: boolean = false
-	property: FrontMatterProperty
+	property: Field
     plugin : SuperchargedLinks
-    initialProperty: FrontMatterProperty
+    initialProperty: Field
     parentSetting: Setting
     new: boolean = true
     parentSettingContainer: HTMLElement
 
 
-	constructor(app: App, plugin: SuperchargedLinks, parentSettingContainer: HTMLElement, parentSetting?: Setting, property?: FrontMatterProperty){
+	constructor(app: App, plugin: SuperchargedLinks, parentSettingContainer: HTMLElement, parentSetting?: Setting, property?: Field){
 		super(app)
         this.plugin = plugin
         this.parentSetting = parentSetting
-        this.initialProperty = new FrontMatterProperty()
+        this.initialProperty = new Field()
         this.parentSettingContainer = parentSettingContainer
 		if(property){
             this.new = false
@@ -38,7 +38,7 @@ export default class FrontmatterPropertySettingsModal extends Modal {
                     newId = parseInt(prop.id) + 1
                 }
             })
-			this.property = new FrontMatterProperty()
+			this.property = new Field()
             this.property.id = newId.toString()
             this.initialProperty.id = newId.toString()
 		}
@@ -59,7 +59,7 @@ export default class FrontmatterPropertySettingsModal extends Modal {
             this.parentSetting.infoEl.textContent = 
                 `${this.property.name}: [${Object.keys(this.property.values).map(k => this.property.values[k]).join(', ')}]`
         } else if(this.saved) {
-            new FrontmatterPropertySetting(this.parentSettingContainer, this.property, this.app, this.plugin)
+            new FieldSetting(this.parentSettingContainer, this.property, this.app, this.plugin)
         }
     }
 
@@ -77,7 +77,7 @@ export default class FrontmatterPropertySettingsModal extends Modal {
         input.onChange(value => {
             this.property.name = value
             this.titleEl.setText(`Manage predefined values for ${this.property.name}`)
-            FrontmatterPropertySettingsModal.removeValidationError(input)
+            FieldSettingsModal.removeValidationError(input)
         })
         return input
     }
@@ -113,7 +113,7 @@ export default class FrontmatterPropertySettingsModal extends Modal {
 		input.onChange(value => {
             this.property.values[key] = value
             this.setValueListText(header)
-            FrontmatterPropertySettingsModal.removeValidationError(input)
+            FieldSettingsModal.removeValidationError(input)
         })
         const valueRemoveButton = new ButtonComponent(valueContainer)
         valueRemoveButton.setIcon("trash")
@@ -226,14 +226,14 @@ export default class FrontmatterPropertySettingsModal extends Modal {
             .onClick(async () => {
                 let error = false
                 if(/^[#>-]/.test(this.property.name)){
-                    FrontmatterPropertySettingsModal.setValidationError(
+                    FieldSettingsModal.setValidationError(
                         this.namePromptComponent, this.namePromptComponent.inputEl,
                         "Property name cannot start with #, >, -"
                     );
                     error = true;
                 }
                 if(this.property.name == ""){
-                    FrontmatterPropertySettingsModal.setValidationError(
+                    FieldSettingsModal.setValidationError(
                         this.namePromptComponent, this.namePromptComponent.inputEl,
                         "Property name can not be Empty"
                     );
@@ -241,21 +241,21 @@ export default class FrontmatterPropertySettingsModal extends Modal {
                 }
                 this.valuesPromptComponents.forEach(input => {
                     if(/^[#>-]/.test(input.inputEl.value)){
-                        FrontmatterPropertySettingsModal.setValidationError(
+                        FieldSettingsModal.setValidationError(
                             input, input.inputEl.parentElement.lastElementChild,
                             "Values cannot cannot start with #, >, -"
                         );
                         error = true;
                     }
                     if(/[,]/gu.test(input.inputEl.value)){
-                        FrontmatterPropertySettingsModal.setValidationError(
+                        FieldSettingsModal.setValidationError(
                             input, input.inputEl.parentElement.lastElementChild,
                             "Values cannot contain a comma"
                         );
                         error = true;
                     }
                     if(input.inputEl.value == ""){
-                        FrontmatterPropertySettingsModal.setValidationError(
+                        FieldSettingsModal.setValidationError(
                             input, input.inputEl.parentElement.lastElementChild,
                             "Values can't be null."
                         );
@@ -269,7 +269,7 @@ export default class FrontmatterPropertySettingsModal extends Modal {
                 this.saved = true;
                 const currentExistingProperty = this.plugin.initialProperties.filter(p => p.id == this.property.id)[0]
                 if(currentExistingProperty){
-                    FrontMatterProperty.copyProperty(currentExistingProperty, this.property)
+                    Field.copyProperty(currentExistingProperty, this.property)
                 } else {
                     this.plugin.initialProperties.push(this.property)
                 }

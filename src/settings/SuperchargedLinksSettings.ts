@@ -1,11 +1,11 @@
-import FrontMatterProperty from "src/FrontMatterProperty"
+import Field from "src/Field"
 
 export interface SuperchargedLinksSettings {
 	targetAttributes: Array<string>;
-	presetFrontmatterProperties: Array<FrontMatterProperty>;
+	presetFields: Array<Field>;
 }
 
 export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	targetAttributes: [],
-	presetFrontmatterProperties: []
+	presetFields: []
 }

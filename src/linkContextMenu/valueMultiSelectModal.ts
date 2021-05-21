@@ -1,22 +1,22 @@
 import {App, Modal, ToggleComponent, TFile, ButtonComponent, ExtraButtonComponent, parseFrontMatterStringArray} from "obsidian"
-import FrontMatterProperty from "src/FrontMatterProperty"
+import Field from "src/Field"
 import linkContextMenu from "src/linkContextMenu/linkContextMenu"
 
 export default class valueMultiSelectModal extends Modal {
     app: App
     file: TFile
     name: string
-    settings: FrontMatterProperty
+    settings: Field
     values: Array<string>
 
-    constructor(app: App, file: TFile, name: string, initialValues: string, settings: FrontMatterProperty){
+    constructor(app: App, file: TFile, name: string, initialValues: string, settings: Field){
         super(app)
         this.app = app
         this.file = file
         this.name = name
         this.settings = settings
-        this.values = initialValues ? initialValues.toString().split(",") : []
-    }
+        this.values = initialValues ? initialValues.toString().replace(/^\[(.*)\]$/,"$1").split(",").map(item => item.trim()) : []
+    }   
 
     onOpen(){
         const valueGrid = this.contentEl.createDiv({
