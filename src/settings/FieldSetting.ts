@@ -1,4 +1,3 @@
-import { timeStamp } from "console"
 import {App, Setting, Plugin} from "obsidian"
 import SuperchargedLinks from "main"
 import Field from "src/Field"
@@ -61,10 +60,9 @@ export default class FieldSetting extends Setting {
             if(files.length > 0){
                 const file = files[0]
                 app.vault.read(file).then((result: string) => {
-                    console.log(result)
                     result.split('\n').forEach(line => {
                         if(/^(.*)$/.test(line)){
-                            values.push(line)
+                            values.push(line.trim())
                         }
                     })
                     resolve(values)

@@ -18,7 +18,6 @@ class linkContextMenu {
 	createContextMenu(): void{
 		this.plugin.registerEvent(
             this.plugin.app.workspace.on('file-menu', (menu, abstractFile, source) => {
-				console.log(source)
                 if(source === "link-context-menu" || 
 					source === "calendar-context-menu" || 
 					source === 'pane-more-options' ||
