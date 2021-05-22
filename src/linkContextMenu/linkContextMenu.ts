@@ -197,7 +197,7 @@ class linkContextMenu {
 					const r = line.match(regex)
 					if(r && r.length > 0){
 						const inputArray = input ? input.replace(/(\,\s+)/g, ',').split(',') : [""]
-						const newValue = inputArray.length == 1 ? inputArray[0] : `[${inputArray.join(', ')}]`
+						const newValue = inputArray.length == 1 ? inputArray[0] : `${inputArray.join(', ')}`
 						newContent.push(`${r[1]}${attribute}${r[2]}${r[3]}:: ${newValue}`)
 					} else {
 						newContent.push(line)
