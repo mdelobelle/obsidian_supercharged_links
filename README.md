@@ -3,7 +3,7 @@
 Internal links adds attributes to <a.internal-link> HTMLElements with the attributes and values of the target file's frontmatter.
 Combined with css snippets, it allows a very flexible way to customize the links
 
-It also adds context menu items to modifiy target note's frontmatter properties by right-clicking on the link
+It also adds context menu items to modifiy target note's frontmatter properties and "inline fields" (dataview syntax) by right-clicking on the link
 
 <img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/e147ac10179d2c351d9a9f222e4637ee7fe32aed/images/superchargeLink.gif alt="drawing" style="width:600px;"/>
 
@@ -124,7 +124,7 @@ https://youtu.be/aaSZnkEuH4w
 
 ## Link context menu extra options
 
-Right click on a link will automatically display an item per target note's frontmatter property
+Right click on a link will automatically display an item per target note's frontmatter property and "inline fields" (dataview syntax)
 
 ### Update text property
 
@@ -201,6 +201,6 @@ https://youtu.be/7BqG4sG15jc
 
 ## Roadmap
 
-- [X] link context menu to modify frontmatter attributes
+- [x] link context menu to modify frontmatter attributes
 - [ ] manage indented lists multi-values frontmatter property
-- [ ] extend options management to iinline-fields
+- [x] extend options management to iinline-fields
