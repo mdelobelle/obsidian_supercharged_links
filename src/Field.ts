@@ -4,6 +4,7 @@ interface Field{
 	values: Record<string, string>
     isCycle: boolean
     isMulti: boolean
+    valuesListNotePath: string
 }
 
 class Field{
@@ -12,12 +13,14 @@ class Field{
                 values: Record<string, string> = {}, 
                 id: string = "", 
                 isMulti: boolean = false, 
-                isCycle: boolean = false){
+                isCycle: boolean = false,
+                valuesListNotePath: string = ""){
 		this.name = name
 		this.values = values
         this.id = id
         this.isCycle = isCycle
         this.isMulti = isMulti
+        this.valuesListNotePath = valuesListNotePath
         this.insertNewValue.bind(this)
 	}
 
@@ -37,6 +40,7 @@ class Field{
         target.name = source.name
         target.isCycle = source.isCycle
         target.isMulti = source.isMulti
+        target.valuesListNotePath = source.valuesListNotePath
         Object.keys(source.values).forEach(k => {
             target.values[k] = source.values[k]
         })

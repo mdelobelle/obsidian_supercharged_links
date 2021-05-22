@@ -1,6 +1,7 @@
 import {App, Modal, ToggleComponent, TFile, ButtonComponent, ExtraButtonComponent, parseFrontMatterStringArray} from "obsidian"
 import Field from "src/Field"
 import linkContextMenu from "src/linkContextMenu/linkContextMenu"
+import FieldSetting from "src/settings/FieldSetting"
 
 export default class valueMultiSelectModal extends Modal {
     app: App
@@ -22,34 +23,48 @@ export default class valueMultiSelectModal extends Modal {
         const valueGrid = this.contentEl.createDiv({
             cls: "frontmatter-values-grid"
         })
+        FieldSetting.getValuesListFromNote(this.settings.valuesListNotePath, this.app).then(listNoteValues => {
+            this.populateValuesGrid(valueGrid, listNoteValues)
+        })
+        
+        
+    }
+
+    buildValueToggler(valueGrid: HTMLDivElement,presetValue: string){
+        const valueSelectorContainer = valueGrid.createDiv({
+            cls: "frontmatter-value-selector-container"
+        })
+        const valueTogglerContainer = valueSelectorContainer.createDiv({
+            cls: "frontmatter-value-selector-toggler"
+        })
+        const valueToggler = new ToggleComponent(valueTogglerContainer)
+        this.values.forEach(value => {
+            if (value == presetValue){
+                valueToggler.setValue(true)
+            }
+        })
+        valueToggler.onChange(value => {
+            if(value && !this.values.includes(presetValue)){
+                this.values.push(presetValue)
+            }
+            if(!value){
+                this.values.remove(presetValue)
+            }
+        })
+        const valueLabel = valueSelectorContainer.createDiv({
+            cls: "frontmatter-value-selector-label"
+        })
+        valueLabel.setText(presetValue)
+    }
+
+    populateValuesGrid(valueGrid: HTMLDivElement, listNoteValues: string[]){
         Object.keys(this.settings.values).forEach(key => {
 
             const presetValue = this.settings.values[key]
-            const valueSelectorContainer = valueGrid.createDiv({
-                cls: "frontmatter-value-selector-container"
-            })
-            const valueTogglerContainer = valueSelectorContainer.createDiv({
-                cls: "frontmatter-value-selector-toggler"
-            })
-            const valueToggler = new ToggleComponent(valueTogglerContainer)
-            this.values.forEach(value => {
-                if (value == presetValue){
-                    valueToggler.setValue(true)
-                }
-            })
-            valueToggler.onChange(value => {
-                if(value && !this.values.includes(presetValue)){
-                    this.values.push(presetValue)
-                }
-                if(!value){
-                    this.values.remove(presetValue)
-                }
-            })
-            const valueLabel = valueSelectorContainer.createDiv({
-                cls: "frontmatter-value-selector-label"
-            })
-            valueLabel.setText(presetValue)
-            
+            this.buildValueToggler(valueGrid, presetValue)
+        })
+        listNoteValues.forEach(value => {
+            this.buildValueToggler(valueGrid, value)
         })
         const footer = this.contentEl.createDiv({
             cls: "frontmatter-value-grid-footer"
@@ -63,6 +78,5 @@ export default class valueMultiSelectModal extends Modal {
         const cancelButton = new ExtraButtonComponent(footer)
         cancelButton.setIcon("cross")
         cancelButton.onClick(() => this.close())
-
     }
 }

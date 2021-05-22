@@ -3,6 +3,7 @@ import {App, Setting, Plugin} from "obsidian"
 import SuperchargedLinks from "main"
 import Field from "src/Field"
 import FieldSettingsModal from "src/settings/FieldSettingsModal"
+import { resolveTxt } from "dns"
 
 export default class FieldSetting extends Setting {
     property: Field
@@ -51,5 +52,27 @@ export default class FieldSetting extends Setting {
                     this.plugin.saveSettings()
             });
         });
+    }
+
+    static getValuesListFromNote(notePath: string, app: App): Promise<string[]> {
+        return new Promise((resolve,reject) => {
+            let values: Array<string> = []
+            const files = app.vault.getMarkdownFiles().filter(mdFile => mdFile.path == notePath)
+            if(files.length > 0){
+                const file = files[0]
+                app.vault.read(file).then((result: string) => {
+                    console.log(result)
+                    result.split('\n').forEach(line => {
+                        if(/^(.*)$/.test(line)){
+                            values.push(line)
+                        }
+                    })
+                    resolve(values)
+                })
+            } else {
+                resolve([])
+            }
+        });
+        
     }
 }

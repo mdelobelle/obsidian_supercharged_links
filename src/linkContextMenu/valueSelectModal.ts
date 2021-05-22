@@ -1,6 +1,7 @@
 import {App, Modal, DropdownComponent, TFile, ButtonComponent} from "obsidian"
 import Field from "src/Field"
 import linkContextMenu from "src/linkContextMenu/linkContextMenu"
+import FieldSetting from "src/settings/FieldSetting"
 
 export default class valueToggleModal extends Modal {
     app: App
@@ -38,9 +39,14 @@ export default class valueToggleModal extends Modal {
         if(Object.values(values).includes(this.value)){
             selectEl.setValue(this.value)
         }
-        selectEl.onChange(value => this.newValue = value != "--Empty--" ? value : "")
-        const submitButton = new ButtonComponent(inputDiv)
-        submitButton.setTooltip("Save")
+        FieldSetting.getValuesListFromNote(this.settings.valuesListNotePath, this.app).then(listNoteValues => {
+            listNoteValues.forEach(value => selectEl.addOption(value, value))
+            if(listNoteValues.includes(this.value)){
+                selectEl.setValue(this.value)
+            }
+            selectEl.onChange(value => this.newValue = value != "--Empty--" ? value : "")
+            const submitButton = new ButtonComponent(inputDiv)
+            submitButton.setTooltip("Save")
             .setIcon("checkmark")
             .onClick(async () => {
                 if(this.newValue || this.newValue == ""){
@@ -48,5 +54,7 @@ export default class valueToggleModal extends Modal {
                 }
                 this.close()
             })
+        })
+        
     }
 }

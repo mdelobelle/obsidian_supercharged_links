@@ -18,7 +18,7 @@ class linkContextMenu {
 	createContextMenu(): void{
 		this.plugin.registerEvent(
             this.plugin.app.workspace.on('file-menu', (menu, abstractFile, source) => {
-                if(source=='link-context-menu'){
+                if(source === "link-context-menu" || source === "calendar-context-menu"){
 					const files = this.plugin.app.vault.getMarkdownFiles().filter(mdFile => mdFile.path == abstractFile.path)
 					if(files.length > 0){
 						const file = files[0]

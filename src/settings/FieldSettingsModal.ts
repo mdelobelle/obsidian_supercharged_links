@@ -8,6 +8,7 @@ export default class FieldSettingsModal extends Modal {
 	valuesPromptComponents: Array<TextComponent> = []
     isMultiTogglerComponent: ToggleComponent
     isCycleTogglerComponent: ToggleComponent
+    listNotePathComponent: TextComponent
     saved: boolean = false
 	property: Field
     plugin : SuperchargedLinks
@@ -90,6 +91,17 @@ export default class FieldSettingsModal extends Modal {
         const toggler = new ToggleComponent(parentNode)
         toggler.setTooltip("Can this property have multiple values?")
         return toggler
+    }
+
+    createListNoteContainer(parentNode: HTMLDivElement): TextComponent {
+        const listNoteContainerLabel = parentNode.createDiv()   
+		listNoteContainerLabel.setText(`Path of the note containing the values:`)
+        const input = new TextComponent(parentNode)
+        const listNotePath = this.property.valuesListNotePath
+        input.setValue(listNotePath)
+        input.setPlaceholder("Path/of/the/note.md")
+        input.onChange(value => this.property.valuesListNotePath = value)
+        return input
     }
 
 	removePresetValue(key: string): void{
@@ -188,6 +200,13 @@ export default class FieldSettingsModal extends Modal {
         })
 
 		mainDiv.createDiv({cls: 'frontmatter-separator'}).createEl("hr")
+        
+        /* Property's note for list of Values */
+        
+        const listNotePathContainer = mainDiv.createDiv()
+        this.listNotePathComponent = this.createListNoteContainer(listNotePathContainer)
+
+        mainDiv.createDiv({cls: 'frontmatter-separator'}).createEl("hr")
         
         /* Property Values */
 		const valuesList = mainDiv.createDiv()
