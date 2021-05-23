@@ -10,8 +10,11 @@ export default class valueToggleModal extends Modal {
     value: string
     settings: Field
     newValue: string
+    lineNumber: number
+    inFrontmatter: boolean
+    top: boolean
 
-    constructor(app: App, file: TFile, name: string, value: string, settings: Field){
+    constructor(app: App, file: TFile, name: string, value: string, settings: Field, lineNumber: number = -1, inFrontMatter: boolean = false, top: boolean = false){
         super(app)
         this.app = app
         this.file = file
@@ -19,6 +22,9 @@ export default class valueToggleModal extends Modal {
         this.value = value
         this.settings = settings
         this.newValue = null
+        this.lineNumber = lineNumber
+        this.inFrontmatter = inFrontMatter
+        this.top = top
     }
 
     onOpen(){
@@ -49,8 +55,27 @@ export default class valueToggleModal extends Modal {
             submitButton.setTooltip("Save")
             .setIcon("checkmark")
             .onClick(async () => {
-                if(this.newValue || this.newValue == ""){
-                    linkContextMenu.replaceFrontmatterAttribute(this.app, this.file, this.name, this.newValue)
+                if(this.lineNumber == -1){
+                    if(this.newValue || this.newValue == ""){
+                        linkContextMenu.replaceFrontmatterAttribute(this.app, this.file, this.name, this.newValue)
+                    }
+                } else {
+                    this.app.vault.read(this.file).then(result => {
+                        let newContent: string[] = []
+                        if(this.top){
+                            newContent.push(`${this.name}${this.inFrontmatter ? ":" : "::"} ${selectEl.getValue()}`)
+                            result.split("\n").forEach((line, _lineNumber) => newContent.push(line))
+                        } else {
+                            result.split("\n").forEach((line, _lineNumber) => {
+                                newContent.push(line)
+                                if(_lineNumber == this.lineNumber){
+                                    newContent.push(`${this.name}${this.inFrontmatter ? ":" : "::"} ${selectEl.getValue()}`)
+                                }
+                            })
+                        }
+                        this.app.vault.modify(this.file, newContent.join('\n'))
+                        this.close()
+                    })
                 }
                 this.close()
             })

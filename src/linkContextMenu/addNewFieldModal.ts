@@ -7,12 +7,14 @@ export default class addNewFieldModal extends Modal {
     lineNumber: number
     file: TFile
     inFrontmatter: boolean
+    top: boolean
 
-    constructor(plugin: SuperchargedLinks, lineNumber: number, file: TFile, inFrontmatter: boolean){
+    constructor(plugin: SuperchargedLinks, lineNumber: number, file: TFile, inFrontmatter: boolean, top: boolean){
         super(plugin.app)
         this.lineNumber = lineNumber
         this.inFrontmatter = inFrontmatter
         this.file = file
+        this.top = top
     }
 
     onOpen(){
@@ -32,15 +34,19 @@ export default class addNewFieldModal extends Modal {
         const saveButton = new ButtonComponent(footerButtons)
         saveButton.setIcon("checkmark")
         saveButton.onClick(() => {
-            console.log(this.file)
             this.app.vault.read(this.file).then(result => {
                 let newContent: string[] = []
-                result.split("\n").forEach((line, _lineNumber) => {
-                    newContent.push(line)
-                    if(_lineNumber == this.lineNumber){
-                        newContent.push(`${nameInputEl.getValue()}${this.inFrontmatter ? ":" : "::"} ${valueInputEl.getValue()}`)
-                    }
-                })
+                if(this.top){
+                    newContent.push(`${nameInputEl.getValue()}${this.inFrontmatter ? ":" : "::"} ${valueInputEl.getValue()}`)
+                    result.split("\n").forEach((line, _lineNumber) => newContent.push(line))
+                } else {
+                    result.split("\n").forEach((line, _lineNumber) => {
+                        newContent.push(line)
+                        if(_lineNumber == this.lineNumber){
+                            newContent.push(`${nameInputEl.getValue()}${this.inFrontmatter ? ":" : "::"} ${valueInputEl.getValue()}`)
+                        }
+                    })
+                }
                 this.app.vault.modify(this.file, newContent.join('\n'))
                 this.close()
             })

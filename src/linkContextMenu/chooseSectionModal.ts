@@ -14,13 +14,14 @@ export default class chooseSectionModal extends Modal {
     }
 
     onOpen(){
-        this.titleEl.setText("Add a field in this note")
+        this.titleEl.setText("Add a field in this note after:")
         const inputDiv = this.contentEl.createDiv({
             cls: "frontmatter-modal-value"
         })
         const selectEl = new DropdownComponent(inputDiv)
         selectEl.selectEl.addClass("frontmatter-select")
-        selectEl.addOption("","top")
+        selectEl.addOption("","Select line")
+        selectEl.addOption("top_0","top")
         this.app.vault.read(this.file).then(result => {
 			let foreHeadText = false
 			let frontmatterStart = false
@@ -48,9 +49,10 @@ export default class chooseSectionModal extends Modal {
             selectEl.onChange(value => {
                 const valueArray = selectEl.getValue().match(/(\w+)_(\d+)/)
                 const position = valueArray[1]
-                const inFrontmatter = position == "frontmatter" ? true : false
                 const lineNumber = Number(valueArray[2])
-                const modal = new fieldSelectModal(this.plugin, this.file, lineNumber, result.split('\n')[lineNumber], inFrontmatter)
+                const inFrontmatter = position == "frontmatter" ? true : false
+                const top = position == "top" ? true : false
+                const modal = new fieldSelectModal(this.plugin, this.file, lineNumber, result.split('\n')[lineNumber], inFrontmatter, top)
                 this.close()
                 modal.open()
             })

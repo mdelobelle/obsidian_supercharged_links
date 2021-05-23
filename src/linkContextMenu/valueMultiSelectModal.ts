@@ -9,14 +9,20 @@ export default class valueMultiSelectModal extends Modal {
     name: string
     settings: Field
     values: Array<string>
+    lineNumber: number
+    inFrontmatter: boolean
+    top: boolean
 
-    constructor(app: App, file: TFile, name: string, initialValues: string, settings: Field){
+    constructor(app: App, file: TFile, name: string, initialValues: string, settings: Field, lineNumber: number = -1, inFrontMatter: boolean = false, top: boolean = false){
         super(app)
         this.app = app
         this.file = file
         this.name = name
         this.settings = settings
         this.values = initialValues ? initialValues.toString().replace(/^\[(.*)\]$/,"$1").split(",").map(item => item.trim()) : []
+        this.lineNumber = lineNumber
+        this.inFrontmatter = inFrontMatter
+        this.top = top
     }   
 
     onOpen(){
@@ -26,8 +32,6 @@ export default class valueMultiSelectModal extends Modal {
         FieldSetting.getValuesListFromNote(this.settings.valuesListNotePath, this.app).then(listNoteValues => {
             this.populateValuesGrid(valueGrid, listNoteValues)
         })
-        
-        
     }
 
     buildValueToggler(valueGrid: HTMLDivElement,presetValue: string){
@@ -71,7 +75,28 @@ export default class valueMultiSelectModal extends Modal {
         const saveButton = new ButtonComponent(footer)
         saveButton.setIcon("checkmark")
         saveButton.onClick(() => {
-            linkContextMenu.replaceFrontmatterAttribute(this.app, this.file, this.name, this.values.join(","))
+            if(this.lineNumber == -1){
+                linkContextMenu.replaceFrontmatterAttribute(this.app, this.file, this.name, this.values.join(","))
+            }else{
+                this.app.vault.read(this.file).then(result => {
+                    let newContent: string[] = []
+                    if(this.top){
+                        newContent.push(`${this.name}${this.inFrontmatter ? ":" : "::"} ${this.values.join(",")}`)
+                        result.split("\n").forEach((line, _lineNumber) => newContent.push(line))
+                    } else {
+                        result.split("\n").forEach((line, _lineNumber) => {
+                            newContent.push(line)
+                            if(_lineNumber == this.lineNumber){
+                                newContent.push(`${this.name}${this.inFrontmatter ? ":" : "::"} ${this.values.join(",")}`)
+                            }
+                        })
+                    }
+                    
+                    this.app.vault.modify(this.file, newContent.join('\n'))
+                    this.close()
+                })
+            }
+            
             this.close()
         })
         const cancelButton = new ExtraButtonComponent(footer)
