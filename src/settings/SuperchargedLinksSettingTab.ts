@@ -59,7 +59,19 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 				text.inputEl.rows = 6;
 				text.inputEl.cols = 25;
 			});
-		
+
+		/* Set classFiles Path*/
+		new Setting(containerEl)
+		.setName('class Files path')
+		.setDesc('Path to the files containing the authorized fields for a type of note')
+		.addText((text) => {text
+			.setPlaceholder('Path/')
+			.setValue(this.plugin.settings.classFilesPath)
+			.onChange(async (value) => {
+				this.plugin.settings.classFilesPath = value
+				await this.plugin.saveSettings();
+			})
+		});
 
         /* Add new property for which we want to preset values*/
 		new Setting(containerEl)

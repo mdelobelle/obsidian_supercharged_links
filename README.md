@@ -111,7 +111,7 @@ a.internal-link[data-link-next-actions]:hover::after{
 
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-hover-in-note.png" style="width:500px">
 
-### Some videos examples
+### Some demo
 
 #### Internal link simple styling
 https://youtu.be/tyEdsmAQb_4
@@ -133,7 +133,7 @@ Right click on a link will automatically display an item per target note's front
 1. Change the value in the modal's prompt
 1. Type `enter` to save or click X or `esc` to cancel
 
-example: 
+demo: 
 https://youtu.be/qhtPKstdnhI
 
 ### Update boolean property
@@ -142,7 +142,7 @@ https://youtu.be/qhtPKstdnhI
 1. Toggle the swith in the modal to change the value 
 1. Press `esc` to leave the modal
 
-example: 
+demo: 
 https://youtu.be/iwL-HqvoNOs
 
 ### Update multiple values property
@@ -153,7 +153,7 @@ https://youtu.be/iwL-HqvoNOs
 
 **this doesn't work with indented lists YAML format**
 
-example:
+demo:
 https://youtu.be/WaW6xElq0T4
 
 ### Preset values for property
@@ -169,7 +169,7 @@ Back in a note Right-click on the link
 6. Change the value in the modal's dropdown
 7. Click on the save button to save or click X or `esc` to cancel
 
-example:
+demo:
 https://youtu.be/GryvvJ6qIg4
 
 ### Multi select preset values for property
@@ -184,7 +184,7 @@ Back in a note Right-click on the link
 5. Change the values by toggling the switches in the modal
 6. Click on the save button to save or click X or `esc` to cancel
 
-example:
+demo:
 https://youtu.be/iyIG6LmCcuc
 
 ### Cycle through preset values
@@ -196,11 +196,73 @@ Back in a note Right-click on the link
 
 3. Click on " .. > .. " to change the property's value for the next one in the settings list
 
-example:
+demo:
 https://youtu.be/7BqG4sG15jc
+
+### Add a new property at section
+
+1. Right-click on the link
+2. Click on "Add field at section"
+3. Select the line in the target file where you want to insert the new field
+4. Select the field
+5. Select/input the value for this field (if the field has preset values, you will be prompted to choose one)
+
+demo:
+https://youtu.be/JYURK2CM3Es
+
+## Manage Authorized / Ignored fields
+
+### Disable field options in context menu
+
+In the settings
+
+1. toggle "display field option in context menu"
+If toggled on, the context menu will include field options
+If toggled off, the context menu wont include field options
+
+demo:
+https://youtu.be/PC3MC0CfG0E
+
+### Ignore fields globally
+
+In the settings
+
+1. Add the fields you don't want to see in your context menu, comma separated
+
+demo:
+https://youtu.be/eFkxECqBvvY
+
+### define a class for a file and authorized fields for this class
+
+a class file is basically a simple note
+the name of the file will be the name of the class
+the lines of the file will be the fields managed for this class
+
+1. Define the folder where you wan't to store your class files
+2. Create a note in this folder, let say `music.md`, containing lines with the name of fields that you want to manage for this class
+```md
+music.md
+=========
+genre
+difficulty
+artist
+tone
+```
+3. In a regular note, let's say `Black Dog.md`, insert a frontmatter field named `fileClass`
+4. The value of `fileClass` has to be the name of the file Class where you have the fields that you want to manage for this note. e.g in our case
+```yaml
+---
+fileClass: music
+---
+```
+5. when right-clicking on a link to `Black Dog.md`, the fields in the context menu will be filter to show only the ones that are also included in `music.md`
+
+demo:
+https://youtu.be/Av7DeYZILUk
 
 ## Roadmap
 
 - [x] link context menu to modify frontmatter attributes
 - [ ] manage indented lists multi-values frontmatter property
 - [x] extend options management to iinline-fields
+- [ ] fileClass fields types and validators

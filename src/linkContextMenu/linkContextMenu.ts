@@ -39,19 +39,53 @@ class linkContextMenu {
 		const cache = this.plugin.app.metadataCache.getCache(abstractFile.path)
 		if(cache.frontmatter){
 			const {position, ...attributes} = cache.frontmatter
-			const filteredAttributes: Record<string, string> = {}
 			Object.keys(attributes).forEach(key => {
 				if(!this.plugin.settings.globallyIgnoredFields.includes(key)){
-					filteredAttributes[key] = attributes[key]
+					delete attributes.key
 				}
 			})
 			menu.addSeparator()
-			this.createExtraOptionsListForFrontmatter(filteredAttributes, menu).then(() => {
-				this.createExtraOptionsListForInlineFields(this.file, menu).then(() => {
-					menu.addSeparator()
-					this.addSectionSelectModalOption(this.plugin, menu)
+			let fileClassForFields = false
+			let fileClassFields: string[] = []
+			if(Object.keys(attributes).includes('fileClass')){
+				const fileClass = attributes['fileClass']
+				const classFiles = this.plugin.app.vault.getMarkdownFiles().filter(mdFile => 
+					(mdFile.path == `${this.plugin.settings.classFilesPath}${fileClass}.md`))
+				if(classFiles.length > 0){
+					const classFile = classFiles[0]
+					fileClassForFields = true
+					this.plugin.app.vault.read(classFile).then(result => {
+						result.split('\n').forEach(line => {
+							fileClassFields.push(line)
+						})
+						Object.keys(attributes).forEach(key => {
+							if(!fileClassFields.includes(key)){
+								delete attributes.key
+							}
+						})
+						this.createExtraOptionsListForFrontmatter(attributes, menu).then(() => {
+							this.createExtraOptionsListForInlineFields(this.file, menu, fileClassForFields, fileClassFields).then(() => {
+								menu.addSeparator()
+								this.addSectionSelectModalOption(this.plugin, menu)
+							})
+						})
+					})
+				} else {
+					this.createExtraOptionsListForFrontmatter(attributes, menu).then(() => {
+						this.createExtraOptionsListForInlineFields(this.file, menu).then(() => {
+							menu.addSeparator()
+							this.addSectionSelectModalOption(this.plugin, menu)
+						})
+					})
+				}
+			} else {
+				this.createExtraOptionsListForFrontmatter(attributes, menu).then(() => {
+					this.createExtraOptionsListForInlineFields(this.file, menu).then(() => {
+						menu.addSeparator()
+						this.addSectionSelectModalOption(this.plugin, menu)
+					})
 				})
-			})
+			}
 		} else {
 			this.createExtraOptionsListForInlineFields(this.file, menu).then(() => {
 				menu.addSeparator()
@@ -61,7 +95,9 @@ class linkContextMenu {
 		
 	}
 
-	async createExtraOptionsListForInlineFields(file:TFile, menu: Menu):Promise<void>{
+	
+
+	async createExtraOptionsListForInlineFields(file:TFile, menu: Menu, fileClassForFields: boolean = false, fileClassFields: string[] = []):Promise<void>{
 		let attributes: Record<string, string> = {}
 		const regex = new RegExp(/[_\*~`]*([0-9\w\p{Letter}\p{Emoji_Presentation}][-0-9\w\p{Letter}\p{Emoji_Presentation}\s]*)[_\*~`]*\s*::(.+)?/u)
 		this.plugin.app.vault.read(file).then((result: string) => {
@@ -70,7 +106,13 @@ class linkContextMenu {
 				if(regexResult 
 					&& regexResult.length > 0 
 					&& !this.plugin.settings.globallyIgnoredFields.includes(regexResult[1].trim())){
-					attributes[regexResult[1].trim()] = regexResult.length > 1 && regexResult[2] ? regexResult[2].trim() : ""
+					if(fileClassForFields){
+						if(fileClassFields.includes(regexResult[1].trim())){
+							attributes[regexResult[1].trim()] = regexResult.length > 1 && regexResult[2] ? regexResult[2].trim() : ""
+						}
+					}else{
+						attributes[regexResult[1].trim()] = regexResult.length > 1 && regexResult[2] ? regexResult[2].trim() : ""
+					}
 				}
 			})
 			if(Object.keys(attributes).length > 0){
