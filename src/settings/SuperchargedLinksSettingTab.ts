@@ -45,6 +45,21 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 					this.plugin.saveSettings()
 				})
 			})
+		/* Exclude Fields from context menu*/
+		new Setting(containerEl)
+			.setName('Ignored fields')
+			.setDesc('Fields to be ignored by the plugin when adding options to the context menu')
+			.addTextArea((text) => {text
+				.setPlaceholder('Enter fields as string, comma separated')
+				.setValue(this.plugin.settings.globallyIgnoredFields.join(', '))
+				.onChange(async (value) => {
+					this.plugin.settings.globallyIgnoredFields = value.replace(/\s/g,'').split(',');
+					await this.plugin.saveSettings();
+				})
+				text.inputEl.rows = 6;
+				text.inputEl.cols = 25;
+			});
+		
 
         /* Add new property for which we want to preset values*/
 		new Setting(containerEl)

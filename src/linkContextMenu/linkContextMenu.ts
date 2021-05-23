@@ -39,8 +39,14 @@ class linkContextMenu {
 		const cache = this.plugin.app.metadataCache.getCache(abstractFile.path)
 		if(cache.frontmatter){
 			const {position, ...attributes} = cache.frontmatter
+			const filteredAttributes: Record<string, string> = {}
+			Object.keys(attributes).forEach(key => {
+				if(!this.plugin.settings.globallyIgnoredFields.includes(key)){
+					filteredAttributes[key] = attributes[key]
+				}
+			})
 			menu.addSeparator()
-			this.createExtraOptionsListForFrontmatter(attributes, menu).then(() => {
+			this.createExtraOptionsListForFrontmatter(filteredAttributes, menu).then(() => {
 				this.createExtraOptionsListForInlineFields(this.file, menu).then(() => {
 					menu.addSeparator()
 					this.addSectionSelectModalOption(this.plugin, menu)
@@ -61,7 +67,9 @@ class linkContextMenu {
 		this.plugin.app.vault.read(file).then((result: string) => {
 			result.split('\n').map(line => {
 				const regexResult = line.match(regex)
-				if(regexResult && regexResult.length > 0){
+				if(regexResult 
+					&& regexResult.length > 0 
+					&& !this.plugin.settings.globallyIgnoredFields.includes(regexResult[1].trim())){
 					attributes[regexResult[1].trim()] = regexResult.length > 1 && regexResult[2] ? regexResult[2].trim() : ""
 				}
 			})
