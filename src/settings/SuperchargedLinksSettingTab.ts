@@ -1,4 +1,4 @@
-import {App, PluginSettingTab, Setting, ButtonComponent} from "obsidian"
+import {App, PluginSettingTab, Setting, ButtonComponent, ToggleComponent} from "obsidian"
 import SuperchargedLinks from "main"
 import FieldSettingsModal from "src/settings/FieldSettingsModal"
 import Field from "src/Field"
@@ -34,6 +34,18 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 			});
         
         /* Managing predefined values for properties */
+		/* Manage menu options display*/
+		new Setting(containerEl)
+			.setName("Display field options in context menu")
+			.setDesc("Choose to show or hide fields options in the context menu of a link or a file")
+			.addToggle((toggle: ToggleComponent) => {
+				toggle.setValue(this.plugin.settings.displayFieldsInContextMenu)
+				toggle.onChange(value => {
+					this.plugin.settings.displayFieldsInContextMenu = value
+					this.plugin.saveSettings()
+				})
+			})
+
         /* Add new property for which we want to preset values*/
 		new Setting(containerEl)
 			.setName("Add New Property Manager")

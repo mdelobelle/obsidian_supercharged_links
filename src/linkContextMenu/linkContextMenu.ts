@@ -19,10 +19,11 @@ class linkContextMenu {
 	createContextMenu(): void{
 		this.plugin.registerEvent(
             this.plugin.app.workspace.on('file-menu', (menu, abstractFile, source) => {
-                if(source === "link-context-menu" || 
+                if(this.plugin.settings.displayFieldsInContextMenu && (
+					source === "link-context-menu" || 
 					source === "calendar-context-menu" || 
 					source === 'pane-more-options' ||
-					source === 'file-explorer-context-menu'){
+					source === 'file-explorer-context-menu')){
 					const files = this.plugin.app.vault.getMarkdownFiles().filter(mdFile => mdFile.path == abstractFile.path)
 					if(files.length > 0){
 						const file = files[0]
