@@ -59,7 +59,6 @@ export default class valueMultiSelectModal extends Modal {
 
     populateValuesGrid(valueGrid: HTMLDivElement, listNoteValues: string[]){
         Object.keys(this.settings.values).forEach(key => {
-
             const presetValue = this.settings.values[key]
             this.buildValueToggler(valueGrid, presetValue)
         })

@@ -72,3 +72,20 @@
     justify-content: flex-end;
     align-items: center;
 }
+
+.frontmatter-textarea-buttons {
+    flex: 1 1 auto;
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.position-selector-container {
+    margin-right: 10px;
+}
+
+.heading-selector-button, .heading-selector-button:not(.mod-cta), .heading-selector-button:not(.mod-warning){
+    padding: 0;
+    background-color: transparent;
+}

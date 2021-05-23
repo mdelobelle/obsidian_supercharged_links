@@ -5,6 +5,7 @@ import valueTextInputModal from "src/linkContextMenu/valueTextInputModal"
 import valueToggleModal from "src/linkContextMenu/valueToggleModal"
 import valueSelectModal from "src/linkContextMenu/valueSelectModal"
 import Field from "src/Field"
+import chooseSectionModal from "./chooseSectionModal"
 
 class linkContextMenu {
     plugin: SuperchargedLinks
@@ -38,9 +39,19 @@ class linkContextMenu {
 		if(cache.frontmatter){
 			const {position, ...attributes} = cache.frontmatter
 			menu.addSeparator()
-			this.createExtraOptionsListForFrontmatter(attributes, menu)
+			this.createExtraOptionsListForFrontmatter(attributes, menu).then(() => {
+				this.createExtraOptionsListForInlineFields(this.file, menu).then(() => {
+					menu.addSeparator()
+					this.addSectionSelectModalOption(this.plugin, menu)
+				})
+			})
+		} else {
+			this.createExtraOptionsListForInlineFields(this.file, menu).then(() => {
+				menu.addSeparator()
+				this.addSectionSelectModalOption(this.plugin, menu)
+			})
 		}
-		this.createExtraOptionsListForInlineFields(this.file, menu)
+		
 	}
 
 	async createExtraOptionsListForInlineFields(file:TFile, menu: Menu):Promise<void>{
@@ -90,6 +101,17 @@ class linkContextMenu {
 				this.addTextInputMenuOption(menu, key, value ? value.toString() : "")
 			}
 		});
+	}
+
+	addSectionSelectModalOption(plugin: SuperchargedLinks, menu: Menu): void{
+		const modal = new chooseSectionModal(this.plugin, this.file)
+		menu.addItem((item) => {
+			item.setIcon("pencil")
+			item.setTitle("Add field at section...")
+			item.onClick((evt: MouseEvent) => {
+				modal.open()
+			})
+		})
 	}
 
 	addCycleMenuOption(menu: Menu, name: string, value: string, propertySettings: Field): void{
