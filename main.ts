@@ -20,8 +20,12 @@ export default class SuperchargedLinks extends Plugin {
 			this.initialProperties.push(property)
 		}) 
 		this.addSettingTab(new SuperchargedLinksSettingTab(this.app, this));
-		this.registerMarkdownPostProcessor((el, ctx) => updateElLinks(this.app, this.settings, el, ctx));
-		this.app.metadataCache.on('changed', (_file) => updateVisibleLinks(this.app, this.settings));
+		this.registerMarkdownPostProcessor((el, ctx) => {
+			updateElLinks(this.app, this.settings, el, ctx)
+		});
+		this.app.metadataCache.on('changed', (_file) => {
+			updateVisibleLinks(this.app, this.settings)
+		});
 		new linkContextMenu(this)
 	}
 
