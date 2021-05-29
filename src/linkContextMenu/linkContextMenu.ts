@@ -40,8 +40,8 @@ class linkContextMenu {
 		if(cache.frontmatter){
 			const {position, ...attributes} = cache.frontmatter
 			Object.keys(attributes).forEach(key => {
-				if(!this.plugin.settings.globallyIgnoredFields.includes(key)){
-					delete attributes.key
+				if(this.plugin.settings.globallyIgnoredFields.includes(key)){
+					delete attributes[key]
 				}
 			})
 			menu.addSeparator()
@@ -59,8 +59,8 @@ class linkContextMenu {
 							fileClassFields.push(line)
 						})
 						Object.keys(attributes).forEach(key => {
-							if(!fileClassFields.includes(key)){
-								delete attributes.key
+							if(!fileClassFields.includes(key) && key != 'fileClass'){
+								delete attributes[key]
 							}
 						})
 						this.createExtraOptionsListForFrontmatter(attributes, menu).then(() => {
