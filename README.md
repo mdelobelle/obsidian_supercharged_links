@@ -126,6 +126,13 @@ https://youtu.be/aaSZnkEuH4w
 
 Right click on a link will automatically display an item per target note's frontmatter property and "inline fields" (dataview syntax)
 
+these options are accessible from:
+- the context menu of a link, 
+- the context menu of a calendar day, 
+- the context menu of a file in the file explorer,
+- the "more options" menu of a file
+- the command palette "Cmd+P" or by typing the hotkey Alt+O (can be customized in hotkeys settings) 
+
 ### Update text property
 
 1. Right-click on the link
