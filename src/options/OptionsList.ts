@@ -24,13 +24,11 @@ export default class OptionsList{
     plugin: SuperchargedLinks
     path: string
     category: Menu | SelectModal
-    private modals: Record<string, any>
 
     constructor(plugin: SuperchargedLinks, file: TFile, category: Menu | SelectModal){
         this.file = file
         this.plugin = plugin
         this.category = category
-        this.modals = {}
     }
 
 	createExtraOptionList(){
@@ -55,38 +53,38 @@ export default class OptionsList{
 							delete attributes[key]
 						}
 					})
-					this.createExtraOptionsListForFrontmatter(attributes, this.category).then(() => {
-						this.createExtraOptionsListForInlineFields(this.file, this.category, fileClassForFields, fileClassFields).then(() => {
+					this.createExtraOptionsListForFrontmatter(attributes,).then(() => {
+						this.createExtraOptionsListForInlineFields(this.file, fileClassForFields, fileClassFields).then(() => {
 							if(isMenu(this.category)){this.category.addSeparator()}
-							this.addSectionSelectModalOption(this.plugin, this.category)
+							this.addSectionSelectModalOption(this.plugin)
 						})
 					})
 				}).catch(() => {
-					this.createExtraOptionsListForFrontmatter(attributes, this.category).then(() => {
-						this.createExtraOptionsListForInlineFields(this.file, this.category).then(() => {
+					this.createExtraOptionsListForFrontmatter(attributes).then(() => {
+						this.createExtraOptionsListForInlineFields(this.file).then(() => {
 							if(isMenu(this.category)){this.category.addSeparator()}
-							this.addSectionSelectModalOption(this.plugin, this.category)
+							this.addSectionSelectModalOption(this.plugin)
 						})
 					})
 				})
 			} else {
-				this.createExtraOptionsListForFrontmatter(attributes, this.category).then(() => {
-					this.createExtraOptionsListForInlineFields(this.file, this.category).then(() => {
+				this.createExtraOptionsListForFrontmatter(attributes).then(() => {
+					this.createExtraOptionsListForInlineFields(this.file).then(() => {
 						if(isMenu(this.category)){this.category.addSeparator()}
-						this.addSectionSelectModalOption(this.plugin, this.category)
+						this.addSectionSelectModalOption(this.plugin)
 					})
 				})
 			}
 		} else {
-			this.createExtraOptionsListForInlineFields(this.file, this.category).then(() => {
+			this.createExtraOptionsListForInlineFields(this.file).then(() => {
 				if(isMenu(this.category)){this.category.addSeparator()}
-				this.addSectionSelectModalOption(this.plugin, this.category)
+				this.addSectionSelectModalOption(this.plugin)
 			})
 		}
 		
 	}
 
-	async createExtraOptionsListForInlineFields(file:TFile, category: Menu | SelectModal, fileClassForFields: boolean = false, fileClassFields: string[] = []):Promise<void>{
+	async createExtraOptionsListForInlineFields(file:TFile, fileClassForFields: boolean = false, fileClassFields: string[] = []):Promise<void>{
 		return new Promise((resolve, reject) => {
 			let attributes: Record<string, string> = {}
 			const regex = new RegExp(/[_\*~`]*([0-9\w\p{Letter}\p{Emoji_Presentation}][-0-9\w\p{Letter}\p{Emoji_Presentation}\s]*)[_\*~`]*\s*::(.+)?/u)
@@ -107,28 +105,28 @@ export default class OptionsList{
 				})
 				if(Object.keys(attributes).length > 0){
 					if(isMenu(this.category)){this.category.addSeparator()}
-					this.buildExtraOptionsList(attributes, category)
+					this.buildExtraOptionsList(attributes)
 				}
 				resolve()
 			})
 		})
 	}
 
-	async createExtraOptionsListForFrontmatter(attributes: Record<string, string>, category: Menu | SelectModal){
-		this.buildExtraOptionsList(attributes, category)
+	async createExtraOptionsListForFrontmatter(attributes: Record<string, string>){
+		this.buildExtraOptionsList(attributes,)
 	}
 
-	buildExtraOptionsList(attributes: Record<string, string>, category: Menu | SelectModal) {
+	buildExtraOptionsList(attributes: Record<string, string>) {
 		Object.keys(attributes).forEach((key: string) => {
 			const value = attributes[key]
 			const propertySettings = this.getPropertySettings(key)
 			if(propertySettings && propertySettings.values){
 				if(propertySettings.isCycle){
-					this.addCycleMenuOption(category, key, value, propertySettings)
+					this.addCycleMenuOption(key, value, propertySettings)
 				} else if(propertySettings.isMulti){
-					this.addMultiMenuOption(category, key, value, propertySettings)
+					this.addMultiMenuOption(key, value, propertySettings)
 				} else {
-					this.addSelectMenuOption(category, key, value, propertySettings)
+					this.addSelectMenuOption(key, value, propertySettings)
 				}
 			} else if(isBoolean(value) || /true/i.test(value) || /false/i.test(value)){
 				let toBooleanValue: boolean
@@ -139,14 +137,14 @@ export default class OptionsList{
 				} else if(/false/i.test(value)){
 					toBooleanValue = false
 				}
-				this.addToggleMenuOption(category, key, toBooleanValue)
+				this.addToggleMenuOption(key, toBooleanValue)
 			} else {
-				this.addTextInputMenuOption(category, key, value ? value.toString() : "")
+				this.addTextInputMenuOption(key, value ? value.toString() : "")
 			}
 		});
 	}
 
-	addSectionSelectModalOption(plugin: SuperchargedLinks, category: Menu | SelectModal): void{
+	addSectionSelectModalOption(plugin: SuperchargedLinks): void{
 		const modal = new chooseSectionModal(this.plugin, this.file)
         if(isMenu(this.category)){
             this.category.addItem((item) => {
@@ -162,7 +160,7 @@ export default class OptionsList{
         }
 	}
 
-	addCycleMenuOption(category: Menu | SelectModal, name: string, value: string, propertySettings: Field): void{
+	addCycleMenuOption(name: string, value: string, propertySettings: Field): void{
 		const values = propertySettings.values
 		const keys = Object.keys(values)
 		const keyForValue = keys.find(key => values[key] === value)
@@ -188,7 +186,7 @@ export default class OptionsList{
         }
 	}
 
-	addMultiMenuOption(category: Menu | SelectModal, name: string, value: string, propertySettings: Field): void{
+	addMultiMenuOption(name: string, value: string, propertySettings: Field): void{
 		const modal = new valueMultiSelectModal(this.plugin.app, this.file, name, value, propertySettings)
 		modal.titleEl.setText("Select values")
         if(isMenu(this.category)){
@@ -205,7 +203,7 @@ export default class OptionsList{
        }
 	}
 
-	addSelectMenuOption(category: Menu | SelectModal, name: string, value: string, propertySettings: Field): void{
+	addSelectMenuOption(name: string, value: string, propertySettings: Field): void{
 		const modal = new valueSelectModal(this.plugin.app, this.file, name, value, propertySettings)
 		modal.titleEl.setText("Select value")
         if(isMenu(this.category)){
@@ -220,7 +218,7 @@ export default class OptionsList{
         }
 	}
 
-	addToggleMenuOption(category: Menu | SelectModal, name: string, value: boolean): void{
+	addToggleMenuOption(name: string, value: boolean): void{
 		const modal = new valueToggleModal(this.plugin.app, this.file, name, value)
 		modal.titleEl.setText(`Change Value for ${name}`)
         if(isMenu(this.category)){
@@ -235,7 +233,7 @@ export default class OptionsList{
         }
 	}
 
-	addTextInputMenuOption(category: Menu | SelectModal, name: string, value: string): void{
+	addTextInputMenuOption(name: string, value: string): void{
 		const modal = new valueTextInputModal(this.plugin.app, this.file, name, value)
 		modal.titleEl.setText(`Change Value for ${name}`)
         if(isMenu(this.category)){
