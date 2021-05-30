@@ -1,7 +1,7 @@
 interface FileClassAttribute{
     name: string
     type: string
-    values: string[]
+    options: string[]
     isMulti: boolean
     isCycle: boolean
 }
@@ -15,6 +15,9 @@ class FileClassAttribute{
         const simpleFieldRaw = raw.match(nameRegex)
         if(detailedFieldRaw){
             this.name = detailedFieldRaw[1].trim()
+            const settings = JSON.parse(`${detailedFieldRaw[2].trim()}`)
+            this.type = settings['type']
+            this.options = settings['options']
         } else if(simpleFieldRaw){
             this.name = simpleFieldRaw[0].trim()
         } else {

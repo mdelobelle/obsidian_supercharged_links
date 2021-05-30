@@ -69,7 +69,6 @@ export default class OptionsList{
 						})
 					})
 				})
-				//end new method
 			} else {
 				this.createExtraOptionsListForFrontmatter(attributes, this.category).then(() => {
 					this.createExtraOptionsListForInlineFields(this.file, this.category).then(() => {
@@ -87,30 +86,31 @@ export default class OptionsList{
 		
 	}
 
-	
-
 	async createExtraOptionsListForInlineFields(file:TFile, category: Menu | SelectModal, fileClassForFields: boolean = false, fileClassFields: string[] = []):Promise<void>{
-		let attributes: Record<string, string> = {}
-		const regex = new RegExp(/[_\*~`]*([0-9\w\p{Letter}\p{Emoji_Presentation}][-0-9\w\p{Letter}\p{Emoji_Presentation}\s]*)[_\*~`]*\s*::(.+)?/u)
-		this.plugin.app.vault.read(file).then((result: string) => {
-			result.split('\n').map(line => {
-				const regexResult = line.match(regex)
-				if(regexResult 
-					&& regexResult.length > 0 
-					&& !this.plugin.settings.globallyIgnoredFields.includes(regexResult[1].trim())){
-					if(fileClassForFields){
-						if(fileClassFields.includes(regexResult[1].trim())){
+		return new Promise((resolve, reject) => {
+			let attributes: Record<string, string> = {}
+			const regex = new RegExp(/[_\*~`]*([0-9\w\p{Letter}\p{Emoji_Presentation}][-0-9\w\p{Letter}\p{Emoji_Presentation}\s]*)[_\*~`]*\s*::(.+)?/u)
+			this.plugin.app.vault.read(file).then((result: string) => {
+				result.split('\n').map(line => {
+					const regexResult = line.match(regex)
+					if(regexResult 
+						&& regexResult.length > 0 
+						&& !this.plugin.settings.globallyIgnoredFields.includes(regexResult[1].trim())){
+						if(fileClassForFields){
+							if(fileClassFields.includes(regexResult[1].trim())){
+								attributes[regexResult[1].trim()] = regexResult.length > 1 && regexResult[2] ? regexResult[2].trim() : ""
+							}
+						}else{
 							attributes[regexResult[1].trim()] = regexResult.length > 1 && regexResult[2] ? regexResult[2].trim() : ""
 						}
-					}else{
-						attributes[regexResult[1].trim()] = regexResult.length > 1 && regexResult[2] ? regexResult[2].trim() : ""
 					}
+				})
+				if(Object.keys(attributes).length > 0){
+					if(isMenu(this.category)){this.category.addSeparator()}
+					this.buildExtraOptionsList(attributes, category)
 				}
+				resolve()
 			})
-			if(Object.keys(attributes).length > 0){
-				if(isMenu(this.category)){this.category.addSeparator()}
-				this.buildExtraOptionsList(attributes, category)
-			}
 		})
 	}
 
