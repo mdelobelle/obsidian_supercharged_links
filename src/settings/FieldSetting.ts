@@ -30,25 +30,25 @@ export default class FieldSetting extends Setting {
     addEditButton(): void{
         this.addButton((b) => {
             b.setIcon("pencil")
-                    .setTooltip("Edit")
-                    .onClick(() => {
-                        let modal = new FieldSettingsModal(this.app, this.plugin, this.containerEl, this, this.property);
-                        modal.open();
-                    });
+            .setTooltip("Edit")
+            .onClick(() => {
+                let modal = new FieldSettingsModal(this.app, this.plugin, this.containerEl, this, this.property);
+                modal.open();
+            });
         })
     }
 
     addDeleteButton(): void{
         this.addButton((b) => {
             b.setIcon("trash")
-                .setTooltip("Delete")
-                .onClick(() => {
-                    const currentExistingProperty = this.plugin.initialProperties.filter(p => p.id == this.property.id)[0]
-                    if(currentExistingProperty){
-                        this.plugin.initialProperties.remove(currentExistingProperty)
-                    }
-                    this.settingEl.parentElement.removeChild(this.settingEl)
-                    this.plugin.saveSettings()
+            .setTooltip("Delete")
+            .onClick(() => {
+                const currentExistingProperty = this.plugin.initialProperties.filter(p => p.id == this.property.id)[0]
+                if(currentExistingProperty){
+                    this.plugin.initialProperties.remove(currentExistingProperty)
+                }
+                this.settingEl.parentElement.removeChild(this.settingEl)
+                this.plugin.saveSettings()
             });
         });
     }

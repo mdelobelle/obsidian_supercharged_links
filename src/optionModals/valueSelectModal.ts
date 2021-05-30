@@ -1,7 +1,7 @@
 import {App, Modal, DropdownComponent, TFile, ButtonComponent} from "obsidian"
 import Field from "src/Field"
+import { replaceValues } from "src/options/replaceValues"
 import FieldSetting from "src/settings/FieldSetting"
-import OptionsList from "../options/OptionsList"
 
 export default class valueToggleModal extends Modal {
     app: App
@@ -57,7 +57,7 @@ export default class valueToggleModal extends Modal {
             .onClick(async () => {
                 if(this.lineNumber == -1){
                     if(this.newValue || this.newValue == ""){
-                        OptionsList.replaceFrontmatterAttribute(this.app, this.file, this.name, this.newValue)
+                        replaceValues(this.app, this.file, this.name, this.newValue)
                     }
                 } else {
                     this.app.vault.read(this.file).then(result => {

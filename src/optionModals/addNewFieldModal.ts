@@ -1,4 +1,4 @@
-import {App, Modal, TextComponent, ButtonComponent, ExtraButtonComponent,TFile} from "obsidian"
+import {Modal, TextComponent, ButtonComponent, ExtraButtonComponent,TFile} from "obsidian"
 import SuperchargedLinks from "main"
 
 export default class addNewFieldModal extends Modal {

@@ -8,6 +8,7 @@ import Field from "src/Field"
 import chooseSectionModal from "../optionModals/chooseSectionModal"
 import SelectModal from "src/optionModals/SelectModal"
 import {createFileClass} from "src/fileClass/FileClass"
+import { replaceValues } from "./replaceValues"
 
 function isMenu(category: Menu | SelectModal): category is Menu {
     return (category as Menu).addItem !== undefined
@@ -177,13 +178,13 @@ export default class OptionsList{
                 item.setTitle(`${name} : ${value} ▷ ${nextValue}`)
                 item.setIcon('switch')
                 item.onClick((evt: MouseEvent) => {
-                    OptionsList.replaceFrontmatterAttribute(this.plugin.app, this.file, name, nextValue)
+                    replaceValues(this.plugin.app, this.file, name, nextValue)
                 })
             })
         } else if(isSelect(this.category)){
             this.category.addOption(`${name}_${value}_${nextValue}`, `${name} : ${value} ▷ ${nextValue}`)
             this.category.modals[`${name}_${value}_${nextValue}`] = () => 
-            OptionsList.replaceFrontmatterAttribute(this.plugin.app, this.file, name, nextValue)
+            replaceValues(this.plugin.app, this.file, name, nextValue)
         }
 	}
 
@@ -254,51 +255,5 @@ export default class OptionsList{
 		if(matchingSettings.length > 0){
 			return matchingSettings[0]
 		}
-	}
-
-    static async replaceFrontmatterAttribute(app: App, file: TFile, attribute: string, input: string): Promise <void>{
-		app.vault.read(file).then((result: string) => {
-			let newContent:Array<string> = []
-			let foreHeadText = false
-			let frontmatterStart = false
-			let frontmatterEnd = false
-			let inFrontmatter = false
-			result.split('\n').map(line => {
-				if(line!="---" && !foreHeadText && !frontmatterStart){
-					foreHeadText = true
-				}
-				if(line == "---" && !foreHeadText){
-					if(!frontmatterStart){
-						frontmatterStart = true
-						inFrontmatter = true
-					} else if(!frontmatterEnd){
-						frontmatterEnd = true
-						inFrontmatter = false
-					}
-				}
-				if(inFrontmatter){
-					const regex = new RegExp(`${attribute}:`, 'u')
-					const regexResult = line.match(regex)
-					if(regexResult && regexResult.length > 0){
-						const inputArray = input ? input.replace(/(\,\s+)/g, ',').split(',') : [""]
-						const newValue = inputArray.length == 1 ? inputArray[0] : `[${inputArray.join(', ')}]`
-						newContent.push(`${attribute}: ${newValue}`)
-					} else {
-						newContent.push(`${line}`)
-					}
-				} else {
-					const regex = new RegExp(`([_\*~\`]*)${attribute}([_\*~\`]*)(\\s*)::`, 'u')
-					const r = line.match(regex)
-					if(r && r.length > 0){
-						const inputArray = input ? input.replace(/(\,\s+)/g, ',').split(',') : [""]
-						const newValue = inputArray.length == 1 ? inputArray[0] : `${inputArray.join(', ')}`
-						newContent.push(`${r[1]}${attribute}${r[2]}${r[3]}:: ${newValue}`)
-					} else {
-						newContent.push(line)
-					}	
-				}
-			})
-			app.vault.modify(file, newContent.join('\n'))
-		})
 	}
 }

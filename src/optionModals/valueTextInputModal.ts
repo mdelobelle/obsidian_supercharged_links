@@ -1,5 +1,5 @@
 import {App, Modal, TextComponent, TFile} from "obsidian"
-import OptionsList from "../options/OptionsList"
+import { replaceValues } from "src/options/replaceValues"
 
 export default class valueTextInputModal extends Modal {
     app: App
@@ -34,7 +34,7 @@ export default class valueTextInputModal extends Modal {
         form.onsubmit = (e: Event) => {
             e.preventDefault()
             if(this.lineNumber == -1){
-                OptionsList.replaceFrontmatterAttribute(this.app, this.file, this.name, inputEl.getValue())
+                replaceValues(this.app, this.file, this.name, inputEl.getValue())
             }
             else {
                 this.app.vault.read(this.file).then(result => {

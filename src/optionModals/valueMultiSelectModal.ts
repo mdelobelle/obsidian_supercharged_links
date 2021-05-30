@@ -1,7 +1,7 @@
 import {App, Modal, ToggleComponent, TFile, ButtonComponent, ExtraButtonComponent, parseFrontMatterStringArray} from "obsidian"
 import Field from "src/Field"
+import { replaceValues } from "src/options/replaceValues"
 import FieldSetting from "src/settings/FieldSetting"
-import OptionsList from "../options/OptionsList"
 
 export default class valueMultiSelectModal extends Modal {
     app: App
@@ -76,7 +76,7 @@ export default class valueMultiSelectModal extends Modal {
         saveButton.setIcon("checkmark")
         saveButton.onClick(() => {
             if(this.lineNumber == -1){
-                OptionsList.replaceFrontmatterAttribute(this.app, this.file, this.name, this.values.join(","))
+                replaceValues(this.app, this.file, this.name, this.values.join(","))
             }else{
                 this.app.vault.read(this.file).then(result => {
                     let newContent: string[] = []

@@ -1,5 +1,5 @@
 import {App, Modal, ToggleComponent, TFile} from "obsidian"
-import OptionsList from "../options/OptionsList"
+import { replaceValues } from "src/options/replaceValues"
 
 export default class valueToggleModal extends Modal {
     app: App
@@ -26,7 +26,7 @@ export default class valueToggleModal extends Modal {
         const inputEl = new ToggleComponent(inputDiv)
         inputEl.setValue(this.value)
         inputEl.onChange(v => {
-            OptionsList.replaceFrontmatterAttribute(this.app, this.file, this.name, v ? "true" : "false")
+            replaceValues(this.app, this.file, this.name, v ? "true" : "false")
         })
     }
 }
