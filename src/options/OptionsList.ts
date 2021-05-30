@@ -7,6 +7,7 @@ import valueSelectModal from "src/optionModals/valueSelectModal"
 import Field from "src/Field"
 import chooseSectionModal from "../optionModals/chooseSectionModal"
 import SelectModal from "src/optionModals/SelectModal"
+import {createFileClass} from "src/fileClass/FileClass"
 
 function isMenu(category: Menu | SelectModal): category is Menu {
     return (category as Menu).addItem !== undefined
@@ -45,35 +46,29 @@ export default class OptionsList{
 			let fileClassFields: string[] = []
 			if(Object.keys(attributes).includes('fileClass')){
 				const fileClass = attributes['fileClass']
-				const classFiles = this.plugin.app.vault.getMarkdownFiles().filter(mdFile => 
-					(mdFile.path == `${this.plugin.settings.classFilesPath}${fileClass}.md`))
-				if(classFiles.length > 0){
-					const classFile = classFiles[0]
+				createFileClass(this.plugin, fileClass).then(fileClass => {
+					fileClassFields = fileClass.attributes.map(attr => attr.name)
 					fileClassForFields = true
-					this.plugin.app.vault.read(classFile).then(result => {
-						result.split('\n').forEach(line => {
-							fileClassFields.push(line)
-						})
-						Object.keys(attributes).forEach(key => {
-							if(!fileClassFields.includes(key) && key != 'fileClass'){
-								delete attributes[key]
-							}
-						})
-						this.createExtraOptionsListForFrontmatter(attributes, this.category).then(() => {
-							this.createExtraOptionsListForInlineFields(this.file, this.category, fileClassForFields, fileClassFields).then(() => {
-								if(isMenu(this.category)){this.category.addSeparator()}
-								this.addSectionSelectModalOption(this.plugin, this.category)
-							})
+					Object.keys(attributes).forEach(key => {
+						if(!fileClassFields.includes(key) && key != 'fileClass'){
+							delete attributes[key]
+						}
+					})
+					this.createExtraOptionsListForFrontmatter(attributes, this.category).then(() => {
+						this.createExtraOptionsListForInlineFields(this.file, this.category, fileClassForFields, fileClassFields).then(() => {
+							if(isMenu(this.category)){this.category.addSeparator()}
+							this.addSectionSelectModalOption(this.plugin, this.category)
 						})
 					})
-				} else {
+				}).catch(() => {
 					this.createExtraOptionsListForFrontmatter(attributes, this.category).then(() => {
 						this.createExtraOptionsListForInlineFields(this.file, this.category).then(() => {
 							if(isMenu(this.category)){this.category.addSeparator()}
 							this.addSectionSelectModalOption(this.plugin, this.category)
 						})
 					})
-				}
+				})
+				//end new method
 			} else {
 				this.createExtraOptionsListForFrontmatter(attributes, this.category).then(() => {
 					this.createExtraOptionsListForInlineFields(this.file, this.category).then(() => {
