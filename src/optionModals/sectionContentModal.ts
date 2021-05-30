@@ -44,7 +44,6 @@ export default class sectionContentModal extends Modal {
                         newContent.push(inputEl.getValue())
                     }
                 })
-                console.log(newContent.join('\n'))
             })
         })
         const cancelButton = new ExtraButtonComponent(footerDiv)

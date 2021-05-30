@@ -34,7 +34,6 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
                     settings.targetAttributes.forEach(attribute => {
                         const regex = new RegExp(`${attribute}\\s*:\\s*(.*)`, 'u')
                         const regexResult = line.match(regex)
-                        console.log(line, ": ", regex)
                         if(regexResult && regexResult.length > 1){
                             const value = regexResult[1] ? regexResult[1].replace(/^\[(.*)\]$/,"$1").trim() : ""
                             new_props[attribute] = value
