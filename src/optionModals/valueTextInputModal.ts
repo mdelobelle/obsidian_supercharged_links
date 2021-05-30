@@ -1,6 +1,5 @@
-import { timeStamp } from "console"
 import {App, Modal, TextComponent, TFile} from "obsidian"
-import linkContextMenu from "src/linkContextMenu/linkContextMenu"
+import OptionsList from "../options/OptionsList"
 
 export default class valueTextInputModal extends Modal {
     app: App
@@ -35,7 +34,7 @@ export default class valueTextInputModal extends Modal {
         form.onsubmit = (e: Event) => {
             e.preventDefault()
             if(this.lineNumber == -1){
-                linkContextMenu.replaceFrontmatterAttribute(this.app, this.file, this.name, inputEl.getValue())
+                OptionsList.replaceFrontmatterAttribute(this.app, this.file, this.name, inputEl.getValue())
             }
             else {
                 this.app.vault.read(this.file).then(result => {
@@ -58,7 +57,9 @@ export default class valueTextInputModal extends Modal {
             this.close()
         }
         const inputEl = new TextComponent(form)
+        inputEl.inputEl.focus()
         inputEl.setValue(this.value)
         inputEl.inputEl.addClass("frontmatter-prompt-input")
+
     }
 }

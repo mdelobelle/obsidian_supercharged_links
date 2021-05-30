@@ -1,9 +1,10 @@
-import {Plugin} from 'obsidian';
+import {Plugin, MarkdownView} from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {updateElLinks, updateVisibleLinks} from "src/linkAttributes/linkAttributes"
 import {SuperchargedLinksSettings, DEFAULT_SETTINGS} from "src/settings/SuperchargedLinksSettings"
 import Field from 'src/Field';
-import linkContextMenu from "src/linkContextMenu/linkContextMenu"
+import linkContextMenu from "src/options/linkContextMenu"
+import NoteFieldsCommandsModal from "src/options/NoteFieldsCommandsModal"
 
 export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
@@ -26,6 +27,25 @@ export default class SuperchargedLinks extends Plugin {
 		this.app.metadataCache.on('changed', (_file) => {
 			updateVisibleLinks(this.app, this.settings)
 		});
+
+		this.addCommand({
+			id: "field_options",
+			name: "field options",
+			hotkeys: [
+				{
+					modifiers: ["Alt"],
+					key: 'O',
+				},
+			],
+			callback: () => {
+				const leaf = this.app.workspace.activeLeaf
+				if(leaf.view instanceof MarkdownView && leaf.view.file){
+					const fieldsOptionsModal = new NoteFieldsCommandsModal(this.app, this, leaf.view.file)
+					fieldsOptionsModal.open()
+				}
+			},
+		});
+
 		new linkContextMenu(this)
 	}
 

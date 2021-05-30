@@ -34,6 +34,7 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
                     settings.targetAttributes.forEach(attribute => {
                         const regex = new RegExp(`${attribute}\\s*:\\s*(.*)`, 'u')
                         const regexResult = line.match(regex)
+                        console.log(line, ": ", regex)
                         if(regexResult && regexResult.length > 1){
                             const value = regexResult[1] ? regexResult[1].replace(/^\[(.*)\]$/,"$1").trim() : ""
                             new_props[attribute] = value
@@ -56,7 +57,6 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
 }
 
 function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>){
-
     Object.keys(new_props).forEach(key => {
         link.setAttribute("data-link-"+key, new_props[key])
     })

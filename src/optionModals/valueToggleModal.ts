@@ -1,5 +1,5 @@
 import {App, Modal, ToggleComponent, TFile} from "obsidian"
-import linkContextMenu from "src/linkContextMenu/linkContextMenu"
+import OptionsList from "../options/OptionsList"
 
 export default class valueToggleModal extends Modal {
     app: App
@@ -26,7 +26,7 @@ export default class valueToggleModal extends Modal {
         const inputEl = new ToggleComponent(inputDiv)
         inputEl.setValue(this.value)
         inputEl.onChange(v => {
-            linkContextMenu.replaceFrontmatterAttribute(this.app, this.file, this.name, v ? "true" : "false")
+            OptionsList.replaceFrontmatterAttribute(this.app, this.file, this.name, v ? "true" : "false")
         })
     }
 }
