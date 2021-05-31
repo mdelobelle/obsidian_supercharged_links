@@ -7,7 +7,7 @@ import valueSelectModal from "src/optionModals/valueSelectModal"
 import Field from "src/Field"
 import chooseSectionModal from "../optionModals/chooseSectionModal"
 import SelectModal from "src/optionModals/SelectModal"
-import {createFileClass, FileClass} from "src/fileClass/FileClass"
+import {createFileClass, FileClass} from "src/fileClass/fileClass"
 import { replaceValues } from "./replaceValues"
 
 function isMenu(category: Menu | SelectModal): category is Menu {

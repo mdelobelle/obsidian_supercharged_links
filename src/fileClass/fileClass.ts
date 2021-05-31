@@ -1,4 +1,4 @@
-import FileClassAttribute from "./FileClassAttribute"
+import FileClassAttribute from "./fileClassAttribute"
 import SuperchargedLinks from "main"
 
 interface FileClass{

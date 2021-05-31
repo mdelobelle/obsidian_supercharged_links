@@ -59,6 +59,16 @@
     margin-left: 10px;
 }
 
+.frontmatter-value-selector-inline-label{
+    display: inline-block;
+    margin-left: 10px;
+    margin-right: 10px
+}
+
+.yaml-frontmatter-red{
+    color: #C7254E
+}
+
 .frontmatter-value-selector-toggler {
     display: inline-block;
     margin-right: 10px;
