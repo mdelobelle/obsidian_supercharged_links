@@ -1,5 +1,4 @@
 import FileClassAttribute from "./FileClassAttribute"
-import {App, TFile} from "obsidian"
 import SuperchargedLinks from "main"
 
 interface FileClass{
@@ -77,30 +76,39 @@ class FileClass{
 
     getAttributes(): Promise<void>{
         return new Promise((resolve, reject) => {
-            const file = this.getClassFile()
-            let attributes: Array<FileClassAttribute> = []
-            let errors: string[] = []
-            this.plugin.app.vault.read(file).then(result => {
-                result.split('\n').forEach(line => {
-                    try {
-                        const attribute = new FileClassAttribute(line)
-                        attributes.push(attribute)
-                    } catch (error) {
-                        errors.push(error)
-                    }
+            try {
+                const file = this.getClassFile()
+                let attributes: Array<FileClassAttribute> = []
+                let errors: string[] = []
+                this.plugin.app.vault.read(file).then(result => {
+                    result.split('\n').forEach(line => {
+                        try {
+                            const attribute = new FileClassAttribute(line)
+                            attributes.push(attribute)
+                        } catch (error) {
+                            errors.push(error)
+                        }
+                    })
+                    this.attributes = attributes
+                    this.errors = errors
+                    resolve()
                 })
-                this.attributes = attributes
-                this.errors = errors
-                resolve()
-            })
+            } catch (error) {
+                reject(error)
+            }
         })
     }
 }
 
 async function createFileClass(plugin: SuperchargedLinks, name: string): Promise<FileClass> {
-    const fileClass = new FileClass(plugin, name);
-    await fileClass.getAttributes()
-    return fileClass;
+    return new Promise((resolve, reject) => {
+        const fileClass = new FileClass(plugin, name);
+        fileClass.getAttributes().then(() => {
+            resolve(fileClass)
+        }).catch((error) => {
+            reject(error)
+        })
+    })
 }
 
 export {createFileClass, FileClass}

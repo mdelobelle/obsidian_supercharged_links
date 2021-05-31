@@ -7,7 +7,7 @@ import valueSelectModal from "src/optionModals/valueSelectModal"
 import Field from "src/Field"
 import chooseSectionModal from "../optionModals/chooseSectionModal"
 import SelectModal from "src/optionModals/SelectModal"
-import {createFileClass} from "src/fileClass/FileClass"
+import {createFileClass, FileClass} from "src/fileClass/FileClass"
 import { replaceValues } from "./replaceValues"
 
 function isMenu(category: Menu | SelectModal): category is Menu {
@@ -24,6 +24,7 @@ export default class OptionsList{
     plugin: SuperchargedLinks
     path: string
     category: Menu | SelectModal
+	fileClass: FileClass
 
     constructor(plugin: SuperchargedLinks, file: TFile, category: Menu | SelectModal){
         this.file = file
@@ -46,6 +47,7 @@ export default class OptionsList{
 			if(Object.keys(attributes).includes('fileClass')){
 				const fileClass = attributes['fileClass']
 				createFileClass(this.plugin, fileClass).then(fileClass => {
+					this.fileClass = fileClass
 					fileClassFields = fileClass.attributes.map(attr => attr.name)
 					fileClassForFields = true
 					Object.keys(attributes).forEach(key => {
@@ -59,7 +61,7 @@ export default class OptionsList{
 							this.addSectionSelectModalOption(this.plugin)
 						})
 					})
-				}).catch(() => {
+				}).catch((error) => {
 					this.createExtraOptionsListForFrontmatter(attributes).then(() => {
 						this.createExtraOptionsListForInlineFields(this.file).then(() => {
 							if(isMenu(this.category)){this.category.addSeparator()}
@@ -250,8 +252,18 @@ export default class OptionsList{
 
 	getPropertySettings(propertyName: string): Field{
 		const matchingSettings = this.plugin.settings.presetFields.filter(p => p.name == propertyName)
-		if(matchingSettings.length > 0){
-			return matchingSettings[0]
+		if(this.fileClass){
+			const fileClassAttributesWithName = this.fileClass.attributes.filter(attr => attr.name == propertyName)
+			if(fileClassAttributesWithName.length > 0){
+				const fileClassAttribute = fileClassAttributesWithName[0]
+				if(fileClassAttribute.options){
+					return fileClassAttribute.getField()
+				} else if(matchingSettings.length > 0){
+					return matchingSettings[0]
+				}
+			}
+		} else if(matchingSettings.length > 0){
+				return matchingSettings[0]
 		}
 	}
 }

@@ -1,3 +1,5 @@
+import Field from "src/Field"
+
 interface FileClassAttribute{
     name: string
     type: string
@@ -17,6 +19,16 @@ class FileClassAttribute{
             this.name = detailedFieldRaw[1].trim()
             const settings = JSON.parse(`${detailedFieldRaw[2].trim()}`)
             this.type = settings['type']
+            switch (this.type) {
+                case "multi":  
+                    this.isMulti = true;
+                    break;
+                case "cycle":
+                    this.isCycle = true;
+                    break;
+                default:
+                    break;
+            }
             this.options = settings['options']
         } else if(simpleFieldRaw){
             this.name = simpleFieldRaw[0].trim()
@@ -24,6 +36,14 @@ class FileClassAttribute{
             const error = new Error("Improper value")
             throw error
         }
+    }
+
+    getField(){
+        let values: Record<string, string> = {}
+        this.options.forEach((option, index) => {
+            values[index] = option
+        })
+        return new Field(this.name, values, this.name, this.isMulti, this.isCycle)
     }
 }
 
