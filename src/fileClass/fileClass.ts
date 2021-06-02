@@ -1,5 +1,7 @@
-import FileClassAttribute from "./fileClassAttribute"
+import {FileClassAttribute} from "./fileClassAttribute"
 import SuperchargedLinks from "main"
+import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
+import { renderResults } from "obsidian"
 
 interface FileClass{
     plugin: SuperchargedLinks
@@ -96,6 +98,40 @@ class FileClass{
             } catch (error) {
                 reject(error)
             }
+        })
+    }
+
+    updateAttribute(newType: string, newOptions: string[], newName: string, attr?: FileClassAttribute): Promise<void>{
+        return new Promise((resolve, reject) => {
+            
+            const file = this.getClassFile()
+            this.plugin.app.vault.read(file).then(result => {
+                if(attr){
+                    let newContent: string[] = []
+                    result.split('\n').forEach(line => {
+                        if(line.startsWith(attr.name)){
+                            if(newType == "input"){
+                                newContent.push(newName)
+                            } else {
+                                let settings: Record<string, any> = {}
+                                settings["type"] = newType
+                                settings["options"] = newOptions
+                                newContent.push(`${newName}:: ${JSON.stringify(settings)}`)
+                            }
+                        } else {
+                            newContent.push(line)
+                        }
+                    })
+                    this.plugin.app.vault.modify(file, newContent.join('\n'))
+                } else {
+                    let settings: Record<string, any> = {}
+                    settings["type"] = newType
+                    settings["options"] = newOptions
+                    result += (`\n${newName}:: ${JSON.stringify(settings)}`)
+                    this.plugin.app.vault.modify(file, result)
+                }
+                resolve()
+            })
         })
     }
 }

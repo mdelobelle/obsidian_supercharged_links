@@ -8,14 +8,14 @@ interface FileClassAttribute{
     isCycle: boolean
 }
 
-class FileClassAttribute{
+const types: Record<string, string> = {
+    "input": "Accepts any value",
+    "select": "Accepts a single value from a list",
+    "multi": "Accepts multiple values from a list",
+    "cycle": "Cycle through values from a list"
+}
 
-    types: Record<string, string> = {
-        "input": "Accepts any value",
-        "select": "Accepts a single value from a list",
-        "multi": "Accepts multiple values from a list",
-        "cycle": "Cycle through values from a list"
-    }
+class FileClassAttribute{
 
     constructor(raw: string){
         const completeRegex = new RegExp(/^[_\*~`]*([0-9\w\p{Letter}\p{Emoji_Presentation}][-0-9\w\p{Letter}\p{Emoji_Presentation}\s]*)[_\*~`]*\s*::(.+)?/u)
@@ -54,4 +54,4 @@ class FileClassAttribute{
     }
 }
 
-export default FileClassAttribute 
+export {FileClassAttribute, types}

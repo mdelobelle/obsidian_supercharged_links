@@ -23,9 +23,18 @@ export default class FileClassAttributeSelectModal extends Modal{
             fileClass.attributes.forEach(attr => {
                 select.addOption(attr.name, attr.name)
             })
+
+            select.addOption("++newAttr++", "++Add a new attribute++")
             select.onChange((attrName) => {
-                const modal = new FileClassAttributeModal(this.plugin.app, fileClass, fileClass.attributes.filter(attr => attr.name == attrName)[0])
-                modal.open()
+                if(attrName == "++newAttr"){
+                    const modal = new FileClassAttributeModal(this.plugin.app, fileClass)
+                    modal.open()
+                    this.close()
+                } else {
+                    const modal = new FileClassAttributeModal(this.plugin.app, fileClass, fileClass.attributes.filter(attr => attr.name == attrName)[0])
+                    modal.open()
+                    this.close()
+                }
             })
         })
     }
