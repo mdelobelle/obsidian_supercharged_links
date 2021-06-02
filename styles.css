@@ -99,3 +99,10 @@
     padding: 0;
     background-color: transparent;
 }
+
+.frontmatter-value-selector-inline-label-top{
+    display: inline-block;
+    margin-left: 10px;
+    margin-right: 10px;
+    vertical-align: top
+}

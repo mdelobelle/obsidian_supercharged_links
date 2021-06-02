@@ -9,6 +9,7 @@ import chooseSectionModal from "../optionModals/chooseSectionModal"
 import SelectModal from "src/optionModals/SelectModal"
 import {createFileClass, FileClass} from "src/fileClass/fileClass"
 import { replaceValues } from "./replaceValues"
+import FileClassAttributeSelectModal from "src/fileClass/FileClassAttributeSelectModal"
 
 function isMenu(category: Menu | SelectModal): category is Menu {
     return (category as Menu).addItem !== undefined
@@ -55,6 +56,21 @@ export default class OptionsList{
 							delete attributes[key]
 						}
 					})
+					const fileClassAttributeSelectModal = new FileClassAttributeSelectModal(this.plugin, this.fileClass.getClassFile())
+					if(isMenu(this.category)){
+						this.category.addSeparator()
+						this.category.addItem((item) => {
+							item.setIcon("gear")
+							item.setTitle(`Manage <${this.fileClass.name}> fields`)
+							item.onClick((evt) => {
+								fileClassAttributeSelectModal.open()
+							})
+						})
+					}else{
+						this.category.addOption("manage_fileClass_attributes", "Manage fileClass attributes")
+						this.category.modals["add_field_at_section"] = () => fileClassAttributeSelectModal.open()
+					}
+					
 					this.createExtraOptionsListForFrontmatter(attributes,).then(() => {
 						this.createExtraOptionsListForInlineFields(this.file, fileClassForFields, fileClassFields).then(() => {
 							if(isMenu(this.category)){this.category.addSeparator()}
@@ -193,14 +209,14 @@ export default class OptionsList{
 		modal.titleEl.setText("Select values")
         if(isMenu(this.category)){
             this.category.addItem((item) => {
-                item.setTitle(`Update ${name}`)
+                item.setTitle(`Update <${name}>`)
                 item.setIcon('bullet-list')
                 item.onClick((evt: MouseEvent) => {
                     modal.open()
                 })
             })
        } else if(isSelect(this.category)){
-            this.category.addOption(`update_${name}`, `Update ${name}`)
+            this.category.addOption(`update_${name}`, `Update <${name}>`)
             this.category.modals[`update_${name}`] = () => modal.open()
        }
 	}
@@ -215,37 +231,37 @@ export default class OptionsList{
                 item.onClick((evt: MouseEvent) => modal.open())
             })
         } else if(isSelect(this.category)){
-            this.category.addOption(`update_${name}`, `Update ${name}`)
+            this.category.addOption(`update_${name}`, `Update <${name}>`)
             this.category.modals[`update_${name}`] = () => modal.open()
         }
 	}
 
 	addToggleMenuOption(name: string, value: boolean): void{
 		const modal = new valueToggleModal(this.plugin.app, this.file, name, value)
-		modal.titleEl.setText(`Change Value for ${name}`)
+		modal.titleEl.setText(`Change Value for <${name}>`)
         if(isMenu(this.category)){
             this.category.addItem((item) => {
-                item.setTitle(`Update ${name}`)
+                item.setTitle(`Update <${name}>`)
                 item.setIcon('checkmark')
                 item.onClick((evt: MouseEvent) => {modal.open()})
             })
         } else if(isSelect(this.category)){
-            this.category.addOption(`update_${name}`, `Update ${name}`)
+            this.category.addOption(`update_${name}`, `Update <${name}>`)
             this.category.modals[`update_${name}`] = () => modal.open()
         }
 	}
 
 	addTextInputMenuOption(name: string, value: string): void{
 		const modal = new valueTextInputModal(this.plugin.app, this.file, name, value)
-		modal.titleEl.setText(`Change Value for ${name}`)
+		modal.titleEl.setText(`Change Value for <${name}>`)
         if(isMenu(this.category)){
             this.category.addItem((item) => {
-                item.setTitle(`Update ${name}`)
+                item.setTitle(`Update <${name}>`)
                 item.setIcon('pencil')
                 item.onClick((evt: MouseEvent) => modal.open())
             })
         } else if(isSelect(this.category)){
-            this.category.addOption(`update_${name}`, `Update ${name}`)
+            this.category.addOption(`update_${name}`, `Update <${name}>`)
             this.category.modals[`update_${name}`] = () => modal.open()
         }
 	}

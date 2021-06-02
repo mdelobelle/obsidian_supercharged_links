@@ -1,4 +1,4 @@
-import {App, DropdownComponent, Modal, TextComponent, ButtonComponent, ExtraButtonComponent} from "obsidian"
+import {App, DropdownComponent, Modal, TextComponent, ButtonComponent, ExtraButtonComponent, TextAreaComponent} from "obsidian"
 import {FileClassAttribute, types} from "src/fileClass/fileClassAttribute"
 import {FileClass} from "src/fileClass/fileClass"
 import { stringify } from "querystring"
@@ -57,10 +57,12 @@ export default class FileClassAttributeModal extends Modal {
 
         // options input
         const optionsInputContainer = this.contentEl.createDiv({cls: 'frontmatter-value-selector-container'})
-        const optionsInputLabel = optionsInputContainer.createDiv({cls: 'frontmatter-value-selector-inline-label'})
+        const optionsInputLabel = optionsInputContainer.createDiv({cls: 'frontmatter-value-selector-inline-label-top'})
         optionsInputLabel.setText("Values")
-        const optionsInput = new TextComponent(optionsInputContainer)
-        this.attr ? optionsInput.setValue(this.type == "input" ? "" : this.options.toString()) : optionsInput.setPlaceholder("insert values, comma separated")
+        const optionsInput = new TextAreaComponent(optionsInputContainer)
+        optionsInput.inputEl.rows = 3
+        optionsInput.inputEl.cols = 26
+        this.attr ? optionsInput.setValue(this.type == "input" ? "" : this.options.join(", ")) : optionsInput.setPlaceholder("insert values, comma separated")
         !this.attr || this.type == "input" ? optionsInputContainer.hide() : optionsInputContainer.show()
 
         // event handlers

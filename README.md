@@ -5,9 +5,11 @@ Combined with css snippets, it allows a very flexible way to customize the links
 
 It also adds context menu items to modifiy target note's frontmatter properties and "inline fields" (dataview syntax) by right-clicking on the link
 
+The preset values for those properties can be managed globally in the plugin's settings or on a file-by-file basis thanks to fileClass definition (see section 4)
+
 <img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/e147ac10179d2c351d9a9f222e4637ee7fe32aed/images/superchargeLink.gif alt="drawing" style="width:600px;"/>
 
-## Basic link styling
+## 1. Basic link styling
 
 The plugin basically scans the target file of each internal link of the files that are currently opened in your workspace.
 
@@ -15,7 +17,7 @@ It gathers some specific front-matter properties and includes them in the html e
 
 Complicated 😰.... let's break it down step by step
 
-### Front-matter
+### 1.a Front-matter
 
 As a reminder, front-matter section is an optional section of your note written in Yaml. 
 Here is the documentation about front-matter on Obsidian help website https://help.obsidian.md/Advanced+topics/YAML+front+matter
@@ -35,7 +37,7 @@ Jim is one of my colleagues
 
 Let's say that I want to have a specific display of the internal-links linking to Jim's note to display a blue tag-like rounded rectangle <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling.png" style="height:30px;vertical-align:bottom">  and display <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling-hover.png" style="height:30px;vertical-align:bottom">  when hovering the link
 
-### Settings
+### 1.b Settings
 
 First you'll have to tell the plugin which front-matter kind of properties you want your internal-link to be supercharged with in the `Target Attributes for Styling` section of the plugin's settings
 
@@ -45,7 +47,7 @@ here are my settings
 
 So in this case the plugin will only include `category`, `next-actions` and `tags` in the internal-links
 
-### a.internal-links
+### 1.c a.internal-links
 
 When a file is opened or when one of the files of your vault has changed, the plugin is "supercharging" all internal-links with the front-matter properties set in the settings, if there are such properties in the file targeted by the link.
 
@@ -74,7 +76,7 @@ So... with the plugin activated the `<a>`element will be supercharged like this:
 
 As you can see, even if `tags` is included in settings as a property to track, since it's not included in Jim.md front-matter section, the property `data-link-tags` isn't included in the `<a>` element
 
-### css
+### 1.d css
 
 Now you can enjoy the flexibilty of css to customize your links by setting css properties in a snippet like `links.css`
 
@@ -111,7 +113,7 @@ a.internal-link[data-link-next-actions]:hover::after{
 
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-hover-in-note.png" style="width:500px">
 
-### Some demo
+### 1.e Some demo
 
 #### Internal link simple styling
 https://youtu.be/tyEdsmAQb_4
@@ -122,7 +124,7 @@ https://youtu.be/Ofm6gIRP-7o
 #### Multiple values for a preperty
 https://youtu.be/aaSZnkEuH4w
 
-## Link context menu extra options
+## 2. Link context menu extra options
 
 Right click on a link will automatically display an item per target note's frontmatter property and "inline fields" (dataview syntax)
 
@@ -133,7 +135,7 @@ these options are accessible from:
 - the "more options" menu of a file
 - the command palette "Cmd+P" or by typing the hotkey Alt+O (can be customized in hotkeys settings) 
 
-### Update text property
+### 2.a Update text property
 
 1. Right-click on the link
 1. Click on "Update .... " to change the property's value
@@ -143,7 +145,7 @@ these options are accessible from:
 demo: 
 https://youtu.be/qhtPKstdnhI
 
-### Update boolean property
+### 2.b Update boolean property
 
 1. Right-click on the link
 1. Toggle the swith in the modal to change the value 
@@ -152,18 +154,18 @@ https://youtu.be/qhtPKstdnhI
 demo: 
 https://youtu.be/iwL-HqvoNOs
 
-### Update multiple values property
+### 2.c Update multiple values property
 
 1. Right-click on the link
 1. Change values comma-separated
-1. 1. Press `enter`, the values will be displayed as an array of values in the target note's frontmatter property
+1. Press `enter`, the values will be displayed as an array of values in the target note's frontmatter property
 
 **this doesn't work with indented lists YAML format**
 
 demo:
 https://youtu.be/WaW6xElq0T4
 
-### Preset values for property
+### 2.d Preset values for property
 
 1. Add a new Property Manager in the settings
 2. Enter the property name
@@ -179,7 +181,7 @@ Back in a note Right-click on the link
 demo:
 https://youtu.be/GryvvJ6qIg4
 
-### Multi select preset values for property
+### 2.e Multi select preset values for property
 
 1. In the settings, follow the steps 1 to 3 of previous section
 2. Toggle the `isMulti` switch
@@ -194,7 +196,7 @@ Back in a note Right-click on the link
 demo:
 https://youtu.be/iyIG6LmCcuc
 
-### Cycle through preset values
+### 2.f Cycle through preset values
 
 1. In the settings, follow the steps 1 to 3 of previous section
 2. Toggle the `isCycle` switch
@@ -206,7 +208,7 @@ Back in a note Right-click on the link
 demo:
 https://youtu.be/7BqG4sG15jc
 
-### Add a new property at section
+### 2.g Add a new property at section
 
 1. Right-click on the link
 2. Click on "Add field at section"
@@ -217,9 +219,9 @@ https://youtu.be/7BqG4sG15jc
 demo:
 https://youtu.be/JYURK2CM3Es
 
-## Manage Authorized / Ignored fields
+## 3. Manage Authorized / Ignored fields
 
-### Disable field options in context menu
+### 3.a Disable field options in context menu
 
 In the settings
 
@@ -230,7 +232,7 @@ If toggled off, the context menu wont include field options
 demo:
 https://youtu.be/PC3MC0CfG0E
 
-### Ignore fields globally
+### 3.b Ignore fields globally
 
 In the settings
 
@@ -239,7 +241,9 @@ In the settings
 demo:
 https://youtu.be/eFkxECqBvvY
 
-### define a class for a file and authorized fields for this class
+## 4. Manage preset values based on the context of a file (fileClass)
+
+### 4.a Define a class for a file and authorized fields for this class
 
 a class file is basically a simple note
 the name of the file will be the name of the class
@@ -267,9 +271,44 @@ fileClass: music
 demo:
 https://youtu.be/Av7DeYZILUk
 
-## Roadmap
+### 4.b Define preset values for a class
+
+You can specify the type of an attribute in a fileClass, and its options. Type and Options are called "attributes settings"
+
+Type can be one of:
+- "input" (default) : this field can take any value
+- "select" : this field can take one value out of a list of items preset in options (see below)
+- "multi" : this field can take 0,1 or multiple values out of a list of items preset in options (see below)
+- "cycle" : this field can take one value that can "progress" within a list of items preset in options (see below)
+
+Options is an array of options
+
+An attribute settings is written in JSON and must be written as a value of and "inline (dataview) field"
+
+example: Say you want to set "genre" attribute in `music.md` fileClass as a "multi" with "rock", "pop" and "jazz" as options, and you want to set "difficulty", "artist" and "tone" as fields that can take any value, your `music.md` will look like this:
+
+```md
+music.md
+=========
+genre:: {"type":"multi", "options":["rock", "pop", "jazz"]}
+difficulty
+artist
+tone
+```
+
+NB: "input" type attributes dont need a setting, leaving the name of the attribute only will categorize this attribute automatically as an "input" type.
+
+Because it can be overwhelming to remember this syntax, you can manage "type" and "options" for each fields from:
+- the context menu of a note that has this fileClass as a frontmatter's fileClass attribute : click on [`⚙️ Manage <music> fields`] for `music.md` from any file with `fileClass: music` set in frontmatter
+- the more-options menu of a fileClass file
+- a command within a fileClass file (`alt+P`)
+
+demo:
+https://youtu.be/U0Bo_x1B2TM
+
+## 5. Roadmap
 
 - [x] link context menu to modify frontmatter attributes
 - [ ] manage indented lists multi-values frontmatter property
 - [x] extend options management to iinline-fields
-- [ ] fileClass fields types and validators
+- [x] fileClass fields types and validators

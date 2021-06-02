@@ -1,6 +1,7 @@
 import {TFile} from "obsidian"
 import SuperchargedLinks from "main"
 import OptionsList from "src/options/OptionsList"
+import FileClassAttributeSelectModal from "src/fileClass/FileClassAttributeSelectModal"
 
 class linkContextMenu {
     plugin: SuperchargedLinks
@@ -24,8 +25,20 @@ class linkContextMenu {
 					if(files.length > 0){
 						const file = files[0]
 						this.file = file
-						this.optionsList = new OptionsList(this.plugin, this.file, menu)
-						this.optionsList.createExtraOptionList()
+						if(file.parent.path + "/" == this.plugin.settings.classFilesPath){
+							menu.addSeparator()
+							menu.addItem((item) => {
+								item.setIcon("gear")
+								item.setTitle(`Manage <${file.basename}> fields`)
+								item.onClick((evt) => {
+									const fileClassAttributeSelectModal = new FileClassAttributeSelectModal(this.plugin, file)
+									fileClassAttributeSelectModal.open()
+								})
+							})
+						} else {
+							this.optionsList = new OptionsList(this.plugin, this.file, menu)
+							this.optionsList.createExtraOptionList()
+						}
 					}
 				}
             })
