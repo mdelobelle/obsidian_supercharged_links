@@ -79,7 +79,27 @@ export default class FileClassAttributeModal extends Modal {
             this.fileClass.updateAttribute(this.type, this.options, this.name, this.attr)
             this.close()
         })
-        //todo : remove button
+        if(this.attr){
+            const removeButton = new ButtonComponent(footer)
+            removeButton.setIcon("trash")
+            removeButton.onClick(() => {
+                const confirmModal = new Modal(this.app)
+                confirmModal.titleEl.setText("Please confirm")
+                confirmModal.contentEl.createDiv().setText(`Do you really want to remove ${this.attr.name} attribute from ${this.fileClass.name}?`)
+                const confirmFooter = confirmModal.contentEl.createDiv({cls: "frontmatter-value-grid-footer"})
+                const confirmButton = new ButtonComponent(confirmFooter)
+                confirmButton.setIcon("checkmark")
+                confirmButton.onClick(() => {
+                    this.fileClass.removeAttribute(this.attr)
+                    confirmModal.close()
+                    this.close()
+                })
+                const dismissButton = new ExtraButtonComponent(confirmFooter)
+                dismissButton.setIcon("cross")
+                dismissButton.onClick(() => this.close())
+                confirmModal.open()
+            })
+        }
         const cancelButton = new ExtraButtonComponent(footer)
         cancelButton.setIcon("cross")
         cancelButton.onClick(() => this.close())

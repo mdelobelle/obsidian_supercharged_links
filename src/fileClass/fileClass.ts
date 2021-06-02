@@ -134,6 +134,23 @@ class FileClass{
             })
         })
     }
+
+    removeAttribute(attr: FileClassAttribute): Promise<void>{
+        return new Promise((resolve, reject) => {
+            const file = this.getClassFile()
+            this.plugin.app.vault.read(file).then(result => {
+                let newContent: string[] = []
+                result.split('\n').forEach(line => {
+                    if(!line.startsWith(attr.name)){
+                        newContent.push(line)
+                    }
+                })
+                this.plugin.app.vault.modify(file, newContent.join('\n'))
+                resolve()
+            })
+        
+        })
+    }
 }
 
 async function createFileClass(plugin: SuperchargedLinks, name: string): Promise<FileClass> {
