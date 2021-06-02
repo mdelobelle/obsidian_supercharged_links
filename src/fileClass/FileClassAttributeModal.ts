@@ -68,7 +68,7 @@ export default class FileClassAttributeModal extends Modal {
             type == "input" ? optionsInputContainer.hide() : optionsInputContainer.show()
             this.type = type
         })
-        optionsInput.onChange(value => this.options = value.split(","))
+        optionsInput.onChange(value => this.options = value.split(",").map(item => item.trim()))
         nameInput.onChange(value => {this.name = value; attrName.setText(`<${value}>`)})
 
         // footer buttons
