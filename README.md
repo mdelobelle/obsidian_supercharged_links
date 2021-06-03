@@ -47,6 +47,8 @@ here are my settings
 
 So in this case the plugin will only include `category`, `next-actions` and `tags` in the internal-links
 
+You can choose to exclude the inline fields to be targetted: it ensures that frontmatter attributes are properly red event if the file is very large (60k+ characters)
+
 ### 1.c a.internal-links
 
 When a file is opened or when one of the files of your vault has changed, the plugin is "supercharging" all internal-links with the front-matter properties set in the settings, if there are such properties in the file targeted by the link.
