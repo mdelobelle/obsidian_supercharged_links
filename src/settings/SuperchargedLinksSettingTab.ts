@@ -36,7 +36,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 		// Managing choice wether you get attributes from inline fields and frontmatter or only frontmater
 		new Setting(containerEl)
 		.setName('Search for attribute in Inline fields like <field::>')
-		.setDesc('Search for attribute in Inline fields like <field::>')
+		.setDesc('Searching for attribute in Inline fields may fail with large files (67k+ chars)')
 		.addToggle(toggle => {
 			toggle.setValue(this.plugin.settings.getFromInlineField)
 				toggle.onChange(value => {
