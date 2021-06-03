@@ -13,7 +13,7 @@ export default class sectionContentModal extends Modal {
     }
 
     onOpen(){
-        this.titleEl.setText("Hello")
+        this.titleEl.setText('Select the line before the field to add')
         const contentDiv = this.contentEl.createDiv()
         const inputDiv = contentDiv.createDiv()
         const inputEl = new TextAreaComponent(inputDiv)
