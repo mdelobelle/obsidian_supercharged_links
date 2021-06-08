@@ -21,6 +21,7 @@ export default class NoteFieldsCommandsModal extends Modal {
         this.titleEl.setText("Hello")
         const optionsListContainer = this.contentEl.createDiv()
         this.select = new SelectModal(optionsListContainer)
+        this.select.addOption("---", "Choose Field")
         this.optionsList = new OptionsList(this.plugin, this.file, this.select)
         this.optionsList.createExtraOptionList()
         this.select.onChange((value) => {
