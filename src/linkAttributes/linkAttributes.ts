@@ -12,46 +12,59 @@ function clearLinkExtraAttributes(link: HTMLElement){
 function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksSettings, dest: TFile): Promise<Record<string, string>>{
     let new_props: Record<string, string> = {}
     return new Promise((resolve, reject) => {
-        app.vault.cachedRead(dest).then((result: string) => {
-            let foreHeadText = false
-            let frontmatterStart = false
-            let frontmatterEnd = false
-            let inFrontmatter = false
-            result.split('\n').map(line => {
-                if(line!="---" && !foreHeadText && !frontmatterStart){
-                    foreHeadText = true
-                }
-                if(line == "---" && !foreHeadText){
-                    if(!frontmatterStart){
-                        frontmatterStart = true
-                        inFrontmatter = true
-                    } else if(!frontmatterEnd){
-                        frontmatterEnd = true
-                        inFrontmatter = false
+        if(!settings.getFromInlineField){
+            const frontmatter = app.metadataCache.getFileCache(dest).frontmatter
+            if(frontmatter){
+                settings.targetAttributes.forEach(attribute => {
+                    if(Object.keys(frontmatter).includes(attribute)){
+                        new_props[attribute] = frontmatter[attribute]
                     }
-                }
-                if(inFrontmatter){
-                    settings.targetAttributes.forEach(attribute => {
-                        const regex = new RegExp(`${attribute}\\s*:\\s*(.*)`, 'u')
-                        const regexResult = line.match(regex)
-                        if(regexResult && regexResult.length > 1){
-                            const value = regexResult[1] ? regexResult[1].replace(/^\[(.*)\]$/,"$1").trim() : ""
-                            new_props[attribute] = value
+                })
+            }
+        } else {
+            app.vault.cachedRead(dest).then((result: string) => {
+                let foreHeadText = false
+                let frontmatterStart = false
+                let frontmatterEnd = false
+                let inFrontmatter = false
+    
+                result.split('\n').map(line => {
+                    if(line!="---" && !foreHeadText && !frontmatterStart){
+                        foreHeadText = true
+                    }
+                    if(line == "---" && !foreHeadText){
+                        if(!frontmatterStart){
+                            frontmatterStart = true
+                            inFrontmatter = true
+                        } else if(!frontmatterEnd){
+                            frontmatterEnd = true
+                            inFrontmatter = false
                         }
-                    })
-                } else {
-                    settings.targetAttributes.forEach(attribute => {
-                        const regex = new RegExp('[_\*~\`]*'+attribute+'[_\*~`]*\s*::(.+)?', 'u')
-                        const r = line.match(regex)
-                        if(r && r.length > 0){
-                            const value = r[1] ? r[1].replace(/^\[(.*)\]$/,"$1").trim() : ""
-                            new_props[attribute] = value
-                        }
-                    })
-                }
+                    }
+                    if(inFrontmatter){
+                        settings.targetAttributes.forEach(attribute => {
+                            const regex = new RegExp(`${attribute}\\s*:\\s*(.*)`, 'u')
+                            const regexResult = line.match(regex)
+                            if(regexResult && regexResult.length > 1){
+                                const value = regexResult[1] ? regexResult[1].replace(/^\[(.*)\]$/,"$1").trim() : ""
+                                new_props[attribute] = value
+                            }
+                        })
+                    } else{
+                        settings.targetAttributes.forEach(attribute => {
+                            const regex = new RegExp('[_\*~\`]*'+attribute+'[_\*~`]*\s*::(.+)?', 'u')
+                            const r = line.match(regex)
+                            if(r && r.length > 0){
+                                const value = r[1] ? r[1].replace(/^\[(.*)\]$/,"$1").trim() : ""
+                                new_props[attribute] = value
+                            }
+                        })
+                    }
+                })
+               
             })
-            resolve(new_props) 
-        })
+        }
+        resolve(new_props) 
     })
 }
 

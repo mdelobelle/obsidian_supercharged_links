@@ -15,8 +15,9 @@ export default class FileClassAttributeSelectModal extends Modal{
     }
 
     onOpen(){
-        this.titleEl.setText("Hello")
+        this.titleEl.setText(`Select the field to update`)
         createFileClass(this.plugin, this.file.basename).then(fileClass => {
+            this.titleEl.setText(`Select the field to update in ${fileClass.name}`)
             const selectContainer = this.contentEl.createDiv()
             const select = new DropdownComponent(selectContainer)
             select.addOption("select an attribute", "--select an attribute--")
