@@ -12,22 +12,23 @@ function clearLinkExtraAttributes(link: HTMLElement){
 function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksSettings, dest: TFile): Promise<Record<string, string>>{
     let new_props: Record<string, string> = {}
     return new Promise((resolve, reject) => {
-        if(!settings.getFromInlineField){
-            const frontmatter = app.metadataCache.getFileCache(dest).frontmatter
-            if(frontmatter){
-                settings.targetAttributes.forEach(attribute => {
-                    if(Object.keys(frontmatter).includes(attribute)){
-                        new_props[attribute] = frontmatter[attribute]
-                    }
-                })
-            }
-        } else {
+
+        const frontmatter = app.metadataCache.getFileCache(dest).frontmatter
+        if(frontmatter){
+            settings.targetAttributes.forEach(attribute => {
+                if(Object.keys(frontmatter).includes(attribute)){
+                    new_props[attribute] = frontmatter[attribute]
+                }
+            })
+        }
+
+        if (settings.getFromInlineField) {
             app.vault.cachedRead(dest).then((result: string) => {
                 let foreHeadText = false
                 let frontmatterStart = false
                 let frontmatterEnd = false
                 let inFrontmatter = false
-    
+
                 result.split('\n').map(line => {
                     if(line!="---" && !foreHeadText && !frontmatterStart){
                         foreHeadText = true
@@ -41,16 +42,8 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
                             inFrontmatter = false
                         }
                     }
-                    if(inFrontmatter){
-                        settings.targetAttributes.forEach(attribute => {
-                            const regex = new RegExp(`${attribute}\\s*:\\s*(.*)`, 'u')
-                            const regexResult = line.match(regex)
-                            if(regexResult && regexResult.length > 1){
-                                const value = regexResult[1] ? regexResult[1].replace(/^\[(.*)\]$/,"$1").trim() : ""
-                                new_props[attribute] = value
-                            }
-                        })
-                    } else{
+
+                    if (!inFrontmatter) {
                         settings.targetAttributes.forEach(attribute => {
                             const regex = new RegExp('[_\*~\`]*'+attribute+'[_\*~`]*\s*::(.+)?', 'u')
                             const r = line.match(regex)
@@ -84,7 +77,7 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
 
 export function updateElLinks(app: App, settings: SuperchargedLinksSettings, el: HTMLElement, ctx: MarkdownPostProcessorContext){
     const links = el.querySelectorAll('a.internal-link');
-    const destName = ctx.sourcePath.replace(/(.*).md/, "$1"); 
+    const destName = ctx.sourcePath.replace(/(.*).md/, "$1");
     links.forEach((link: HTMLElement) => {
         clearLinkExtraAttributes(link);
         updateLinkExtraAttributes(app, settings, link, destName);
@@ -108,7 +101,7 @@ export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings
                         })
                     }
                 })
-            }	
+            }
         }
     })
 }
