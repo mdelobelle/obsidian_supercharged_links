@@ -105,13 +105,20 @@ function updateEditLinkExtraAttributes(app: App, settings: SuperchargedLinksSett
 
 export function updateDivLinks(app: App, settings: SuperchargedLinksSettings){
     const divs = fishAll('div.internal-link');
-    if (settings.enableFileList) {
-        divs.push(...fishAll('div.nav-file-title-content'));
-    }
+
     divs.forEach((link: HTMLElement) => {
         clearExtraAttributes(link);
         updateDivExtraAttributes(app, settings, link, "");
     })
+
+    const fileDivs = fishAll('div.nav-file-title-content')
+    fileDivs.forEach((link: HTMLElement) => {
+        clearExtraAttributes(link);
+        if (settings.enableFileList) {
+            updateDivExtraAttributes(app, settings, link, "");
+        }
+    })
+
 }
 
 export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings) {
