@@ -55,6 +55,17 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 				})
 			})
 
+		new Setting(containerEl)
+			.setName('Enable in Backlinks')
+			.setDesc('If true, this will also supercharge the backlinks and forward links panels.')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.enableBacklinks)
+				toggle.onChange(value => {
+					this.plugin.settings.enableBacklinks = value
+					this.plugin.saveSettings()
+				})
+			})
+
 		// Managing choice wether you want to parse tags both from normal tags and in the frontmatter
 		new Setting(containerEl)
 			.setName('Parse all tags in the file')

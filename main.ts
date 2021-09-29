@@ -1,6 +1,12 @@
 import {Plugin, MarkdownView, Notice} from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
-import {updateElLinks, updateVisibleLinks, updateDivLinks, updateEditorLinks} from "src/linkAttributes/linkAttributes"
+import {
+	updateElLinks,
+	updateVisibleLinks,
+	updateDivLinks,
+	updateEditorLinks,
+	clearExtraAttributes, updateDivExtraAttributes
+} from "src/linkAttributes/linkAttributes"
 import {SuperchargedLinksSettings, DEFAULT_SETTINGS} from "src/settings/SuperchargedLinksSettings"
 import Field from 'src/Field';
 import linkContextMenu from "src/options/linkContextMenu"
@@ -11,6 +17,7 @@ export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
 	initialProperties: Array<Field> = []
 	settingTab: SuperchargedLinksSettingTab
+	private observer: MutationObserver;
 
 	async onload():Promise <void> {
 		console.log('Supercharged links loaded');
@@ -39,6 +46,29 @@ export default class SuperchargedLinks extends Plugin {
 				}
 			})
 		})
+		const settings = this.settings;
+		const app = this.app;
+		this.observer = new MutationObserver((records, observer) => {
+			records.forEach((mutation) =>  {
+				if (mutation.type === 'childList') {
+					mutation.addedNodes.forEach((n) => {
+						if ('className' in n) {
+							// @ts-ignore
+							if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes("tree-item")) {
+								const fileDivs = fishAll('div.tree-item-inner')
+								fileDivs.forEach((link: HTMLElement) => {
+									clearExtraAttributes(link);
+									if (settings.enableBacklinks) {
+										updateDivExtraAttributes(app, settings, link, "");
+									}
+								})
+							}
+						}
+					})
+				}
+			})
+		});
+		this.observer.observe(document, {subtree: true, childList: true, attributes: false});
 
 		this.addCommand({
 			id: "field_options",
@@ -83,6 +113,7 @@ export default class SuperchargedLinks extends Plugin {
 	}
 
 	onunload() {
+		this.observer.disconnect();
 		console.log('Supercharged links unloaded');
 	}
 

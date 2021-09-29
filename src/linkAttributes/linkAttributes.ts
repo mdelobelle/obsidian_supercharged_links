@@ -1,7 +1,7 @@
 import {App, TFile, parseFrontMatterEntry, MarkdownPostProcessorContext, MarkdownView, LinkCache} from "obsidian"
 import {SuperchargedLinksSettings} from "src/settings/SuperchargedLinksSettings"
 
-function clearExtraAttributes(link: HTMLElement){
+export function clearExtraAttributes(link: HTMLElement){
     Object.values(link.attributes).forEach(attr =>{
         if(attr.name.startsWith("data-link")){
             link.removeAttribute(attr.name)
@@ -87,7 +87,7 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
     }
 }
 
-function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string){
+export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string){
     const linkName = link.textContent;
     const dest = app.metadataCache.getFirstLinkpathDest(linkName, destName)
     if(dest){
@@ -118,7 +118,6 @@ export function updateDivLinks(app: App, settings: SuperchargedLinksSettings){
             updateDivExtraAttributes(app, settings, link, "");
         }
     })
-
 }
 
 export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings) {

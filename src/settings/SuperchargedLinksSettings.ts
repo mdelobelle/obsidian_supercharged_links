@@ -10,6 +10,7 @@ export interface SuperchargedLinksSettings {
 	classFilesPath: string;
 	enableEditor: boolean;
 	enableFileList: boolean;
+	enableBacklinks: boolean;
 }
 
 export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
@@ -21,5 +22,6 @@ export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	classFilesPath: "",
 	getFromInlineField: true,
 	enableEditor: true,
-	enableFileList: true
+	enableFileList: true,
+	enableBacklinks: true
 }
