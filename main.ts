@@ -34,7 +34,9 @@ export default class SuperchargedLinks extends Plugin {
 		});
 		this.registerCodeMirror((cm) => {
 			cm.on("update", () => {
-				updateEditorLinks(this.app, this.settings);
+				if (this.settings.enableEditor) {
+					updateEditorLinks(this.app, this.settings);
+				}
 			})
 		})
 

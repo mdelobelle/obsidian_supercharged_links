@@ -1,7 +1,7 @@
 import {App, TFile, parseFrontMatterEntry, MarkdownPostProcessorContext, MarkdownView, LinkCache} from "obsidian"
 import {SuperchargedLinksSettings} from "src/settings/SuperchargedLinksSettings"
 
-function clearLinkExtraAttributes(link: HTMLElement){
+function clearExtraAttributes(link: HTMLElement){
     Object.values(link.attributes).forEach(attr =>{
         if(attr.name.startsWith("data-link")){
             link.removeAttribute(attr.name)
@@ -105,8 +105,11 @@ function updateEditLinkExtraAttributes(app: App, settings: SuperchargedLinksSett
 
 export function updateDivLinks(app: App, settings: SuperchargedLinksSettings){
     const divs = fishAll('div.internal-link');
+    if (settings.enableFileList) {
+        divs.push(...fishAll('div.nav-file-title-content'));
+    }
     divs.forEach((link: HTMLElement) => {
-        clearLinkExtraAttributes(link);
+        clearExtraAttributes(link);
         updateDivExtraAttributes(app, settings, link, "");
     })
 }
@@ -114,7 +117,7 @@ export function updateDivLinks(app: App, settings: SuperchargedLinksSettings){
 export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings) {
     const internalLinks = fishAll('span.cm-hmd-internal-link');
     internalLinks.forEach((link: HTMLElement) => {
-        clearLinkExtraAttributes(link);
+        clearExtraAttributes(link);
         updateEditLinkExtraAttributes(app, settings, link, "");
     })
 }
@@ -123,13 +126,13 @@ export function updateElLinks(app: App, settings: SuperchargedLinksSettings, el:
     const links = el.querySelectorAll('a.internal-link');
     const destName = ctx.sourcePath.replace(/(.*).md/, "$1");
     links.forEach((link: HTMLElement) => {
-        clearLinkExtraAttributes(link);
+        clearExtraAttributes(link);
         updateLinkExtraAttributes(app, settings, link, destName);
     })
 }
 
 export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings) {
-    fishAll("a.internal-link").forEach(internalLink => clearLinkExtraAttributes(internalLink))
+    fishAll("a.internal-link").forEach(internalLink => clearExtraAttributes(internalLink))
     app.workspace.iterateRootLeaves((leaf) => {
         if(leaf.view instanceof MarkdownView && leaf.view.file){
             const file: TFile = leaf.view.file;

@@ -33,6 +33,28 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 				text.inputEl.cols = 25;
 			});
 
+		new Setting(containerEl)
+			.setName('Enable in Editor')
+			.setDesc('If true, this will also supercharge internal links in the editor view of a note.')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.enableEditor)
+				toggle.onChange(value => {
+					this.plugin.settings.enableEditor = value
+					this.plugin.saveSettings()
+				})
+			})
+
+		new Setting(containerEl)
+			.setName('Enable in File Browser')
+			.setDesc('If true, this will also supercharge the file browser.')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.enableFileList)
+				toggle.onChange(value => {
+					this.plugin.settings.enableFileList = value
+					this.plugin.saveSettings()
+				})
+			})
+
 		// Managing choice wether you want to parse tags both from normal tags and in the frontmatter
 		new Setting(containerEl)
 			.setName('Parse all tags in the file')

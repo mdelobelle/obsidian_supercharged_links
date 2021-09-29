@@ -7,7 +7,9 @@ export interface SuperchargedLinksSettings {
 	displayFieldsInContextMenu: boolean;
 	globallyIgnoredFields: Array<string>;
 	getFromInlineField: boolean;
-	classFilesPath: string
+	classFilesPath: string;
+	enableEditor: boolean;
+	enableFileList: boolean;
 }
 
 export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
@@ -17,5 +19,7 @@ export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	displayFieldsInContextMenu: true,
 	globallyIgnoredFields: [],
 	classFilesPath: "",
-	getFromInlineField: true
+	getFromInlineField: true,
+	enableEditor: true,
+	enableFileList: true
 }
