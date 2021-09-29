@@ -47,7 +47,7 @@ here are my settings
 
 So in this case the plugin will only include `category`, `next-actions` and `tags` in the internal-links
 
-You can choose to exclude the inline fields to be targetted: it ensures that frontmatter attributes are properly red event if the file is very large (60k+ characters)
+You can choose to exclude the inline fields to be targeted: it ensures that frontmatter attributes are properly read even if the file is very large (60k+ characters)
 
 ### 1.c a.internal-links
 
@@ -82,9 +82,9 @@ As you can see, even if `tags` is included in settings as a property to track, s
 
 Now you can enjoy the flexibilty of css to customize your links by setting css properties in a snippet like `links.css`
 
-exemple: 
+example: 
 
-to put a fancy 👤 emoji before the name of each link to a "category: people" note:
+To put a fancy 👤 emoji before the name of each link to a "category: people" note:
 ```css
 a.internal-link[data-link-category$="People" i]::before{
     content: "👤 "
@@ -115,7 +115,7 @@ a.internal-link[data-link-next-actions]:hover::after{
 
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-hover-in-note.png" style="width:500px">
 
-### 1.e Some demo
+### 1.e Demos 
 
 #### Internal link simple styling
 https://youtu.be/tyEdsmAQb_4
@@ -123,7 +123,7 @@ https://youtu.be/tyEdsmAQb_4
 #### Multiple properties
 https://youtu.be/Ofm6gIRP-7o
 
-#### Multiple values for a preperty
+#### Multiple values for a property
 https://youtu.be/aaSZnkEuH4w
 
 ## 2. Link context menu extra options

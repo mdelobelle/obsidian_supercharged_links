@@ -13,13 +13,18 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
     let new_props: Record<string, string> = {}
     return new Promise((resolve, reject) => {
         if(!settings.getFromInlineField){
-            const frontmatter = app.metadataCache.getFileCache(dest).frontmatter
+            const cache = app.metadataCache.getFileCache(dest)
+            const frontmatter = cache.frontmatter
             if(frontmatter){
                 settings.targetAttributes.forEach(attribute => {
                     if(Object.keys(frontmatter).includes(attribute)){
                         new_props[attribute] = frontmatter[attribute]
                     }
                 })
+            }
+            const tags = cache.tags
+            if (tags && settings.targetTags) {
+                new_props["tags"] = tags.map(t => t.tag).toString()
             }
         } else {
             app.vault.cachedRead(dest).then((result: string) => {

@@ -33,6 +33,18 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 				text.inputEl.cols = 25;
 			});
 
+		// Managing choice wether you want to parse tags both from normal tags and in the frontmatter
+		new Setting(containerEl)
+			.setName('Parse all tags in the file')
+			.setDesc('Sets the `data-link-tags`-attribute to look for tags both in the frontmatter and in the file as #tag-name')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.targetTags)
+				toggle.onChange(value => {
+					this.plugin.settings.targetTags = value
+					this.plugin.saveSettings()
+				})
+			})
+
 		// Managing choice wether you get attributes from inline fields and frontmatter or only frontmater
 		new Setting(containerEl)
 		.setName('Search for attribute in Inline fields like <field::>')

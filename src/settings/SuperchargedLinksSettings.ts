@@ -2,6 +2,7 @@ import Field from "src/Field"
 
 export interface SuperchargedLinksSettings {
 	targetAttributes: Array<string>;
+	targetTags: boolean;
 	presetFields: Array<Field>;
 	displayFieldsInContextMenu: boolean;
 	globallyIgnoredFields: Array<string>;
@@ -11,6 +12,7 @@ export interface SuperchargedLinksSettings {
 
 export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	targetAttributes: [],
+	targetTags: true,
 	presetFields: [],
 	displayFieldsInContextMenu: true,
 	globallyIgnoredFields: [],
