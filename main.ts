@@ -1,6 +1,6 @@
 import {Plugin, MarkdownView, Notice} from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
-import {updateElLinks, updateVisibleLinks} from "src/linkAttributes/linkAttributes"
+import {updateElLinks, updateVisibleLinks, updateDivLinks} from "src/linkAttributes/linkAttributes"
 import {SuperchargedLinksSettings, DEFAULT_SETTINGS} from "src/settings/SuperchargedLinksSettings"
 import Field from 'src/Field';
 import linkContextMenu from "src/options/linkContextMenu"
@@ -25,8 +25,12 @@ export default class SuperchargedLinks extends Plugin {
 		this.registerMarkdownPostProcessor((el, ctx) => {
 			updateElLinks(this.app, this.settings, el, ctx)
 		});
+		this.app.workspace.on('file-open', () => {
+			updateDivLinks(this.app, this.settings);
+		})
 		this.app.metadataCache.on('changed', (_file) => {
-			updateVisibleLinks(this.app, this.settings)
+			updateVisibleLinks(this.app, this.settings);
+			updateDivLinks(this.app, this.settings);
 		});
 
 		this.addCommand({

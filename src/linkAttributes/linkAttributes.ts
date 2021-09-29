@@ -87,9 +87,26 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
     }
 }
 
+function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string){
+    const linkName = link.textContent;
+    const dest = app.metadataCache.getFirstLinkpathDest(linkName, destName)
+    if(dest){
+        fetchFrontmatterTargetAttributes(app, settings, dest).then(new_props => setLinkNewProps(link, new_props))
+    }
+}
+
+export function updateDivLinks(app: App, settings: SuperchargedLinksSettings){
+    console.log("updating div links");
+    const divs = fishAll('div.internal-link');
+    divs.forEach((link: HTMLElement) => {
+        clearLinkExtraAttributes(link);
+        updateDivExtraAttributes(app, settings, link, "");
+    })
+}
+
 export function updateElLinks(app: App, settings: SuperchargedLinksSettings, el: HTMLElement, ctx: MarkdownPostProcessorContext){
     const links = el.querySelectorAll('a.internal-link');
-    const destName = ctx.sourcePath.replace(/(.*).md/, "$1"); 
+    const destName = ctx.sourcePath.replace(/(.*).md/, "$1");
     links.forEach((link: HTMLElement) => {
         clearLinkExtraAttributes(link);
         updateLinkExtraAttributes(app, settings, link, destName);
@@ -113,7 +130,7 @@ export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings
                         })
                     }
                 })
-            }	
+            }
         }
     })
 }
