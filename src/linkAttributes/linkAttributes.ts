@@ -95,12 +95,27 @@ function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings,
     }
 }
 
+function updateEditLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string){
+    const linkName = link.textContent.split('|')[0];
+    const dest = app.metadataCache.getFirstLinkpathDest(linkName, destName)
+    if(dest){
+        fetchFrontmatterTargetAttributes(app, settings, dest).then(new_props => setLinkNewProps(link, new_props))
+    }
+}
+
 export function updateDivLinks(app: App, settings: SuperchargedLinksSettings){
-    console.log("updating div links");
     const divs = fishAll('div.internal-link');
     divs.forEach((link: HTMLElement) => {
         clearLinkExtraAttributes(link);
         updateDivExtraAttributes(app, settings, link, "");
+    })
+}
+
+export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings) {
+    const internalLinks = fishAll('span.cm-hmd-internal-link');
+    internalLinks.forEach((link: HTMLElement) => {
+        clearLinkExtraAttributes(link);
+        updateEditLinkExtraAttributes(app, settings, link, "");
     })
 }
 

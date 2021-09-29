@@ -1,6 +1,6 @@
 import {Plugin, MarkdownView, Notice} from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
-import {updateElLinks, updateVisibleLinks, updateDivLinks} from "src/linkAttributes/linkAttributes"
+import {updateElLinks, updateVisibleLinks, updateDivLinks, updateEditorLinks} from "src/linkAttributes/linkAttributes"
 import {SuperchargedLinksSettings, DEFAULT_SETTINGS} from "src/settings/SuperchargedLinksSettings"
 import Field from 'src/Field';
 import linkContextMenu from "src/options/linkContextMenu"
@@ -32,6 +32,11 @@ export default class SuperchargedLinks extends Plugin {
 			updateVisibleLinks(this.app, this.settings);
 			updateDivLinks(this.app, this.settings);
 		});
+		this.registerCodeMirror((cm) => {
+			cm.on("update", () => {
+				updateEditorLinks(this.app, this.settings);
+			})
+		})
 
 		this.addCommand({
 			id: "field_options",
