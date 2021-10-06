@@ -17,7 +17,7 @@ export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
 	initialProperties: Array<Field> = []
 	settingTab: SuperchargedLinksSettingTab
-	private observer: MutationObserver;
+	private observers: MutationObserver[];
 
 	async onload():Promise <void> {
 		console.log('Supercharged links loaded');
@@ -45,30 +45,26 @@ export default class SuperchargedLinks extends Plugin {
 					updateEditorLinks(this.app, this.settings);
 				}
 			})
-		})
-		const settings = this.settings;
-		const app = this.app;
-		this.observer = new MutationObserver((records, observer) => {
-			records.forEach((mutation) =>  {
-				if (mutation.type === 'childList') {
-					mutation.addedNodes.forEach((n) => {
-						if ('className' in n) {
-							// @ts-ignore
-							if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes("tree-item")) {
-								const fileDivs = fishAll('div.tree-item-inner')
-								fileDivs.forEach((link: HTMLElement) => {
-									clearExtraAttributes(link);
-									if (settings.enableBacklinks) {
-										updateDivExtraAttributes(app, settings, link, "");
-									}
-								})
-							}
-						}
-					})
-				}
-			})
 		});
-		this.observer.observe(document, {subtree: true, childList: true, attributes: false});
+
+		this.observers = [];
+
+		this.app.workspace.onLayoutReady(() => {
+		    this.app.workspace.iterateAllLeaves((leaf) => console.log(leaf.view.getViewType()));
+		    const register = (viewTypeName: string) => {
+				const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
+				if (leaves.length > 1) console.error('more than one ' + viewTypeName + ' panel');
+				else if (leaves.length < 1) console.error(viewTypeName + ' not found');
+				else {
+					this.watchContainer(leaves[0].view.containerEl);
+				}
+			}
+		    // Observe the backlinks and incoming links panels
+			register('backlink');
+		    register('outgoing-link');
+		    register('search');
+		    register('starred');
+		});
 
 		this.addCommand({
 			id: "field_options",
@@ -112,8 +108,36 @@ export default class SuperchargedLinks extends Plugin {
 		new linkContextMenu(this)
 	}
 
+	watchContainer(container: HTMLElement) {
+		const settings = this.settings;
+		const app = this.app;
+		let observer = new MutationObserver((records, observer) => {
+			records.forEach((mutation) => {
+				if (mutation.type === 'childList') {
+					mutation.addedNodes.forEach((n) => {
+						if ('className' in n) {
+							// @ts-ignore
+							if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes("tree-item")) {
+								const fileDivs = container.getElementsByClassName('tree-item-inner');
+								for (let i = 0; i < fileDivs.length; ++i) {
+									const link = fileDivs[i] as HTMLElement;
+									clearExtraAttributes(link);
+									if (settings.enableBacklinks) {
+										updateDivExtraAttributes(app, settings, link, "");
+									}
+								}
+							}
+						}
+					})
+				}
+			})
+		});
+		observer.observe(container, {subtree: true, childList: true, attributes: false});
+		this.observers.push(observer);
+	}
+
 	onunload() {
-		this.observer.disconnect();
+	    this.observers.forEach((observer) => observer.disconnect());
 		console.log('Supercharged links unloaded');
 	}
 
