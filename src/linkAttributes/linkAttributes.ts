@@ -78,7 +78,7 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>){
 }
 
 function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string){
-    const linkHref = link.getAttribute('href');
+    const linkHref = link.getAttribute('href').split('#')[0];
     const dest = app.metadataCache.getFirstLinkpathDest(linkHref, destName)
     if(dest){
         fetchFrontmatterTargetAttributes(app, settings, dest).then(new_props => setLinkNewProps(link, new_props))
@@ -94,7 +94,7 @@ export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSe
 }
 
 function updateEditLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string){
-    const linkName = link.textContent.split('|')[0];
+    const linkName = link.textContent.split('|')[0].split('#')[0];
     const dest = app.metadataCache.getFirstLinkpathDest(linkName, destName)
     if(dest){
         fetchFrontmatterTargetAttributes(app, settings, dest).then(new_props => setLinkNewProps(link, new_props))
