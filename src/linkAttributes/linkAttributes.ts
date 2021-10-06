@@ -1,4 +1,4 @@
-import {App, TFile, parseFrontMatterEntry, MarkdownPostProcessorContext, MarkdownView, LinkCache} from "obsidian"
+import {App, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile} from "obsidian"
 import {SuperchargedLinksSettings} from "src/settings/SuperchargedLinksSettings"
 
 export function clearExtraAttributes(link: HTMLElement){
@@ -12,8 +12,8 @@ export function clearExtraAttributes(link: HTMLElement){
 function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksSettings, dest: TFile): Promise<Record<string, string>>{
     let new_props: Record<string, string> = {}
     return new Promise((resolve, reject) => {
+        const cache = app.metadataCache.getFileCache(dest)
         if(!settings.getFromInlineField){
-            const cache = app.metadataCache.getFileCache(dest)
             const frontmatter = cache.frontmatter
             if(frontmatter){
                 settings.targetAttributes.forEach(attribute => {
@@ -21,10 +21,6 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
                         new_props[attribute] = frontmatter[attribute]
                     }
                 })
-            }
-            const tags = cache.tags
-            if (tags && settings.targetTags) {
-                new_props["tags"] = tags.map(t => t.tag).toString()
             }
         } else {
             app.vault.cachedRead(dest).then((result: string) => {
@@ -51,8 +47,7 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
                             const regex = new RegExp(`${attribute}\\s*:\\s*(.*)`, 'u')
                             const regexResult = line.match(regex)
                             if(regexResult && regexResult.length > 1){
-                                const value = regexResult[1] ? regexResult[1].replace(/^\[(.*)\]$/,"$1").trim() : ""
-                                new_props[attribute] = value
+                                new_props[attribute] = regexResult[1] ? regexResult[1].replace(/^\[(.*)\]$/, "$1").trim() : ""
                             }
                         })
                     } else{
@@ -60,14 +55,17 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
                             const regex = new RegExp('[_\*~\`]*'+attribute+'[_\*~`]*\s*::(.+)?', 'u')
                             const r = line.match(regex)
                             if(r && r.length > 0){
-                                const value = r[1] ? r[1].replace(/^\[(.*)\]$/,"$1").trim() : ""
-                                new_props[attribute] = value
+                                new_props[attribute] = r[1] ? r[1].replace(/^\[(.*)\]$/, "$1").trim() : ""
                             }
                         })
                     }
                 })
                
             })
+        }
+        const tags = cache.tags
+        if (tags && settings.targetTags) {
+            new_props["tags"] = tags.map(t => t.tag).toString()
         }
         resolve(new_props) 
     })
