@@ -103,6 +103,7 @@ function updateEditLinkExtraAttributes(app: App, settings: SuperchargedLinksSett
 
 export function updateDivLinks(app: App, settings: SuperchargedLinksSettings){
     const divs = fishAll('div.internal-link');
+    divs.push(...fishAll('td.internal-link'));
 
     divs.forEach((link: HTMLElement) => {
         clearExtraAttributes(link);
