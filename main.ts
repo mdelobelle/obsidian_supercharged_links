@@ -49,22 +49,8 @@ export default class SuperchargedLinks extends Plugin {
 
 		this.observers = [];
 
-		this.app.workspace.onLayoutReady(() => {
-		    this.app.workspace.iterateAllLeaves((leaf) => console.log(leaf.view.getViewType()));
-		    const register = (viewTypeName: string) => {
-				const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
-				if (leaves.length > 1) console.error('more than one ' + viewTypeName + ' panel');
-				else if (leaves.length < 1) console.error(viewTypeName + ' not found');
-				else {
-					this.watchContainer(leaves[0].view.containerEl);
-				}
-			}
-		    // Observe the backlinks and incoming links panels
-			register('backlink');
-		    register('outgoing-link');
-		    register('search');
-		    register('starred');
-		});
+		this.app.workspace.onLayoutReady(() => this.initViewObservers(this));
+		this.app.workspace.on("layout-change", () => this.initViewObservers(this));
 
 		this.addCommand({
 			id: "field_options",
@@ -108,17 +94,36 @@ export default class SuperchargedLinks extends Plugin {
 		new linkContextMenu(this)
 	}
 
-	watchContainer(container: HTMLElement) {
-		const settings = this.settings;
-		const app = this.app;
-		let observer = new MutationObserver((records, observer) => {
+	initViewObservers(plugin: SuperchargedLinks) {
+		plugin.app.workspace.iterateAllLeaves((leaf) => console.log(leaf.view.getViewType()));
+		plugin.observers.forEach((observer) => observer.disconnect());
+		plugin.registerViewType('backlink', plugin);
+		plugin.registerViewType('outgoing-link', plugin);
+		plugin.registerViewType('search', plugin);
+		plugin.registerViewType('starred', plugin,'nav-file', 'nav-file-title-content');
+		plugin.registerViewType('file-explorer', plugin, 'nav-file', 'nav-file-title-content');
+	}
+
+	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, parent_class='tree-item', own_class='tree-item-inner') {
+		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
+		if (leaves.length > 1) console.error('more than one ' + viewTypeName + ' panel');
+		else if (leaves.length < 1) return;
+		else {
+			plugin.watchContainer(leaves[0].view.containerEl, plugin, parent_class, own_class);
+		}
+	}
+
+	watchContainer(container: HTMLElement, plugin: SuperchargedLinks, parent_class='tree-item', own_class='tree-item-inner') {
+		const settings = plugin.settings;
+		const app = plugin.app;
+		let observer = new MutationObserver((records, _) => {
 			records.forEach((mutation) => {
 				if (mutation.type === 'childList') {
 					mutation.addedNodes.forEach((n) => {
 						if ('className' in n) {
 							// @ts-ignore
-							if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes("tree-item")) {
-								const fileDivs = container.getElementsByClassName('tree-item-inner');
+							if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes(parent_class)) {
+								const fileDivs = (n as HTMLElement).getElementsByClassName(own_class);
 								for (let i = 0; i < fileDivs.length; ++i) {
 									const link = fileDivs[i] as HTMLElement;
 									clearExtraAttributes(link);
@@ -133,7 +138,7 @@ export default class SuperchargedLinks extends Plugin {
 			})
 		});
 		observer.observe(container, {subtree: true, childList: true, attributes: false});
-		this.observers.push(observer);
+		plugin.observers.push(observer);
 	}
 
 	onunload() {
