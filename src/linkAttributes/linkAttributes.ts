@@ -1,7 +1,7 @@
-import {App, TFile, parseFrontMatterEntry, MarkdownPostProcessorContext, MarkdownView, LinkCache} from "obsidian"
+import {App, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile} from "obsidian"
 import {SuperchargedLinksSettings} from "src/settings/SuperchargedLinksSettings"
 
-function clearLinkExtraAttributes(link: HTMLElement){
+export function clearExtraAttributes(link: HTMLElement){
     Object.values(link.attributes).forEach(attr =>{
         if(attr.name.startsWith("data-link")){
             link.removeAttribute(attr.name)
@@ -12,8 +12,9 @@ function clearLinkExtraAttributes(link: HTMLElement){
 function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksSettings, dest: TFile): Promise<Record<string, string>>{
     let new_props: Record<string, string> = {}
     return new Promise((resolve, reject) => {
+        const cache = app.metadataCache.getFileCache(dest)
         if(!settings.getFromInlineField){
-            const frontmatter = app.metadataCache.getFileCache(dest).frontmatter
+            const frontmatter = cache.frontmatter
             if(frontmatter){
                 settings.targetAttributes.forEach(attribute => {
                     if(Object.keys(frontmatter).includes(attribute)){
@@ -46,8 +47,7 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
                             const regex = new RegExp(`${attribute}\\s*:\\s*(.*)`, 'u')
                             const regexResult = line.match(regex)
                             if(regexResult && regexResult.length > 1){
-                                const value = regexResult[1] ? regexResult[1].replace(/^\[(.*)\]$/,"$1").trim() : ""
-                                new_props[attribute] = value
+                                new_props[attribute] = regexResult[1] ? regexResult[1].replace(/^\[(.*)\]$/, "$1").trim() : ""
                             }
                         })
                     } else{
@@ -55,14 +55,17 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
                             const regex = new RegExp('[_\*~\`]*'+attribute+'[_\*~`]*\s*::(.+)?', 'u')
                             const r = line.match(regex)
                             if(r && r.length > 0){
-                                const value = r[1] ? r[1].replace(/^\[(.*)\]$/,"$1").trim() : ""
-                                new_props[attribute] = value
+                                new_props[attribute] = r[1] ? r[1].replace(/^\[(.*)\]$/, "$1").trim() : ""
                             }
                         })
                     }
                 })
                
             })
+        }
+        const tags = cache.tags
+        if (tags && settings.targetTags) {
+            new_props["tags"] = tags.map(t => t.tag).toString()
         }
         resolve(new_props) 
     })
@@ -75,24 +78,66 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>){
 }
 
 function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string){
-    const linkHref = link.getAttribute('href');
+    const linkHref = link.getAttribute('href').split('#')[0];
     const dest = app.metadataCache.getFirstLinkpathDest(linkHref, destName)
     if(dest){
         fetchFrontmatterTargetAttributes(app, settings, dest).then(new_props => setLinkNewProps(link, new_props))
     }
 }
 
+export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string){
+    const linkName = link.textContent;
+    const dest = app.metadataCache.getFirstLinkpathDest(linkName, destName)
+    if(dest){
+        fetchFrontmatterTargetAttributes(app, settings, dest).then(new_props => setLinkNewProps(link, new_props))
+    }
+}
+
+function updateEditLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string){
+    const linkName = link.textContent.split('|')[0].split('#')[0];
+    const dest = app.metadataCache.getFirstLinkpathDest(linkName, destName)
+    if(dest){
+        fetchFrontmatterTargetAttributes(app, settings, dest).then(new_props => setLinkNewProps(link, new_props))
+    }
+}
+
+export function updateDivLinks(app: App, settings: SuperchargedLinksSettings){
+    const divs = fishAll('div.internal-link');
+    divs.push(...fishAll('td.internal-link'));
+
+    divs.forEach((link: HTMLElement) => {
+        clearExtraAttributes(link);
+        updateDivExtraAttributes(app, settings, link, "");
+    })
+
+    const fileDivs = fishAll('div.nav-file-title-content')
+    fileDivs.forEach((link: HTMLElement) => {
+        clearExtraAttributes(link);
+        if (settings.enableFileList) {
+            updateDivExtraAttributes(app, settings, link, "");
+        }
+    })
+}
+
+export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings) {
+    const internalLinks = fishAll('span.cm-hmd-internal-link');
+    internalLinks.forEach((link: HTMLElement) => {
+        clearExtraAttributes(link);
+        updateEditLinkExtraAttributes(app, settings, link, "");
+    })
+}
+
 export function updateElLinks(app: App, settings: SuperchargedLinksSettings, el: HTMLElement, ctx: MarkdownPostProcessorContext){
     const links = el.querySelectorAll('a.internal-link');
-    const destName = ctx.sourcePath.replace(/(.*).md/, "$1"); 
+    const destName = ctx.sourcePath.replace(/(.*).md/, "$1");
     links.forEach((link: HTMLElement) => {
-        clearLinkExtraAttributes(link);
+        clearExtraAttributes(link);
         updateLinkExtraAttributes(app, settings, link, destName);
     })
 }
 
 export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings) {
-    fishAll("a.internal-link").forEach(internalLink => clearLinkExtraAttributes(internalLink))
+    fishAll("a.internal-link").forEach(internalLink => clearExtraAttributes(internalLink))
     app.workspace.iterateRootLeaves((leaf) => {
         if(leaf.view instanceof MarkdownView && leaf.view.file){
             const file: TFile = leaf.view.file;
@@ -108,7 +153,7 @@ export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings
                         })
                     }
                 })
-            }	
+            }
         }
     })
 }

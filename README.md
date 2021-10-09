@@ -1,57 +1,55 @@
 ## Obsidian Internal Links supercharger
 
-Internal links adds attributes to <a.internal-link> HTMLElements with the attributes and values of the target file's frontmatter.
-Combined with css snippets, it allows a very flexible way to customize the links
+Internal links adds attributes to HTMLElements with the attributes and values of the target file's frontmatter.
+Combined with css snippets, it allows a very flexible way to customize your links! It supports the note preview, edit mode, backlinks and outgoing links panel, the file browser and the search panel, and also supports the Breadcrumbs plugin.
+
+<img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/e147ac10179d2c351d9a9f222e4637ee7fe32aed/images/link-styling-workspace.gif alt="drawing" style="width:600px;"/>
 
 It also adds context menu items to modifiy target note's frontmatter properties and "inline fields" (dataview syntax) by right-clicking on the link
-
 The preset values for those properties can be managed globally in the plugin's settings or on a file-by-file basis thanks to fileClass definition (see section 4)
 
 <img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/e147ac10179d2c351d9a9f222e4637ee7fe32aed/images/superchargeLink.gif alt="drawing" style="width:600px;"/>
 
 ## 1. Basic link styling
 
-The plugin basically scans the target file of each internal link of the files that are currently opened in your workspace.
+The plugin scans your workspace to find links to your files. For each of those links, it will use the front-matter and tags, and adds them as CSS attributes to the html element of the link. 
 
-It gathers some specific front-matter properties and includes them in the html element of the link, with the value of the property contained in the target note's front matter section.
-
-Complicated 😰.... let's break it down step by step
+Complicated 😰....! Let's break it down step by step :)
 
 ### 1.a Front-matter
 
-As a reminder, front-matter section is an optional section of your note written in Yaml. 
-Here is the documentation about front-matter on Obsidian help website https://help.obsidian.md/Advanced+topics/YAML+front+matter
+The front-matter section is an optional section of your note written in Yaml. 
+For documentation, see https://help.obsidian.md/Advanced+topics/YAML+front+matter
 
 Let's say I have a note about Jim : Jim.md
 
 ```md
 ---
-category: people
 next-actions: [👥, ☎️, 🍻, say hi]
 age: 42
 ---
 
 Jim is one of my colleagues
 
+#person
+
 ```
 
-Let's say that I want to have a specific display of the internal-links linking to Jim's note to display a blue tag-like rounded rectangle <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling.png" style="height:30px;vertical-align:bottom">  and display <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling-hover.png" style="height:30px;vertical-align:bottom">  when hovering the link
+I want to have a specific display of the internal-links linking to Jim's note to display a blue tag-like rounded rectangle <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling.png" style="height:30px;vertical-align:bottom">  and display <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling-hover.png" style="height:30px;vertical-align:bottom">  when hovering the link
 
 ### 1.b Settings
 
-First you'll have to tell the plugin which front-matter kind of properties you want your internal-link to be supercharged with in the `Target Attributes for Styling` section of the plugin's settings
-
-here are my settings
+First you have to tell the plugin what front-matter properties you want your internal-link to be supercharged with in the `Target Attributes for Styling` section of the plugin's settings.
 
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-settings.png" alt="drawing" style="width:400px;"/>
 
-So in this case the plugin will only include `category`, `next-actions` and `tags` in the internal-links
+So in this case the plugin will only include `category` and `next-actions` and `tags` in the internal-links.
 
-You can choose to exclude the inline fields to be targetted: it ensures that frontmatter attributes are properly red event if the file is very large (60k+ characters)
+You can choose not to search for Dataview inline fields, which will improve performance if you are not using those.
 
 ### 1.c a.internal-links
 
-When a file is opened or when one of the files of your vault has changed, the plugin is "supercharging" all internal-links with the front-matter properties set in the settings, if there are such properties in the file targeted by the link.
+When a file is opened or when one of the files of your vault has changed, the plugin is "supercharging" all internal-links with the front-matter properties set previously. This only happens if these properties are present in the file targeted by the link.
 
 Let's say that I have a file daily.md like this:
 
@@ -69,30 +67,40 @@ Without the plugin activated, the html link element would normally look like thi
 
 You wouldn't really know anything about Jim.md's specificity here and therefore wouldn't be able to customize it a lot.
 
-That's where the plugin comes in: it will add two extra properties in the `<a>` element : `category` and `next-actions`. 
-Since `tags` is not existing in Jim.md front-matter section, it won't be included.
+That's where the plugin comes in: it will add two extra properties in the `<a>` element : `next-actions` and `tags`. `tags` is a special property as it will also include tags such as `#person` that might be in your file. 
 
-**heads-up** the plugin is not adding directly `category` and `next-actions` property. Instead, it will prefix them with `data-link` in order not to potentially conflict with other attribute management ssystem made by other plugins or Obsidian itself.
+**Importantly**, the plugin adds these properties by prefixing them with `data-link` so that it will not conflict with other attributes in other plugins or Obsidian itself.
 
-So... with the plugin activated the `<a>`element will be supercharged like this: `<a data-href="Jim" href="Jim" class="internal-link" target="_blank" rel="noopener" data-link-category="people" data-link-next-actions="👥 ☎️ 🍻 say hi">Jim</a>`
+So... with the plugin activated the `<a>`element will be supercharged like this: `<a data-href="Jim" href="Jim" class="internal-link" target="_blank" rel="noopener" data-link-next-actions="👥 ☎️ 🍻 say hi" data-link-tags="#person" >Jim</a>`
 
-As you can see, even if `tags` is included in settings as a property to track, since it's not included in Jim.md front-matter section, the property `data-link-tags` isn't included in the `<a>` element
+Although `category` is included in settings as a property to track, since it's not included in Jim.md front-matter section, the property `data-link-tags` isn't included in the `<a>` element
 
 ### 1.d css
 
-Now you can enjoy the flexibilty of css to customize your links by setting css properties in a snippet like `links.css`
+Now you can enjoy the flexibilty of css to customize your links by setting css properties in a CSS snippet like `links.css`
 
-exemple: 
+#### Examples
 
-to put a fancy 👤 emoji before the name of each link to a "category: people" note:
+To change the color of every appearance of a link to a note based on the tag in the file:
+
 ```css
-a.internal-link[data-link-category$="People" i]::before{
+[data-link-tags*="#topic" i]{
+    color: #ff6600 !important;
+}
+```
+This will target all HTML elements that contain the `data-link-tags` property, that is, all supercharged links.
+
+To put a fancy 👤 emoji before the name of each link to a "category: people" note:
+```css
+:not(.cm-hmd-internal-link)[data-link-category$="People" i]::before{
     content: "👤 "
 }
 ```
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-in-note.png" style="width:500px">
 
-to highlight the link in a tag-like blue rounded rectangle when there is a property next-actions in the target file:
+We make sure not to target links in the editor view using `:not(.cm-hmd-internal-link)`, since this will break the cursor positioning!
+
+To highlight the link in a tag-like blue rounded rectangle when there is a property next-actions in the target file:
 
 ```css
 a.internal-link[data-link-next-actions]{
@@ -103,9 +111,13 @@ a.internal-link[data-link-next-actions]{
 }
 ```
 
+
+
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-tag-in-note.png" style="width:500px">
 
-to display the next actions contained in the next-actions property of the target file when hovering the link:
+This will only change this in the preview view, because we are explicitly targetting `a.internal-link`.
+
+To display the value of the next actions property at the target file,  whenever you hover on the link:
 
 ```css
 a.internal-link[data-link-next-actions]:hover::after{
@@ -115,7 +127,7 @@ a.internal-link[data-link-next-actions]:hover::after{
 
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-hover-in-note.png" style="width:500px">
 
-### 1.e Some demo
+### 1.e Demos 
 
 #### Internal link simple styling
 https://youtu.be/tyEdsmAQb_4
@@ -123,7 +135,7 @@ https://youtu.be/tyEdsmAQb_4
 #### Multiple properties
 https://youtu.be/Ofm6gIRP-7o
 
-#### Multiple values for a preperty
+#### Multiple values for a property
 https://youtu.be/aaSZnkEuH4w
 
 ## 2. Link context menu extra options
