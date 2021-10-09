@@ -95,25 +95,26 @@ export default class SuperchargedLinks extends Plugin {
 	}
 
 	initViewObservers(plugin: SuperchargedLinks) {
-		plugin.app.workspace.iterateAllLeaves((leaf) => console.log(leaf.view.getViewType()));
 		plugin.observers.forEach((observer) => observer.disconnect());
 		plugin.registerViewType('backlink', plugin);
 		plugin.registerViewType('outgoing-link', plugin);
 		plugin.registerViewType('search', plugin);
+		plugin.registerViewType('breadcrumbs-matrix', plugin, 'internal-link', '', false);
+		plugin.registerViewType('graph-analysis', plugin, 'internal-link', '', false);
 		plugin.registerViewType('starred', plugin,'nav-file', 'nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, 'nav-file', 'nav-file-title-content');
 	}
 
-	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, parent_class='tree-item', own_class='tree-item-inner') {
+	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, parent_class='tree-item', own_class='tree-item-inner', searchParent=true) {
 		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
 		if (leaves.length > 1) console.error('more than one ' + viewTypeName + ' panel');
 		else if (leaves.length < 1) return;
 		else {
-			plugin.watchContainer(leaves[0].view.containerEl, plugin, parent_class, own_class);
+			plugin.watchContainer(leaves[0].view.containerEl, plugin, parent_class, own_class, searchParent);
 		}
 	}
 
-	watchContainer(container: HTMLElement, plugin: SuperchargedLinks, parent_class='tree-item', own_class='tree-item-inner') {
+	watchContainer(container: HTMLElement, plugin: SuperchargedLinks, parent_class='tree-item', own_class='tree-item-inner', searchParent=true) {
 		const settings = plugin.settings;
 		const app = plugin.app;
 		let observer = new MutationObserver((records, _) => {
@@ -123,13 +124,19 @@ export default class SuperchargedLinks extends Plugin {
 						if ('className' in n) {
 							// @ts-ignore
 							if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes(parent_class)) {
-								const fileDivs = (n as HTMLElement).getElementsByClassName(own_class);
-								for (let i = 0; i < fileDivs.length; ++i) {
-									const link = fileDivs[i] as HTMLElement;
-									clearExtraAttributes(link);
-									if (settings.enableBacklinks) {
-										updateDivExtraAttributes(app, settings, link, "");
+							    if (searchParent) {
+									const fileDivs = (n as HTMLElement).getElementsByClassName(own_class);
+									for (let i = 0; i < fileDivs.length; ++i) {
+										const link = fileDivs[i] as HTMLElement;
+										clearExtraAttributes(link);
+										if (settings.enableBacklinks) {
+											updateDivExtraAttributes(app, settings, link, "");
+										}
 									}
+								}
+							    else {
+							    	clearExtraAttributes(n as HTMLElement);
+							    	updateDivExtraAttributes(app, settings, n as HTMLElement, "");
 								}
 							}
 						}
