@@ -14,6 +14,7 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
     let new_props: Record<string, string> = {}
     return new Promise((resolve, reject) => {
         const cache = app.metadataCache.getFileCache(dest)
+        if (!cache) return;
         if(!settings.getFromInlineField){
             const frontmatter = cache.frontmatter
             if(frontmatter){
