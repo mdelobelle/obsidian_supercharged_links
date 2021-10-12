@@ -1,4 +1,4 @@
-import { App, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile } from "obsidian"
+import { App, getAllTags, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile } from "obsidian"
 import { SuperchargedLinksSettings } from "src/settings/SuperchargedLinksSettings"
 
 export function clearExtraAttributes(link: HTMLElement) {
@@ -9,10 +9,11 @@ export function clearExtraAttributes(link: HTMLElement) {
     })
 }
 
-function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksSettings, dest: TFile): Promise<Record<string, string>> {
+function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Promise<Record<string, string>> {
     let new_props: Record<string, string> = {}
     return new Promise((resolve, reject) => {
         const cache = app.metadataCache.getFileCache(dest)
+        if (!cache) return;
         if (!settings.getFromInlineField) {
             const frontmatter = cache.frontmatter
             if (frontmatter) {
@@ -62,10 +63,14 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
 
             })
         }
-        const tags = cache.tags
-        if (tags && settings.targetTags) {
-            new_props["tags"] = tags.map(t => t.tag).toString()
+        if (settings.targetTags) {
+            new_props["tags"] = getAllTags(cache).join(' ');
         }
+
+        if (addDataHref){
+            new_props['data-href'] = dest.basename;
+        }
+
         resolve(new_props)
     })
 }
@@ -79,24 +84,27 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
 function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
     const linkHref = link.getAttribute('href').split('#')[0];
     const dest = app.metadataCache.getFirstLinkpathDest(linkHref, destName)
+
     if (dest) {
-        fetchFrontmatterTargetAttributes(app, settings, dest).then(new_props => setLinkNewProps(link, new_props))
+        fetchFrontmatterTargetAttributes(app, settings, dest, false).then(new_props => setLinkNewProps(link, new_props))
     }
 }
 
 export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
     const linkName = link.textContent;
     const dest = app.metadataCache.getFirstLinkpathDest(linkName, destName)
+
     if (dest) {
-        fetchFrontmatterTargetAttributes(app, settings, dest).then(new_props => setLinkNewProps(link, new_props))
+        fetchFrontmatterTargetAttributes(app, settings, dest, true).then(new_props => setLinkNewProps(link, new_props))
     }
 }
 
 function updateEditLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
     const linkName = link.textContent.split('|')[0].split('#')[0];
     const dest = app.metadataCache.getFirstLinkpathDest(linkName, destName)
+
     if (dest) {
-        fetchFrontmatterTargetAttributes(app, settings, dest).then(new_props => setLinkNewProps(link, new_props))
+        fetchFrontmatterTargetAttributes(app, settings, dest, true).then(new_props => setLinkNewProps(link, new_props))
     }
 }
 
@@ -146,7 +154,7 @@ export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings
                     const fileName = file.path.replace(/(.*).md/, "$1")
                     const dest = app.metadataCache.getFirstLinkpathDest(link.link, fileName)
                     if (dest) {
-                        fetchFrontmatterTargetAttributes(app, settings, dest).then(new_props => {
+                        fetchFrontmatterTargetAttributes(app, settings, dest, false).then(new_props => {
                             const internalLinks = leaf.view.containerEl.querySelectorAll(`a.internal-link[href="${link.link}"]`)
                             internalLinks.forEach((internalLink: HTMLElement) => setLinkNewProps(internalLink, new_props))
                         })
