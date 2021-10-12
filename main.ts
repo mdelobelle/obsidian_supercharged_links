@@ -1,4 +1,4 @@
-import {Plugin, MarkdownView, Notice} from 'obsidian';
+import { Plugin, MarkdownView, Notice } from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {
 	updateElLinks,
@@ -7,11 +7,12 @@ import {
 	updateEditorLinks,
 	clearExtraAttributes, updateDivExtraAttributes
 } from "src/linkAttributes/linkAttributes"
-import {SuperchargedLinksSettings, DEFAULT_SETTINGS} from "src/settings/SuperchargedLinksSettings"
+import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
 import Field from 'src/Field';
 import linkContextMenu from "src/options/linkContextMenu"
 import NoteFieldsCommandsModal from "src/options/NoteFieldsCommandsModal"
 import FileClassAttributeSelectModal from 'src/fileClass/FileClassAttributeSelectModal';
+import { CSSBuilderModal } from 'src/cssBuilder/cssBuilderModal'
 
 export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
@@ -19,7 +20,7 @@ export default class SuperchargedLinks extends Plugin {
 	settingTab: SuperchargedLinksSettingTab
 	private observers: MutationObserver[];
 
-	async onload():Promise <void> {
+	async onload(): Promise<void> {
 		console.log('Supercharged links loaded');
 		await this.loadSettings();
 
@@ -27,7 +28,7 @@ export default class SuperchargedLinks extends Plugin {
 			const property = new Field()
 			Object.assign(property, prop)
 			this.initialProperties.push(property)
-		}) 
+		})
 		this.addSettingTab(new SuperchargedLinksSettingTab(this.app, this));
 		this.registerMarkdownPostProcessor((el, ctx) => {
 			updateElLinks(this.app, this.settings, el, ctx)
@@ -63,7 +64,7 @@ export default class SuperchargedLinks extends Plugin {
 			],
 			callback: () => {
 				const leaf = this.app.workspace.activeLeaf
-				if(leaf.view instanceof MarkdownView && leaf.view.file){
+				if (leaf.view instanceof MarkdownView && leaf.view.file) {
 					const fieldsOptionsModal = new NoteFieldsCommandsModal(this.app, this, leaf.view.file)
 					fieldsOptionsModal.open()
 				}
@@ -82,12 +83,21 @@ export default class SuperchargedLinks extends Plugin {
 			],
 			callback: () => {
 				const leaf = this.app.workspace.activeLeaf
-				if(leaf.view instanceof MarkdownView && leaf.view.file && `${leaf.view.file.parent.path}/` == this.settings.classFilesPath){
+				if (leaf.view instanceof MarkdownView && leaf.view.file && `${leaf.view.file.parent.path}/` == this.settings.classFilesPath) {
 					const modal = new FileClassAttributeSelectModal(this, leaf.view.file)
 					modal.open()
 				} else {
 					const notice = new Notice("This is not a fileClass", 2500)
 				}
+			},
+		});
+
+		this.addCommand({
+			id: "css_snippet_helper",
+			name: "CSS Snippet helper",
+			callback: () => {
+				const formModal = new CSSBuilderModal(this)
+				formModal.open()
 			},
 		});
 
@@ -101,11 +111,11 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('search', plugin);
 		plugin.registerViewType('breadcrumbs-matrix', plugin, 'internal-link', '', false);
 		plugin.registerViewType('graph-analysis', plugin, 'internal-link', '', false);
-		plugin.registerViewType('starred', plugin,'nav-file', 'nav-file-title-content');
+		plugin.registerViewType('starred', plugin, 'nav-file', 'nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, 'nav-file', 'nav-file-title-content');
 	}
 
-	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, parent_class='tree-item', own_class='tree-item-inner', searchParent=true) {
+	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, parent_class = 'tree-item', own_class = 'tree-item-inner', searchParent = true) {
 		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
 		if (leaves.length > 1) console.error('more than one ' + viewTypeName + ' panel');
 		else if (leaves.length < 1) return;
@@ -114,7 +124,7 @@ export default class SuperchargedLinks extends Plugin {
 		}
 	}
 
-	watchContainer(container: HTMLElement, plugin: SuperchargedLinks, parent_class='tree-item', own_class='tree-item-inner', searchParent=true) {
+	watchContainer(container: HTMLElement, plugin: SuperchargedLinks, parent_class = 'tree-item', own_class = 'tree-item-inner', searchParent = true) {
 		const settings = plugin.settings;
 		const app = plugin.app;
 		let observer = new MutationObserver((records, _) => {
@@ -124,7 +134,7 @@ export default class SuperchargedLinks extends Plugin {
 						if ('className' in n) {
 							// @ts-ignore
 							if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes(parent_class)) {
-							    if (searchParent) {
+								if (searchParent) {
 									const fileDivs = (n as HTMLElement).getElementsByClassName(own_class);
 									for (let i = 0; i < fileDivs.length; ++i) {
 										const link = fileDivs[i] as HTMLElement;
@@ -134,9 +144,9 @@ export default class SuperchargedLinks extends Plugin {
 										}
 									}
 								}
-							    else {
-							    	clearExtraAttributes(n as HTMLElement);
-							    	updateDivExtraAttributes(app, settings, n as HTMLElement, "");
+								else {
+									clearExtraAttributes(n as HTMLElement);
+									updateDivExtraAttributes(app, settings, n as HTMLElement, "");
 								}
 							}
 						}
@@ -144,12 +154,12 @@ export default class SuperchargedLinks extends Plugin {
 				}
 			})
 		});
-		observer.observe(container, {subtree: true, childList: true, attributes: false});
+		observer.observe(container, { subtree: true, childList: true, attributes: false });
 		plugin.observers.push(observer);
 	}
 
 	onunload() {
-	    this.observers.forEach((observer) => observer.disconnect());
+		this.observers.forEach((observer) => observer.disconnect());
 		console.log('Supercharged links unloaded');
 	}
 
