@@ -1,4 +1,4 @@
-import {App, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile} from "obsidian"
+import {App, getAllTags, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile} from "obsidian"
 import {SuperchargedLinksSettings} from "src/settings/SuperchargedLinksSettings"
 
 export function clearExtraAttributes(link: HTMLElement){
@@ -65,14 +65,13 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
                
             })
         }
-        const tags = cache.tags
-        if (tags && settings.targetTags) {
-            new_props["tags"] = tags.map(t => t.tag).toString()
+        if (settings.targetTags) {
+            new_props["tags"] = getAllTags(cache).join(' ');
         }
         if (addDataHref){
             new_props['data-href'] = dest.basename;
         }
-        resolve(new_props) 
+        resolve(new_props)
     })
 }
 
