@@ -11,56 +11,25 @@ export function clearExtraAttributes(link: HTMLElement) {
 
 function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Promise<Record<string, string>> {
     let new_props: Record<string, string> = {}
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         const cache = app.metadataCache.getFileCache(dest)
         if (!cache) return;
-        if (!settings.getFromInlineField) {
-            const frontmatter = cache.frontmatter
-            if (frontmatter) {
-                settings.targetAttributes.forEach(attribute => {
-                    if (Object.keys(frontmatter).includes(attribute)) {
-                        new_props[attribute] = frontmatter[attribute]
-                    }
-                })
-            }
-        } else {
-            app.vault.cachedRead(dest).then((result: string) => {
-                let foreHeadText = false
-                let frontmatterStart = false
-                let frontmatterEnd = false
-                let inFrontmatter = false
-                result.split('\n').map(line => {
-                    if (line != "---" && !foreHeadText && !frontmatterStart) {
-                        foreHeadText = true
-                    }
-                    if (line == "---" && !foreHeadText) {
-                        if (!frontmatterStart) {
-                            frontmatterStart = true
-                            inFrontmatter = true
-                        } else if (!frontmatterEnd) {
-                            frontmatterEnd = true
-                            inFrontmatter = false
-                        }
-                    }
-                    if (inFrontmatter) {
-                        settings.targetAttributes.forEach(attribute => {
-                            const regex = new RegExp(`${attribute}\\s*:\\s*(.*)`, 'u')
-                            const regexResult = line.match(regex)
-                            if (regexResult && regexResult.length > 1) {
-                                new_props[attribute] = regexResult[1] ? regexResult[1].replace(/^\[(.*)\]$/, "$1").trim() : ""
-                            }
-                        })
-                    } else {
-                        settings.targetAttributes.forEach(attribute => {
-                            const regex = new RegExp('[_\*~\`]*' + attribute + '[_\*~`]*\s*::(.+)?', 'u')
-                            const r = line.match(regex)
-                            if (r && r.length > 0) {
-                                new_props[attribute] = r[1] ? r[1].replace(/^\[(.*)\]$/, "$1").trim() : ""
-                            }
-                        })
-                    }
-                })
 
+        const frontmatter = cache.frontmatter
+        if (frontmatter) {
+            settings.targetAttributes.forEach(attribute => {
+                if (Object.keys(frontmatter).includes(attribute)) {
+                    new_props[attribute] = frontmatter[attribute]
+                }
+            })
+        }
+        if (settings.getFromInlineField) {
+            const regex = new RegExp(`(${settings.targetAttributes.join("|")})::(.+)?`, "g");
+            await app.vault.cachedRead(dest).then((result) => {
+                const matches = result.matchAll(regex);
+                for (const match of matches) {
+                    new_props[match[1]] = match[2].replace(/^\[(.*)\]$/, "$1").trim();
+                }
             })
         }
         if (settings.targetTags) {

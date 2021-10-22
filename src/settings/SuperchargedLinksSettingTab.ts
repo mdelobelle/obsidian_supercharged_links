@@ -81,7 +81,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 		// Managing choice wether you get attributes from inline fields and frontmatter or only frontmater
 		new Setting(containerEl)
 		.setName('Search for attribute in Inline fields like <field::>')
-		.setDesc('Searching for attribute in Inline fields may fail with large files (67k+ chars)')
+		.setDesc('Sets the `data-link-<field>`-attribute to the value of inline fields')
 		.addToggle(toggle => {
 			toggle.setValue(this.plugin.settings.getFromInlineField)
 				toggle.onChange(value => {
@@ -89,7 +89,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 					this.plugin.saveSettings()
 				})
 		})
-        
+
         /* Managing predefined values for properties */
 		/* Manage menu options display*/
 		new Setting(containerEl)
