@@ -28,7 +28,9 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
             await app.vault.cachedRead(dest).then((result) => {
                 const matches = result.matchAll(regex);
                 for (const match of matches) {
-                    new_props[match[1]] = match[2].replace(/^\[(.*)\]$/, "$1").trim();
+                    if (match[2] !== undefined) {
+                        new_props[match[1]] = match[2].replace(/^\[(.*)\]$/, "$1").trim();
+                    }
                 }
             })
         }
@@ -36,7 +38,7 @@ function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksS
             new_props["tags"] = getAllTags(cache).join(' ');
         }
 
-        if (addDataHref){
+        if (addDataHref) {
             new_props['data-href'] = dest.basename;
         }
 
