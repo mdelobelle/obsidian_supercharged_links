@@ -40,13 +40,25 @@ export default class SuperchargedLinks extends Plugin {
 			updateVisibleLinks(this.app, this.settings);
 			updateDivLinks(this.app, this.settings);
 		});
-		this.registerCodeMirror((cm) => {
-			cm.on("update", () => {
-				if (this.settings.enableEditor) {
-					updateEditorLinks(this.app, this.settings);
-				}
-			})
+
+		this.app.workspace.on('editor-change', (editor, markdownView) => {
+			if (this.settings.enableEditor && markdownView.getMode() !== "preview") {
+				updateEditorLinks(this.app, this.settings, markdownView.containerEl)
+			}
 		});
+		this.app.workspace.on('active-leaf-change', (leaf) => {
+			if (this.settings.enableEditor) {
+				updateEditorLinks(this.app, this.settings, leaf.view.containerEl)
+			}
+		})
+		// this.registerCodeMirror((cm) => {
+		// 	console.log(cm)
+		// 	cm.on("update", () => {
+		// 		if (this.settings.enableEditor) {
+		// 			updateEditorLinks(this.app, this.settings);
+		// 		}
+		// 	})
+		// });
 
 		this.observers = [];
 

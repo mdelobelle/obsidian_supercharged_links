@@ -126,8 +126,8 @@ export function updateDivLinks(app: App, settings: SuperchargedLinksSettings) {
     })
 }
 
-export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings) {
-    const internalLinks = fishAll('span.cm-hmd-internal-link');
+export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings, el: HTMLElement) {
+    const internalLinks = el.querySelectorAll('span.cm-hmd-internal-link');
     internalLinks.forEach((link: HTMLElement) => {
         clearExtraAttributes(link);
         updateEditLinkExtraAttributes(app, settings, link, "");
