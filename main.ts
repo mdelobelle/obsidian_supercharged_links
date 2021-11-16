@@ -1,4 +1,4 @@
-import { Plugin, MarkdownView, Notice } from 'obsidian';
+import {Plugin, MarkdownView, Notice, debounce} from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {
 	updateElLinks,
@@ -41,9 +41,13 @@ export default class SuperchargedLinks extends Plugin {
 			updateDivLinks(this.app, this.settings);
 		});
 
+		const dbUpdateEditor = debounce((markdownView:MarkdownView) => {
+			updateEditorLinks(this.app, this.settings, markdownView.containerEl, markdownView.file)
+		}, 300, true)
+
 		this.app.workspace.on('editor-change', (editor, markdownView) => {
 			if (this.settings.enableEditor && markdownView.getMode() !== "preview") {
-				updateEditorLinks(this.app, this.settings, markdownView.containerEl, markdownView.file)
+				dbUpdateEditor(markdownView)
 			}
 		});
 		this.app.workspace.on('active-leaf-change', (leaf) => {
