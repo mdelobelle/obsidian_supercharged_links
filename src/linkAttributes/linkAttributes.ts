@@ -1,4 +1,4 @@
-import { App, getAllTags, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile } from "obsidian"
+import {App, getAllTags, getLinkpath, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile} from "obsidian"
 import { SuperchargedLinksSettings } from "src/settings/SuperchargedLinksSettings"
 
 export function clearExtraAttributes(link: HTMLElement) {
@@ -90,23 +90,17 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
     }
 }
 
-export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
-    const linkName = link.textContent;
-    const dest = app.metadataCache.getFirstLinkpathDest(linkName, destName)
+export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string, linkName?: string) {
+    if (!linkName) {
+        linkName = link.textContent;
+    }
+    const dest = app.metadataCache.getFirstLinkpathDest(getLinkpath(linkName), destName)
 
     if (dest) {
         fetchFrontmatterTargetAttributes(app, settings, dest, true).then(new_props => setLinkNewProps(link, new_props))
     }
 }
 
-function updateEditLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
-    const linkName = link.textContent.split('|')[0].split('#')[0];
-    const dest = app.metadataCache.getFirstLinkpathDest(linkName, destName)
-
-    if (dest) {
-        fetchFrontmatterTargetAttributes(app, settings, dest, true).then(new_props => setLinkNewProps(link, new_props))
-    }
-}
 
 export function updateDivLinks(app: App, settings: SuperchargedLinksSettings) {
     const divs = fishAll('div.internal-link');
@@ -126,12 +120,31 @@ export function updateDivLinks(app: App, settings: SuperchargedLinksSettings) {
     })
 }
 
-export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings, el: HTMLElement) {
+export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings, el: HTMLElement, file: TFile) {
     const internalLinks = el.querySelectorAll('span.cm-hmd-internal-link');
     internalLinks.forEach((link: HTMLElement) => {
         clearExtraAttributes(link);
-        updateEditLinkExtraAttributes(app, settings, link, "");
+        updateDivExtraAttributes(app, settings, link, "", link.textContent.split('|')[0].split('#')[0]);
     })
+
+    // Aliased elements do not have an attribute to find the original link.
+    // So iterate through the array of links to find all aliased links and match them to the html elements
+    let aliasedElements = Array.from(el.querySelectorAll("span.cm-link-alias"))
+        .filter(el => {
+            // Remove zero-width space which are added in live preview
+            return (el as HTMLElement).innerText !== "\u200B"
+        });
+    let links = app.metadataCache.getFileCache(file).links;
+    let aliasedLinks = links.filter(eachLink => eachLink.displayText !== eachLink.link);
+    aliasedLinks.forEach((linkCache, index) => {
+        let linkElement = aliasedElements[index] as HTMLElement
+        if(linkElement && linkElement.innerText === linkCache.displayText) {
+            clearExtraAttributes(linkElement);
+            updateDivExtraAttributes(app, settings, linkElement, '', linkCache.link)
+        }
+    })
+
+
 }
 
 export function updateElLinks(app: App, settings: SuperchargedLinksSettings, el: HTMLElement, ctx: MarkdownPostProcessorContext) {

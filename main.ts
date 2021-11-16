@@ -43,12 +43,12 @@ export default class SuperchargedLinks extends Plugin {
 
 		this.app.workspace.on('editor-change', (editor, markdownView) => {
 			if (this.settings.enableEditor && markdownView.getMode() !== "preview") {
-				updateEditorLinks(this.app, this.settings, markdownView.containerEl)
+				updateEditorLinks(this.app, this.settings, markdownView.containerEl, markdownView.file)
 			}
 		});
 		this.app.workspace.on('active-leaf-change', (leaf) => {
-			if (this.settings.enableEditor) {
-				updateEditorLinks(this.app, this.settings, leaf.view.containerEl)
+			if (this.settings.enableEditor && leaf.view instanceof MarkdownView) {
+				updateEditorLinks(this.app, this.settings, leaf.view.containerEl, (leaf.view as MarkdownView).file)
 			}
 		})
 		// this.registerCodeMirror((cm) => {
