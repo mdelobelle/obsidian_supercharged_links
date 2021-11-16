@@ -3,7 +3,7 @@
 Internal links adds attributes to HTMLElements with the attributes and values of the target file's frontmatter.
 Combined with css snippets, it allows a very flexible way to customize your links! It supports the note preview, edit mode, backlinks and outgoing links panel, the file browser and the search panel, and also supports the Breadcrumbs plugin.
 
-<img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/e147ac10179d2c351d9a9f222e4637ee7fe32aed/images/link-styling-workspace.gif alt="drawing" style="width:600px;"/>
+<img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-workspace.png alt="drawing" style="width:600px;"/>
 
 It also adds context menu items to modifiy target note's frontmatter properties and "inline fields" (dataview syntax) by right-clicking on the link
 The preset values for those properties can be managed globally in the plugin's settings or on a file-by-file basis thanks to fileClass definition (see section 4)
