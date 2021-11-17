@@ -101,10 +101,13 @@ export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings,
     // Aliased elements do not have an attribute to find the original link.
     // So iterate through the array of links to find all aliased links and match them to the html elements
     let aliasedElements = Array.from(el.querySelectorAll("span.cm-link-alias"))
-        .filter(el => {
+        ?.filter(el => {
             // Remove zero-width space which are added in live preview
             return (el as HTMLElement).innerText !== "\u200B"
         });
+    if (!aliasedElements) {
+        return
+    }
     let links = app.metadataCache.getFileCache(file).links;
     let aliasedLinks = links.filter(eachLink => eachLink.displayText !== eachLink.link);
     aliasedLinks.forEach((linkCache, index) => {
