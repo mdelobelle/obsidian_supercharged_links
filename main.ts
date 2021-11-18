@@ -1,4 +1,4 @@
-import {Plugin, MarkdownView, Notice, debounce, Platform} from 'obsidian';
+import { Plugin, MarkdownView, Notice, debounce, Platform } from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {
 	updateElLinks,
@@ -24,6 +24,7 @@ export default class SuperchargedLinks extends Plugin {
 		console.log('Supercharged links loaded');
 		await this.loadSettings();
 
+
 		this.settings.presetFields.forEach(prop => {
 			const property = new Field()
 			Object.assign(property, prop)
@@ -41,7 +42,7 @@ export default class SuperchargedLinks extends Plugin {
 			updateDivLinks(this.app, this.settings);
 		});
 
-		const updateEditor = (markdownView:MarkdownView) => {
+		const updateEditor = (markdownView: MarkdownView) => {
 			updateEditorLinks(this.app, this.settings, markdownView.containerEl, markdownView.file)
 		}
 		const dbUpdateEditor = debounce(updateEditor, 300, true)

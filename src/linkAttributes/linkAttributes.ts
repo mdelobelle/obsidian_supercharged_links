@@ -1,4 +1,4 @@
-import {App, getAllTags, getLinkpath, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile} from "obsidian"
+import { App, getAllTags, getLinkpath, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile } from "obsidian"
 import { SuperchargedLinksSettings } from "src/settings/SuperchargedLinksSettings"
 
 export function clearExtraAttributes(link: HTMLElement) {
@@ -112,7 +112,7 @@ export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings,
     let aliasedLinks = links.filter(eachLink => eachLink.displayText !== eachLink.link);
     aliasedLinks.forEach((linkCache, index) => {
         let linkElement = aliasedElements[index] as HTMLElement
-        if(linkElement && linkElement.innerText === linkCache.displayText) {
+        if (linkElement && linkElement.innerText === linkCache.displayText) {
             clearExtraAttributes(linkElement);
             updateDivExtraAttributes(app, settings, linkElement, '', linkCache.link)
         }
