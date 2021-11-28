@@ -34,30 +34,30 @@ export default class SuperchargedLinks extends Plugin {
 		this.registerMarkdownPostProcessor((el, ctx) => {
 			updateElLinks(this.app, this.settings, el, ctx)
 		});
-		this.app.workspace.on('file-open', () => {
+		this.registerEvent(this.app.workspace.on('file-open', () => {
 			updateDivLinks(this.app, this.settings);
-		})
-		this.app.metadataCache.on('changed', (_file) => {
+		}));
+		this.registerEvent(this.app.metadataCache.on('changed', (_file) => {
 			updateVisibleLinks(this.app, this.settings);
 			updateDivLinks(this.app, this.settings);
-		});
+		}));
 
 		const updateEditor = (markdownView: MarkdownView) => {
 			updateEditorLinks(this.app, this.settings, markdownView.containerEl, markdownView.file)
 		}
 		const dbUpdateEditor = debounce(updateEditor, 300, true)
 
-		this.app.workspace.on('editor-change', (editor, markdownView) => {
+		this.registerEvent(this.app.workspace.on('editor-change', (editor, markdownView) => {
 			if (this.settings.enableEditor && markdownView.getMode() !== "preview" && Platform.isDesktop) {
 				dbUpdateEditor(markdownView)
 
 			}
-		});
-		this.app.workspace.on('active-leaf-change', (leaf) => {
+		}));
+		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
 			if (this.settings.enableEditor && leaf.view instanceof MarkdownView && Platform.isDesktop) {
 				updateEditorLinks(this.app, this.settings, leaf.view.containerEl, (leaf.view as MarkdownView).file)
 			}
-		})
+		}));
 		// this.registerCodeMirror((cm) => {
 		// 	console.log(cm)
 		// 	cm.on("update", () => {
