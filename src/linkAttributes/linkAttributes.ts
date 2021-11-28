@@ -108,15 +108,17 @@ export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings,
     if (!aliasedElements) {
         return
     }
-    let links = app.metadataCache.getFileCache(file).links;
-    let aliasedLinks = links.filter(eachLink => eachLink.displayText !== eachLink.link);
-    aliasedLinks.forEach((linkCache, index) => {
-        let linkElement = aliasedElements[index] as HTMLElement
-        if (linkElement && linkElement.innerText === linkCache.displayText) {
-            clearExtraAttributes(linkElement);
-            updateDivExtraAttributes(app, settings, linkElement, '', linkCache.link)
-        }
-    })
+    let cache = app.metadataCache.getFileCache(file)
+    if (cache && cache.links) {
+        let aliasedLinks = cache.links.filter(eachLink => eachLink.displayText !== eachLink.link);
+        aliasedLinks.forEach((linkCache, index) => {
+            let linkElement = aliasedElements[index] as HTMLElement
+            if (linkElement && linkElement.innerText === linkCache.displayText) {
+                clearExtraAttributes(linkElement);
+                updateDivExtraAttributes(app, settings, linkElement, '', linkCache.link)
+            }
+        })
+    }
 
 
 }
