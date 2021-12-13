@@ -9,7 +9,31 @@ export function clearExtraAttributes(link: HTMLElement) {
     })
 }
 
-function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Promise<Record<string, string>> {
+export function fetchFrontmatterTargetAttributesSync(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Record<string, string> {
+    let new_props: Record<string, string> = {}
+    const cache = app.metadataCache.getFileCache(dest)
+    if (!cache) return;
+
+    const frontmatter = cache.frontmatter
+    if (frontmatter) {
+        settings.targetAttributes.forEach(attribute => {
+            if (Object.keys(frontmatter).includes(attribute)) {
+                new_props[attribute] = frontmatter[attribute]
+            }
+        })
+    }
+
+    if (settings.targetTags) {
+        new_props["tags"] = getAllTags(cache).join(' ');
+    }
+
+    if (addDataHref) {
+        new_props['data-href'] = dest.basename;
+    }
+    return new_props
+}
+
+export function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Promise<Record<string, string>> {
     let new_props: Record<string, string> = {}
     return new Promise(async (resolve, reject) => {
         const cache = app.metadataCache.getFileCache(dest)
@@ -89,38 +113,6 @@ export function updateDivLinks(app: App, settings: SuperchargedLinksSettings) {
             updateDivExtraAttributes(app, settings, link, "");
         }
     })
-}
-
-export function updateEditorLinks(app: App, settings: SuperchargedLinksSettings, el: HTMLElement, file: TFile) {
-    const internalLinks = el.querySelectorAll('span.cm-hmd-internal-link');
-    internalLinks.forEach((link: HTMLElement) => {
-        clearExtraAttributes(link);
-        updateDivExtraAttributes(app, settings, link, "", link.textContent.split('|')[0].split('#')[0]);
-    })
-
-    // Aliased elements do not have an attribute to find the original link.
-    // So iterate through the array of links to find all aliased links and match them to the html elements
-    let aliasedElements = Array.from(el.querySelectorAll("span.cm-link-alias"))
-        ?.filter(el => {
-            // Remove zero-width space which are added in live preview
-            return (el as HTMLElement).innerText !== "\u200B"
-        });
-    if (!aliasedElements) {
-        return
-    }
-    let cache = app.metadataCache.getFileCache(file)
-    if (cache && cache.links) {
-        let aliasedLinks = cache.links.filter(eachLink => eachLink.displayText !== eachLink.link);
-        aliasedLinks.forEach((linkCache, index) => {
-            let linkElement = aliasedElements[index] as HTMLElement
-            if (linkElement && linkElement.innerText === linkCache.displayText) {
-                clearExtraAttributes(linkElement);
-                updateDivExtraAttributes(app, settings, linkElement, '', linkCache.link)
-            }
-        })
-    }
-
-
 }
 
 export function updateElLinks(app: App, settings: SuperchargedLinksSettings, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
