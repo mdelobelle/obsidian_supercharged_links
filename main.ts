@@ -15,7 +15,7 @@ import linkContextMenu from "src/options/linkContextMenu"
 import NoteFieldsCommandsModal from "src/options/NoteFieldsCommandsModal"
 import FileClassAttributeSelectModal from 'src/fileClass/FileClassAttributeSelectModal';
 import { CSSBuilderModal } from 'src/cssBuilder/cssBuilderModal'
-import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate} from "@codemirror/view";
+import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
 import {RangeSetBuilder} from "@codemirror/rangeset";
 import {syntaxTree} from "@codemirror/language";
 import {tokenClassNodeProp} from "@codemirror/stream-parser";
@@ -165,17 +165,38 @@ export default class SuperchargedLinks extends Plugin {
 	buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings) {
 		// Implements the live preview supercharging
 		// Code structure based on https://github.com/nothingislost/obsidian-cm6-attributes/blob/743d71b0aa616407149a0b6ea5ffea28e2154158/src/main.ts
+		// Code help credits to @NothingIsLost! They have been a great help getting this to work properly.
+		class HeaderWidget extends WidgetType {
+			attributes: Record<string, string>
+
+			constructor(attributes: Record<string, string>) {
+				super();
+				this.attributes = attributes
+			}
+
+			toDOM() {
+				let headerEl = document.createElement("span");
+				headerEl.setAttrs(this.attributes);
+				headerEl.addClass('cm-link-icon');
+				// create a naive bread crumb
+				return headerEl;
+			}
+
+			ignoreEvent() {
+				return true;
+			}
+		}
 		const settings = _settings;
 		const viewPlugin = ViewPlugin.fromClass(
 			class{
 				decorations: DecorationSet;
 
 				constructor(view: EditorView) {
-				    this.decorations = this.buildDecorations(view);
+					this.decorations = this.buildDecorations(view);
 				}
 
 				update(update: ViewUpdate) {
-					if (update.docChanged) {
+					if (update.docChanged || update.viewportChanged) {
 						this.decorations = this.buildDecorations(update.view);
 					}
 				}
@@ -191,21 +212,21 @@ export default class SuperchargedLinks extends Plugin {
 					const mdView = view.state.field(editorViewField) as MarkdownView;
 					for (let {from, to} of view.visibleRanges) {
 						try {
-						    syntaxTree(view.state).iterate({
+							syntaxTree(view.state).iterate({
 								from,
 								to,
 								enter: (type, from, to) => {
 									const tokenProps = type.prop(tokenClassNodeProp);
 									if (tokenProps) {
 										const props = new Set(tokenProps.split(" "));
+										// if (props.has("hmd-internal-link")) {console.log("props", type, from, to)}
 										if (props.has("hmd-internal-link") &&
 											!props.has("link-alias-pipe") &&
 											!props.has("link-alias")) {
-										    let linkText = view.state.doc.sliceString(from, to);
-										    linkText = linkText.split("#")[0];
+											let linkText = view.state.doc.sliceString(from, to);
+											linkText = linkText.split("#")[0];
 											let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
 											if (file) {
-											    console.log(props);
 												let _attributes = fetchFrontmatterTargetAttributesSync(app, settings, file, true);
 												let attributes: Record<string, string> = {};
 												for (let key in _attributes) {
@@ -214,7 +235,12 @@ export default class SuperchargedLinks extends Plugin {
 												let deco = Decoration.mark({
 													attributes
 												});
+												let iconDeco = Decoration.widget({
+													widget: new HeaderWidget(attributes),
+												});
+												builder.add(from, from, iconDeco);
 												builder.add(from, to, deco);
+
 											}
 										}
 									}
