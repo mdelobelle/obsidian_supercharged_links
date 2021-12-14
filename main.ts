@@ -210,48 +210,50 @@ export default class SuperchargedLinks extends Plugin {
 						return;
 					}
 					const mdView = view.state.field(editorViewField) as MarkdownView;
+					let lastAttributes = {};
 					for (let {from, to} of view.visibleRanges) {
-						try {
-							syntaxTree(view.state).iterate({
-								from,
-								to,
-								enter: (type, from, to) => {
-									const tokenProps = type.prop(tokenClassNodeProp);
-									if (tokenProps) {
-										const props = new Set(tokenProps.split(" "));
-										// if (props.has("hmd-internal-link")) {console.log("props", type, from, to)}
-										if (props.has("hmd-internal-link") &&
-											!props.has("link-alias-pipe") &&
-											!props.has("link-alias")) {
-											let linkText = view.state.doc.sliceString(from, to);
-											linkText = linkText.split("#")[0];
-											let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
-											if (file) {
-												let _attributes = fetchFrontmatterTargetAttributesSync(app, settings, file, true);
-												let attributes: Record<string, string> = {};
-												for (let key in _attributes) {
-													attributes["data-link-" + key] = _attributes[key];
-												}
-												let deco = Decoration.mark({
-													attributes
-												});
-												let iconDeco = Decoration.widget({
-													widget: new HeaderWidget(attributes),
-												});
-												builder.add(from, from, iconDeco);
-												builder.add(from, to, deco);
-
+						syntaxTree(view.state).iterate({
+							from,
+							to,
+							enter: (type, from, to) => {
+								const tokenProps = type.prop(tokenClassNodeProp);
+								if (tokenProps) {
+									const props = new Set(tokenProps.split(" "));
+									const isLink = props.has("hmd-internal-link");
+									const isAlias = props.has("link-alias");
+									const isPipe = props.has("link-alias-pipe");
+									// if (props.has("hmd-internal-link")) {console.log("props", type, from, to)}
+									if (isLink && !isAlias && !isPipe) {
+										let linkText = view.state.doc.sliceString(from, to);
+										linkText = linkText.split("#")[0];
+										let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
+										if (file) {
+											let _attributes = fetchFrontmatterTargetAttributesSync(app, settings, file, true);
+											let attributes: Record<string, string> = {};
+											for (let key in _attributes) {
+												attributes["data-link-" + key] = _attributes[key];
 											}
+											let deco = Decoration.mark({
+												attributes
+											});
+											let iconDeco = Decoration.widget({
+												widget: new HeaderWidget(attributes),
+											});
+											builder.add(from, from, iconDeco);
+											builder.add(from, to, deco);
+											lastAttributes = attributes;
 										}
 									}
+									else if (isLink && isAlias) {
+										let deco = Decoration.mark({
+											attributes: lastAttributes
+										})
+										builder.add(from, to, deco);
+									}
 								}
-							})
+							}
+						})
 
-						}
-						catch (err) {
-							console.error("Custom CM6 view plugin failure", err);
-							throw err;
-						}
 					}
 					return builder.finish();
 				}
