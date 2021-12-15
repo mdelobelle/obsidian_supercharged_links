@@ -1,9 +1,21 @@
-## Obsidian Internal Links supercharger
+## Supercharged Links
 
-Internal links adds attributes to HTMLElements with the attributes and values of the target file's frontmatter.
-Combined with css snippets, it allows a very flexible way to customize your links! It supports the note preview, edit mode, backlinks and outgoing links panel, the file browser and the search panel, and also supports the Breadcrumbs plugin.
+This plugin gives you huge control style links and references in Obsidian to notes in your vault!
+You can, for example, automatically add colors and emojis to the links.
 
 <img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-workspace.png alt="drawing" style="width:600px;"/>
+
+Why is this useful?
+If the note you are referring to represents something, like a paper, a location, a person or a day in the week, you can make this type of note stand out in Obsidian. 
+Supercharged links will make sure that you can make those different links stand out.
+This visual feedback helps you find the right link back quickly!
+
+
+Now how does this work? The plugin adds CSS attributes to the links.
+Those attributes will be based on the tags, frontmatter and Dataview inline links in your notes.
+Combined with css snippets, you will have full control over customizing your links! 
+It supports note preview, live preview (!), backlinks panel, the file browser, the search panel, and supports the Breadcrumbs plugin.
+
 
 It also adds context menu items to modifiy target note's frontmatter properties and "inline fields" (dataview syntax) by right-clicking on the link
 The preset values for those properties can be managed globally in the plugin's settings or on a file-by-file basis thanks to fileClass definition (see section 4)
@@ -92,13 +104,13 @@ This will target all HTML elements that contain the `data-link-tags` property, t
 
 To put a fancy 👤 emoji before the name of each link to a "category: people" note:
 ```css
-:not(.cm-hmd-internal-link)[data-link-category$="People" i]::before{
+.data-link-icon[data-link-category$="People" i]::before{
     content: "👤 "
 }
 ```
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-in-note.png" style="width:500px">
 
-We make sure not to target links in the editor view using `:not(.cm-hmd-internal-link)`, since this will break the cursor positioning!
+Selecting specifically `.data-link-icon` is required to prevent bugs in Live Preview.
 
 To highlight the link in a tag-like blue rounded rectangle when there is a property next-actions in the target file:
 
