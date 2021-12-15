@@ -34,19 +34,11 @@ export function fetchFrontmatterTargetAttributesSync(app: App, settings: Superch
 }
 
 export function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Promise<Record<string, string>> {
-    let new_props: Record<string, string> = {}
     return new Promise(async (resolve, reject) => {
         const cache = app.metadataCache.getFileCache(dest)
         if (!cache) return;
+        const new_props = fetchFrontmatterTargetAttributesSync(app, settings, dest, addDataHref);
 
-        const frontmatter = cache.frontmatter
-        if (frontmatter) {
-            settings.targetAttributes.forEach(attribute => {
-                if (Object.keys(frontmatter).includes(attribute)) {
-                    new_props[attribute] = frontmatter[attribute]
-                }
-            })
-        }
         if (settings.getFromInlineField) {
             const regex = new RegExp(`(${settings.targetAttributes.join("|")})::(.+)?`, "g");
             await app.vault.cachedRead(dest).then((result) => {
@@ -57,13 +49,6 @@ export function fetchFrontmatterTargetAttributes(app: App, settings: Supercharge
                     }
                 }
             })
-        }
-        if (settings.targetTags) {
-            new_props["tags"] = getAllTags(cache).join(' ');
-        }
-
-        if (addDataHref) {
-            new_props['data-href'] = dest.basename;
         }
 
         resolve(new_props)
