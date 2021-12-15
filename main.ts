@@ -177,7 +177,7 @@ export default class SuperchargedLinks extends Plugin {
 			toDOM() {
 				let headerEl = document.createElement("span");
 				headerEl.setAttrs(this.attributes);
-				headerEl.addClass('cm-link-icon');
+				headerEl.addClass('data-link-icon');
 				// create a naive bread crumb
 				return headerEl;
 			}

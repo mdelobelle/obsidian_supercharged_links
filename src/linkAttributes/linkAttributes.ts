@@ -58,7 +58,7 @@ export function fetchFrontmatterTargetAttributes(app: App, settings: Supercharge
 function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
     Object.keys(new_props).forEach(key => {
         link.setAttribute("data-link-" + key, new_props[key])
-        link.addClass("cm-link-icon");
+        link.addClass("data-link-icon");
     })
 }
 
