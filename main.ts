@@ -19,6 +19,7 @@ import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetTyp
 import {RangeSetBuilder} from "@codemirror/rangeset";
 import {syntaxTree} from "@codemirror/language";
 import {tokenClassNodeProp} from "@codemirror/stream-parser";
+import {Prec} from "@codemirror/state";
 
 export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
@@ -49,7 +50,7 @@ export default class SuperchargedLinks extends Plugin {
 		}));
 
 
-		const ext = this.buildCMViewPlugin(this.app, this.settings);
+		const ext = Prec.lowest(this.buildCMViewPlugin(this.app, this.settings));
 		this.registerEditorExtension(ext);
 
 		this.observers = [];
