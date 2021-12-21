@@ -1,11 +1,13 @@
-import { Plugin, MarkdownView, Notice, debounce, Platform } from 'obsidian';
+import {Plugin, MarkdownView, Notice, App, editorViewField} from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {
 	updateElLinks,
 	updateVisibleLinks,
 	updateDivLinks,
-	updateEditorLinks,
-	clearExtraAttributes, updateDivExtraAttributes
+	clearExtraAttributes,
+	updateDivExtraAttributes,
+	fetchFrontmatterTargetAttributes,
+	fetchFrontmatterTargetAttributesSync
 } from "src/linkAttributes/linkAttributes"
 import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
 import Field from 'src/Field';
@@ -13,6 +15,11 @@ import linkContextMenu from "src/options/linkContextMenu"
 import NoteFieldsCommandsModal from "src/options/NoteFieldsCommandsModal"
 import FileClassAttributeSelectModal from 'src/fileClass/FileClassAttributeSelectModal';
 import { CSSBuilderModal } from 'src/cssBuilder/cssBuilderModal'
+import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
+import {RangeSetBuilder} from "@codemirror/rangeset";
+import {syntaxTree} from "@codemirror/language";
+import {tokenClassNodeProp} from "@codemirror/stream-parser";
+import {Prec} from "@codemirror/state";
 
 export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
@@ -42,30 +49,9 @@ export default class SuperchargedLinks extends Plugin {
 			updateDivLinks(this.app, this.settings);
 		}));
 
-		const updateEditor = (markdownView: MarkdownView) => {
-			updateEditorLinks(this.app, this.settings, markdownView.containerEl, markdownView.file)
-		}
-		const dbUpdateEditor = debounce(updateEditor, 300, true)
 
-		this.registerEvent(this.app.workspace.on('editor-change', (editor, markdownView) => {
-			if (this.settings.enableEditor && markdownView.getMode() !== "preview" && Platform.isDesktop) {
-				dbUpdateEditor(markdownView)
-
-			}
-		}));
-		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
-			if (this.settings.enableEditor && leaf.view instanceof MarkdownView && Platform.isDesktop) {
-				updateEditorLinks(this.app, this.settings, leaf.view.containerEl, (leaf.view as MarkdownView).file)
-			}
-		}));
-		// this.registerCodeMirror((cm) => {
-		// 	console.log(cm)
-		// 	cm.on("update", () => {
-		// 		if (this.settings.enableEditor) {
-		// 			updateEditorLinks(this.app, this.settings);
-		// 		}
-		// 	})
-		// });
+		const ext = Prec.lowest(this.buildCMViewPlugin(this.app, this.settings));
+		this.registerEditorExtension(ext);
 
 		this.observers = [];
 
@@ -175,6 +161,109 @@ export default class SuperchargedLinks extends Plugin {
 		});
 		observer.observe(container, { subtree: true, childList: true, attributes: false });
 		plugin.observers.push(observer);
+	}
+
+	buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings) {
+		// Implements the live preview supercharging
+		// Code structure based on https://github.com/nothingislost/obsidian-cm6-attributes/blob/743d71b0aa616407149a0b6ea5ffea28e2154158/src/main.ts
+		// Code help credits to @NothingIsLost! They have been a great help getting this to work properly.
+		class HeaderWidget extends WidgetType {
+			attributes: Record<string, string>
+
+			constructor(attributes: Record<string, string>) {
+				super();
+				this.attributes = attributes
+			}
+
+			toDOM() {
+				let headerEl = document.createElement("span");
+				headerEl.setAttrs(this.attributes);
+				headerEl.addClass('data-link-icon');
+				// create a naive bread crumb
+				return headerEl;
+			}
+
+			ignoreEvent() {
+				return true;
+			}
+		}
+		const settings = _settings;
+		const viewPlugin = ViewPlugin.fromClass(
+			class{
+				decorations: DecorationSet;
+
+				constructor(view: EditorView) {
+					this.decorations = this.buildDecorations(view);
+				}
+
+				update(update: ViewUpdate) {
+					if (update.docChanged || update.viewportChanged) {
+						this.decorations = this.buildDecorations(update.view);
+					}
+				}
+
+				destroy() {}
+
+				buildDecorations(view: EditorView) {
+					let builder = new RangeSetBuilder<Decoration>();
+					if (!settings.enableEditor) {
+						builder.finish();
+						return;
+					}
+					const mdView = view.state.field(editorViewField) as MarkdownView;
+					let lastAttributes = {};
+					for (let {from, to} of view.visibleRanges) {
+						syntaxTree(view.state).iterate({
+							from,
+							to,
+							enter: (type, from, to) => {
+								const tokenProps = type.prop(tokenClassNodeProp);
+								if (tokenProps) {
+									const props = new Set(tokenProps.split(" "));
+									const isLink = props.has("hmd-internal-link");
+									const isAlias = props.has("link-alias");
+									const isPipe = props.has("link-alias-pipe");
+									// if (props.has("hmd-internal-link")) {console.log("props", type, from, to)}
+									if (isLink && !isAlias && !isPipe) {
+										let linkText = view.state.doc.sliceString(from, to);
+										linkText = linkText.split("#")[0];
+										let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
+										if (file) {
+											let _attributes = fetchFrontmatterTargetAttributesSync(app, settings, file, true);
+											let attributes: Record<string, string> = {};
+											for (let key in _attributes) {
+												attributes["data-link-" + key] = _attributes[key];
+											}
+											let deco = Decoration.mark({
+												attributes
+											});
+											let iconDeco = Decoration.widget({
+												widget: new HeaderWidget(attributes),
+											});
+											builder.add(from, from, iconDeco);
+											builder.add(from, to, deco);
+											lastAttributes = attributes;
+										}
+									}
+									else if (isLink && isAlias) {
+										let deco = Decoration.mark({
+											attributes: lastAttributes
+										})
+										builder.add(from, to, deco);
+									}
+								}
+							}
+						})
+
+					}
+					return builder.finish();
+				}
+			},
+			{
+				decorations: v => v.decorations
+			}
+		);
+		return viewPlugin;
 	}
 
 	onunload() {
