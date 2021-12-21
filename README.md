@@ -115,7 +115,7 @@ Selecting specifically `.data-link-icon` is required to prevent bugs in Live Pre
 To highlight the link in a tag-like blue rounded rectangle when there is a property next-actions in the target file:
 
 ```css
-a.internal-link[data-link-next-actions]{
+:not(:empty)[data-link-next-actions]{
     color: white;
     background-color: rgb(29, 29, 129);
     border-radius: 18px;
@@ -139,7 +139,12 @@ a.internal-link[data-link-next-actions]:hover::after{
 
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-hover-in-note.png" style="width:500px">
 
+A small caveat: `::after` is currently not supported in Live Preview!
+
 ### 1.e Demos 
+
+#### Live Preview
+<img src="https://i.imgur.com/8VJm1TJ.gif" style="width:500px">
 
 #### Internal link simple styling
 https://youtu.be/tyEdsmAQb_4
