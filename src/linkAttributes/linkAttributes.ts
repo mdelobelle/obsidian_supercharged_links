@@ -10,7 +10,7 @@ export function clearExtraAttributes(link: HTMLElement) {
 }
 
 export function fetchFrontmatterTargetAttributesSync(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Record<string, string> {
-    let new_props: Record<string, string> = {}
+    let new_props: Record<string, string> = {tags: ""}
     const cache = app.metadataCache.getFileCache(dest)
     if (!cache) return;
 
@@ -18,13 +18,17 @@ export function fetchFrontmatterTargetAttributesSync(app: App, settings: Superch
     if (frontmatter) {
         settings.targetAttributes.forEach(attribute => {
             if (Object.keys(frontmatter).includes(attribute)) {
-                new_props[attribute] = frontmatter[attribute]
+                if (attribute === 'tag' || attribute === 'tags') {
+                    new_props['tags'] += frontmatter[attribute];
+                } else {
+                    new_props[attribute] = frontmatter[attribute]
+                }
             }
         })
     }
 
     if (settings.targetTags) {
-        new_props["tags"] = getAllTags(cache).join(' ');
+        new_props["tags"] += getAllTags(cache).join(' ');
     }
 
     if (addDataHref) {

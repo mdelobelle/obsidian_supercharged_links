@@ -207,8 +207,7 @@ export default class SuperchargedLinks extends Plugin {
 				buildDecorations(view: EditorView) {
 					let builder = new RangeSetBuilder<Decoration>();
 					if (!settings.enableEditor) {
-						builder.finish();
-						return;
+						return builder.finish();
 					}
 					const mdView = view.state.field(editorViewField) as MarkdownView;
 					let lastAttributes = {};
