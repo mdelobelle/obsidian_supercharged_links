@@ -1,11 +1,12 @@
 {
-  "name": "obsidian-sample-plugin",
-  "version": "0.11.13",
-  "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+  "name": "supercharged-links-obsidian",
+  "version": "0.4.1",
+  "description": "Adds properties and menu options to internal links",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
-    "build": "rollup --config rollup.config.js --environment BUILD:production"
+    "build": "rollup --config rollup.config.js --environment BUILD:production",
+    "release": "standard-version"
   },
   "keywords": [],
   "author": "",
@@ -29,8 +30,8 @@
     "rollup": "^2.32.1",
     "tslib": "^2.2.0",
     "typescript": "^4.2.4",
-    "obsidian": "^0.13.8"
+    "obsidian": "^0.13.8",
+    "standard-version": "^9.3.2"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
