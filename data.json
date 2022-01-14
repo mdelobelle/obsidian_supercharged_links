@@ -1,9 +1,8 @@
 {
   "targetAttributes": [
+    "tags",
     "category",
-    "next-actions",
-    "genre",
-    "tags"
+    "blob"
   ],
   "targetTags": true,
   "presetFields": [
@@ -37,7 +36,7 @@
       "valuesListNotePath": "⚙️/genre.md"
     }
   ],
-  "displayFieldsInContextMenu": true,
+  "displayFieldsInContextMenu": false,
   "globallyIgnoredFields": [
     ""
   ],

@@ -3,14 +3,14 @@ import { SuperchargedLinksSettings } from "src/settings/SuperchargedLinksSetting
 
 export function clearExtraAttributes(link: HTMLElement) {
     Object.values(link.attributes).forEach(attr => {
-        if (attr.name.startsWith("data-link")) {
+        if (attr.name.includes("data-link")) {
             link.removeAttribute(attr.name)
         }
     })
 }
 
-export function fetchFrontmatterTargetAttributesSync(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Record<string, string> {
-    let new_props: Record<string, string> = {tags: ""}
+export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Record<string, string> {
+    let new_props: Record<string, string> = { tags: "" }
     const cache = app.metadataCache.getFileCache(dest)
     if (!cache) return;
 
@@ -34,29 +34,31 @@ export function fetchFrontmatterTargetAttributesSync(app: App, settings: Superch
     if (addDataHref) {
         new_props['data-href'] = dest.basename;
     }
-    return new_props
-}
 
-export function fetchFrontmatterTargetAttributes(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Promise<Record<string, string>> {
-    return new Promise(async (resolve, reject) => {
-        const cache = app.metadataCache.getFileCache(dest)
-        if (!cache) return;
-        const new_props = fetchFrontmatterTargetAttributesSync(app, settings, dest, addDataHref);
+    //@ts-ignore
+    const getResults = (api) => {
+        settings.targetAttributes.forEach((field: string) => {
+            const value = api.page(dest.path)[field]
+            if (value) {
+                new_props[field] = value
+            }
+        })
+    };
 
-        if (settings.getFromInlineField) {
-            const regex = new RegExp(`(${settings.targetAttributes.join("|")})::(.+)?`, "g");
-            await app.vault.cachedRead(dest).then((result) => {
-                const matches = result.matchAll(regex);
-                for (const match of matches) {
-                    if (match[2] !== undefined) {
-                        new_props[match[1]] = match[2].replace(/^\[(.*)\]$/, "$1").trim();
-                    }
-                }
-            })
+    if (settings.getFromInlineField && app.plugins.enabledPlugins.has("dataview")) {
+        const api = app.plugins.plugins.dataview?.api;
+        if (api) {
+            getResults(api)
         }
+        else
+            this.plugin.registerEvent(
+                this.app.metadataCache.on("dataview:api-ready", (api: any) =>
+                    getResults(api)
+                )
+            );
+    }
 
-        resolve(new_props)
-    })
+    return new_props
 }
 
 function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
@@ -71,7 +73,8 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
     const dest = app.metadataCache.getFirstLinkpathDest(linkHref, destName)
 
     if (dest) {
-        fetchFrontmatterTargetAttributes(app, settings, dest, false).then(new_props => setLinkNewProps(link, new_props))
+        const new_props = fetchTargetAttributesSync(app, settings, dest, false)
+        setLinkNewProps(link, new_props)
     }
 }
 
@@ -82,7 +85,8 @@ export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSe
     const dest = app.metadataCache.getFirstLinkpathDest(getLinkpath(linkName), destName)
 
     if (dest) {
-        fetchFrontmatterTargetAttributes(app, settings, dest, true).then(new_props => setLinkNewProps(link, new_props))
+        const new_props = fetchTargetAttributesSync(app, settings, dest, true)
+        setLinkNewProps(link, new_props)
     }
 }
 
@@ -125,10 +129,9 @@ export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings
                     const fileName = file.path.replace(/(.*).md/, "$1")
                     const dest = app.metadataCache.getFirstLinkpathDest(link.link, fileName)
                     if (dest) {
-                        fetchFrontmatterTargetAttributes(app, settings, dest, false).then(new_props => {
-                            const internalLinks = leaf.view.containerEl.querySelectorAll(`a.internal-link[href="${link.link}"]`)
-                            internalLinks.forEach((internalLink: HTMLElement) => setLinkNewProps(internalLink, new_props))
-                        })
+                        const new_props = fetchTargetAttributesSync(app, settings, dest, false)
+                        const internalLinks = leaf.view.containerEl.querySelectorAll(`a.internal-link[href="${link.link}"]`)
+                        internalLinks.forEach((internalLink: HTMLElement) => setLinkNewProps(internalLink, new_props))
                     }
                 })
             }

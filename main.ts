@@ -1,4 +1,4 @@
-import {Plugin, MarkdownView, Notice, App, editorViewField} from 'obsidian';
+import { Plugin, MarkdownView, Notice, App, editorViewField } from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {
 	updateElLinks,
@@ -6,8 +6,7 @@ import {
 	updateDivLinks,
 	clearExtraAttributes,
 	updateDivExtraAttributes,
-	fetchFrontmatterTargetAttributes,
-	fetchFrontmatterTargetAttributesSync
+	fetchTargetAttributesSync
 } from "src/linkAttributes/linkAttributes"
 import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
 import Field from 'src/Field';
@@ -15,11 +14,11 @@ import linkContextMenu from "src/options/linkContextMenu"
 import NoteFieldsCommandsModal from "src/options/NoteFieldsCommandsModal"
 import FileClassAttributeSelectModal from 'src/fileClass/FileClassAttributeSelectModal';
 import { CSSBuilderModal } from 'src/cssBuilder/cssBuilderModal'
-import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
-import {RangeSetBuilder} from "@codemirror/rangeset";
-import {syntaxTree} from "@codemirror/language";
-import {tokenClassNodeProp} from "@codemirror/stream-parser";
-import {Prec} from "@codemirror/state";
+import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType } from "@codemirror/view";
+import { RangeSetBuilder } from "@codemirror/rangeset";
+import { syntaxTree } from "@codemirror/language";
+import { tokenClassNodeProp } from "@codemirror/stream-parser";
+import { Prec } from "@codemirror/state";
 
 export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
@@ -189,7 +188,7 @@ export default class SuperchargedLinks extends Plugin {
 		}
 		const settings = _settings;
 		const viewPlugin = ViewPlugin.fromClass(
-			class{
+			class {
 				decorations: DecorationSet;
 
 				constructor(view: EditorView) {
@@ -202,7 +201,7 @@ export default class SuperchargedLinks extends Plugin {
 					}
 				}
 
-				destroy() {}
+				destroy() { }
 
 				buildDecorations(view: EditorView) {
 					let builder = new RangeSetBuilder<Decoration>();
@@ -211,7 +210,7 @@ export default class SuperchargedLinks extends Plugin {
 					}
 					const mdView = view.state.field(editorViewField) as MarkdownView;
 					let lastAttributes = {};
-					for (let {from, to} of view.visibleRanges) {
+					for (let { from, to } of view.visibleRanges) {
 						syntaxTree(view.state).iterate({
 							from,
 							to,
@@ -228,7 +227,7 @@ export default class SuperchargedLinks extends Plugin {
 										linkText = linkText.split("#")[0];
 										let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
 										if (file) {
-											let _attributes = fetchFrontmatterTargetAttributesSync(app, settings, file, true);
+											let _attributes = fetchTargetAttributesSync(app, settings, file, true);
 											let attributes: Record<string, string> = {};
 											for (let key in _attributes) {
 												attributes["data-link-" + key] = _attributes[key];
