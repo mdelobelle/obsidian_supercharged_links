@@ -38,10 +38,8 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
     //@ts-ignore
     const getResults = (api) => {
         settings.targetAttributes.forEach((field: string) => {
-            const value = api.page(dest.path)[field]
-            if (value) {
-                new_props[field] = value
-            }
+            const value = api.page(dest.path) ? api.page(dest.path)[field] : null
+            if (value) new_props[field] = value
         })
     };
 
@@ -57,7 +55,7 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
                 )
             );
     }
-
+    if (dest.basename === "john") console.log(new_props)
     return new_props
 }
 
@@ -66,6 +64,7 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
         link.setAttribute("data-link-" + key, new_props[key])
         link.addClass("data-link-icon");
     })
+    console.log(link)
 }
 
 function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
@@ -74,7 +73,7 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
 
     if (dest) {
         const new_props = fetchTargetAttributesSync(app, settings, dest, false)
-        setLinkNewProps(link, new_props)
+        if (new_props) setLinkNewProps(link, new_props)
     }
 }
 
@@ -86,7 +85,7 @@ export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSe
 
     if (dest) {
         const new_props = fetchTargetAttributesSync(app, settings, dest, true)
-        setLinkNewProps(link, new_props)
+        if (new_props) setLinkNewProps(link, new_props)
     }
 }
 
@@ -120,6 +119,7 @@ export function updateElLinks(app: App, settings: SuperchargedLinksSettings, el:
 
 export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings) {
     fishAll("a.internal-link").forEach(internalLink => clearExtraAttributes(internalLink))
+
     app.workspace.iterateRootLeaves((leaf) => {
         if (leaf.view instanceof MarkdownView && leaf.view.file) {
             const file: TFile = leaf.view.file;
@@ -137,4 +137,5 @@ export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings
             }
         }
     })
+
 }
