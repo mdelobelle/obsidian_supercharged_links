@@ -1,9 +1,8 @@
 {
   "targetAttributes": [
+    "tags",
     "category",
-    "next-actions",
-    "genre",
-    "tags"
+    "blob"
   ],
   "targetTags": true,
   "presetFields": [
@@ -37,14 +36,14 @@
       "valuesListNotePath": "⚙️/genre.md"
     }
   ],
-  "displayFieldsInContextMenu": true,
+  "displayFieldsInContextMenu": false,
   "globallyIgnoredFields": [
     ""
   ],
   "classFilesPath": "🗃/",
   "getFromInlineField": true,
   "enableEditor": true,
-  "enableFileList": true,
-  "enableBacklinks": true,
+  "enableFileList": false,
+  "enableBacklinks": false,
   "getFromFrontmatter": true
 }
