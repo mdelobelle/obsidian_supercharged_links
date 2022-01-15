@@ -9,6 +9,7 @@ export function clearExtraAttributes(link: HTMLElement) {
     })
 }
 
+
 export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Record<string, string> {
     let new_props: Record<string, string> = { tags: "" }
     const cache = app.metadataCache.getFileCache(dest)
@@ -34,7 +35,6 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
     if (addDataHref) {
         new_props['data-href'] = dest.basename;
     }
-
     //@ts-ignore
     const getResults = (api) => {
         settings.targetAttributes.forEach((field: string) => {
@@ -55,7 +55,7 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
                 )
             );
     }
-    if (dest.basename === "john") console.log(new_props)
+
     return new_props
 }
 
@@ -64,7 +64,6 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
         link.setAttribute("data-link-" + key, new_props[key])
         link.addClass("data-link-icon");
     })
-    console.log(link)
 }
 
 function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
@@ -119,7 +118,6 @@ export function updateElLinks(app: App, settings: SuperchargedLinksSettings, el:
 
 export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings) {
     fishAll("a.internal-link").forEach(internalLink => clearExtraAttributes(internalLink))
-
     app.workspace.iterateRootLeaves((leaf) => {
         if (leaf.view instanceof MarkdownView && leaf.view.file) {
             const file: TFile = leaf.view.file;
@@ -137,5 +135,4 @@ export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings
             }
         }
     })
-
 }
