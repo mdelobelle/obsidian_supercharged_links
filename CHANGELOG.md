@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.3](https://github.com/HEmile/obsidian_supercharged_links/compare/0.4.2...0.4.3) (2022-01-17)
+
+
+### Features
+
+* Support recent files plugin ([0266a6c](https://github.com/HEmile/obsidian_supercharged_links/commit/0266a6cc5e155ff5bff8057f8c605c5098f5d57e)), closes [#72](https://github.com/HEmile/obsidian_supercharged_links/issues/72)
+
+
+### Bug Fixes
+
+* File browser does not immediately update ([9fe8642](https://github.com/HEmile/obsidian_supercharged_links/commit/9fe86424e58558f488fe9125dd5fac48d1775a5a))
+
 ### [0.4.1](https://github.com/HEmile/obsidian_supercharged_links/compare/v0.4.4...v0.4.1) (2022-01-12)
 
 
