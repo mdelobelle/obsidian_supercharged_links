@@ -114,31 +114,31 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.observers.forEach(([observer, type ]) => {
 			observer.disconnect();
 		});
-		plugin.registerViewType('backlink', plugin, false);
-		plugin.registerViewType('outgoing-link', plugin, false);
-		plugin.registerViewType('search', plugin, false);
-		plugin.registerViewType('BC-matrix', plugin, true, 'BC-Link', '', false);
-		plugin.registerViewType('BC-ducks', plugin, true, 'internal-link');
-		plugin.registerViewType('BC-tree', plugin, true, 'internal-link');
-		plugin.registerViewType('graph-analysis', plugin, false, 'internal-link', '', false);
-		plugin.registerViewType('starred', plugin, false, 'nav-file-title-content', 'nav-file', );
-		plugin.registerViewType('file-explorer', plugin, true, 'nav-file-title-content' );
+		plugin.registerViewType('backlink', plugin, ".tree-item-inner");
+		plugin.registerViewType('outgoing-link', plugin, ".tree-item-inner");
+		plugin.registerViewType('search', plugin, ".tree-item-inner");
+		plugin.registerViewType('BC-matrix', plugin, '.BC-Link');
+		plugin.registerViewType('BC-ducks', plugin, '.internal-link');
+		plugin.registerViewType('BC-tree', plugin, 'a.internal-link');
+		plugin.registerViewType('graph-analysis', plugin, '.internal-link');
+		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
+		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content' );
 	}
 
-	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, searchWholeContainer=true, own_class = 'tree-item-inner', parent_class = 'tree-item', searchParent = true) {
+	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector = 'tree-item-inner') {
 		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
 		if (leaves.length > 1) console.error('more than one ' + viewTypeName + ' panel');
 		else if (leaves.length < 1) return;
 		else {
 			const container = leaves[0].view.containerEl;
-			this.updateContainer(container, plugin, own_class);
-			plugin._watchContainer(viewTypeName, leaves[0].view.containerEl, plugin, searchWholeContainer, own_class, parent_class, searchParent);
+			this.updateContainer(container, plugin, selector);
+			plugin._watchContainer(viewTypeName, leaves[0].view.containerEl, plugin, selector);
 		}
 	}
 
-	updateContainer(container: HTMLElement, plugin: SuperchargedLinks, own_class: string) {
+	updateContainer(container: HTMLElement, plugin: SuperchargedLinks, selector: string) {
 		if (!plugin.settings.enableBacklinks) return;
-		const nodes = container.findAll("." + own_class);
+		const nodes = container.findAll(selector);
 		for (let i = 0; i < nodes.length; ++i)  {
 			const el = nodes[i] as HTMLElement;
 		    clearExtraAttributes(el);
@@ -146,51 +146,22 @@ export default class SuperchargedLinks extends Plugin {
 		}
 	}
 
-	removeFromContainer(container: HTMLElement, own_class: string) {
-		const nodes = container.findAll("." + own_class);
+	removeFromContainer(container: HTMLElement, selector: string) {
+		const nodes = container.findAll(selector);
 		for (let i = 0; i < nodes.length; ++i)  {
 		    const el = nodes[i] as HTMLElement;
 			clearExtraAttributes(el);
 		}
 	}
 
-	_watchContainer(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, searchWholeContainer: boolean, own_class: string, parent_class:string, searchParent: boolean) {
+	_watchContainer(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string) {
 		const settings = plugin.settings;
 		const app = plugin.app;
 		let observer = new MutationObserver((records, _) => {
-			if (searchWholeContainer) {
-				plugin.updateContainer(container, plugin, own_class);
-			}
-			else {
-				records.forEach((mutation) => {
-					if (mutation.type === 'childList') {
-						mutation.addedNodes.forEach((n) => {
-							if ('className' in n) {
-								// @ts-ignore
-								if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes(parent_class)) {
-									if (searchParent) {
-										const fileDivs = (n as HTMLElement).getElementsByClassName(own_class);
-										for (let i = 0; i < fileDivs.length; ++i) {
-											const link = fileDivs[i] as HTMLElement;
-											clearExtraAttributes(link);
-											// TODO: Move this check earlier and unload extra attributes manually instead
-											if (settings.enableBacklinks) {
-												updateDivExtraAttributes(app, settings, link, "");
-											}
-										}
-									} else {
-										clearExtraAttributes(n as HTMLElement);
-										updateDivExtraAttributes(app, settings, n as HTMLElement, "");
-									}
-								}
-							}
-						});
-					}
-				});
-			}
+				plugin.updateContainer(container, plugin, selector);
 		});
 		observer.observe(container, { subtree: true, childList: true, attributes: false });
-		plugin.observers.push([observer, viewType, own_class]);
+		plugin.observers.push([observer, viewType, selector]);
 	}
 
 	buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings) {
