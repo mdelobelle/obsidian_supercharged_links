@@ -1,13 +1,12 @@
 ## Supercharged Links
 
-This plugin gives you huge control style links and references in Obsidian to notes in your vault!
-You can, for example, automatically add colors and emojis to the links.
+This plugin gives you huge control over the style of links and references in your Obsidian vault!
+You can, for example, automatically add colors and emojis to the links:
 
 <img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-workspace.png alt="drawing" style="width:600px;"/>
 
 Why is this useful?
-If the note you are referring to represents something, like a paper, a location, a person or a day in the week, you can make this type of note stand out in Obsidian. 
-Supercharged links will make sure that you can make those different links stand out.
+Let's take an example, where the notes in your vault represent something, like a paper, a location, a person or a day in the week. Then you can use Supercharged links to make sure that those different links stand out. Another use case might be to give notes with the `#todo` tag a loud color.
 This visual feedback helps you find the right link back quickly!
 
 
