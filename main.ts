@@ -47,7 +47,12 @@ export default class SuperchargedLinks extends Plugin {
 		}));
 		this.registerEvent(this.app.metadataCache.on('changed', (_file) => {
 			updateVisibleLinks(this.app, this.settings);
-			// updateDivLinks(this.app, this.settings);
+			this.observers.forEach(([observer, type, own_class ]) => {
+				const leaves = this.app.workspace.getLeavesOfType(type);
+				leaves.forEach(leaf => {
+					this.updateContainer(leaf.view.containerEl, this, own_class);
+				})
+			});
 		}));
 
 
