@@ -123,6 +123,7 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('graph-analysis', plugin, '.internal-link');
 		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content' );
+		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content' );
 	}
 
 	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector = 'tree-item-inner') {
