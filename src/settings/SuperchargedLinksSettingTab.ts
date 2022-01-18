@@ -56,8 +56,8 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 			})
 
 		new Setting(containerEl)
-			.setName('Enable in Backlinks')
-			.setDesc('If true, this will also supercharge the backlinks and forward links panels.')
+			.setName('Enable in Plugins')
+			.setDesc('If true, this will also supercharge plugins like the backlinks and forward links panels.')
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableBacklinks)
 				toggle.onChange(value => {
