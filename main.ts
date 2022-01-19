@@ -119,7 +119,7 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.observers.forEach(([observer, type ]) => {
 			observer.disconnect();
 		});
-		plugin.registerViewType('backlink', plugin, ".tree-item-inner");
+		plugin.registerViewType('backlink', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('outgoing-link', plugin, ".tree-item-inner");
 		plugin.registerViewType('search', plugin, ".tree-item-inner");
 		plugin.registerViewType('BC-matrix', plugin, '.BC-Link');
@@ -131,14 +131,19 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content' );
 	}
 
-	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector = 'tree-item-inner') {
+	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false ){
 		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
 		if (leaves.length > 1) console.error('more than one ' + viewTypeName + ' panel');
 		else if (leaves.length < 1) return;
 		else {
 			const container = leaves[0].view.containerEl;
 			this.updateContainer(container, plugin, selector);
-			plugin._watchContainer(viewTypeName, leaves[0].view.containerEl, plugin, selector);
+			if (updateDynamic) {
+				plugin._watchContainerDynamic(viewTypeName, container, plugin, selector)
+			}
+			else {
+				plugin._watchContainer(viewTypeName, container, plugin, selector);
+			}
 		}
 	}
 
@@ -161,10 +166,34 @@ export default class SuperchargedLinks extends Plugin {
 	}
 
 	_watchContainer(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string) {
-		const settings = plugin.settings;
-		const app = plugin.app;
 		let observer = new MutationObserver((records, _) => {
 				plugin.updateContainer(container, plugin, selector);
+		});
+		observer.observe(container, { subtree: true, childList: true, attributes: false });
+		plugin.observers.push([observer, viewType, selector]);
+	}
+
+	_watchContainerDynamic(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, own_class='tree-item-inner', parent_class='tree-item') {
+		// Used for efficient updating of the backlinks panel
+		// Only loops through newly added DOM nodes instead of changing all of them
+		let observer = new MutationObserver((records, _) => {
+			records.forEach((mutation) => {
+				if (mutation.type === 'childList') {
+					mutation.addedNodes.forEach((n) => {
+						if ('className' in n) {
+							// @ts-ignore
+							if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes(parent_class)) {
+								const fileDivs = (n as HTMLElement).getElementsByClassName(own_class);
+								for (let i = 0; i < fileDivs.length; ++i) {
+									const link = fileDivs[i] as HTMLElement;
+									clearExtraAttributes(link);
+									updateDivExtraAttributes(plugin.app, plugin.settings, link, "");
+								}
+							}
+						}
+					});
+				}
+			});
 		});
 		observer.observe(container, { subtree: true, childList: true, attributes: false });
 		plugin.observers.push([observer, viewType, selector]);

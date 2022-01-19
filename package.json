@@ -1,6 +1,6 @@
 {
   "name": "supercharged-links-obsidian",
-  "version": "0.4.4",
+  "version": "0.4.6",
   "description": "Adds properties and menu options to internal links",
   "main": "main.js",
   "scripts": {
