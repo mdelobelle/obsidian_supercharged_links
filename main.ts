@@ -1,4 +1,4 @@
-import { Plugin, MarkdownView, Notice, App, editorViewField } from 'obsidian';
+import {Plugin, MarkdownView, Notice, App, editorViewField, debounce} from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {
 	updateElLinks,
@@ -45,7 +45,8 @@ export default class SuperchargedLinks extends Plugin {
 			// Removing those in favour of watching the containers
 			// updateDivLinks(this.app, this.settings);
 		}));
-		this.registerEvent(this.app.metadataCache.on('changed', (_file) => {
+
+		this.registerEvent(this.app.metadataCache.on('changed', debounce((_file) => {
 			updateVisibleLinks(this.app, this.settings);
 			this.observers.forEach(([observer, type, own_class ]) => {
 				const leaves = this.app.workspace.getLeavesOfType(type);
@@ -53,7 +54,8 @@ export default class SuperchargedLinks extends Plugin {
 					this.updateContainer(leaf.view.containerEl, this, own_class);
 				})
 			});
-		}));
+			// Debounced to prevent lag when writing
+		}, 4500, true)));
 
 
 		const ext = Prec.lowest(this.buildCMViewPlugin(this.app, this.settings));
@@ -120,7 +122,7 @@ export default class SuperchargedLinks extends Plugin {
 			observer.disconnect();
 		});
 		plugin.registerViewType('backlink', plugin, ".tree-item-inner", true);
-		plugin.registerViewType('outgoing-link', plugin, ".tree-item-inner");
+		plugin.registerViewType('outgoing-link', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('search', plugin, ".tree-item-inner");
 		plugin.registerViewType('BC-matrix', plugin, '.BC-Link');
 		plugin.registerViewType('BC-ducks', plugin, '.internal-link');
@@ -167,7 +169,7 @@ export default class SuperchargedLinks extends Plugin {
 
 	_watchContainer(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string) {
 		let observer = new MutationObserver((records, _) => {
-				plugin.updateContainer(container, plugin, selector);
+			 plugin.updateContainer(container, plugin, selector);
 		});
 		observer.observe(container, { subtree: true, childList: true, attributes: false });
 		plugin.observers.push([observer, viewType, selector]);
