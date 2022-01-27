@@ -138,7 +138,18 @@ a.internal-link[data-link-next-actions]:hover::after{
 
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-hover-in-note.png" style="width:500px">
 
-A small caveat: `::after` is currently not supported in Live Preview!
+A small caveat: `::after` may not be completely supported in Live Preview!
+
+To hide the display of links with the tag #hide from your notes (that is, from preview mode and live preview):
+```css
+a.internal-link[data-link-tags *="hide"],
+.cm-hmd-internal-link > [data-link-tags *="hide"]{
+    visibility: hidden !important;
+    display: none;
+}
+
+```
+
 
 ### 1.e Demos 
 
