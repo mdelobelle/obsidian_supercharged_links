@@ -24,6 +24,7 @@ export default class SuperchargedLinks extends Plugin {
 	initialProperties: Array<Field> = []
 	settingTab: SuperchargedLinksSettingTab
 	private observers: [MutationObserver, string, string][];
+	private modalObserver: MutationObserver;
 
 	async onload(): Promise<void> {
 		console.log('Supercharged links loaded');
@@ -57,7 +58,10 @@ export default class SuperchargedLinks extends Plugin {
 
 		this.observers = [];
 
-		this.app.workspace.onLayoutReady(() => this.initViewObservers(this));
+		this.app.workspace.onLayoutReady(() => {
+			this.initViewObservers(this);
+			this.initModalObservers(this);
+		});
 		this.app.workspace.on("layout-change", () => this.initViewObservers(this));
 
 		this.addCommand({
@@ -127,6 +131,29 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content' );
 	}
 
+	initModalObservers(plugin: SuperchargedLinks) {
+		const config = {
+			subtree: false,
+			childList: true,
+			attributes: false
+		};
+		const selector = ".suggestion-item, .suggestion-note";
+		this.modalObserver = new MutationObserver(records => {
+			records.forEach((mutation) => {
+				if (mutation.type === 'childList') {
+					mutation.addedNodes.forEach(n => {
+						// @ts-ignore
+						if ('className' in n && n.className.includes('modal-container')) {
+							plugin.updateContainer(n as HTMLElement, plugin, selector);
+							plugin._watchContainer(null, n as HTMLElement, plugin, selector);
+						}
+					});
+				}
+			});
+		});
+		this.modalObserver.observe(document.body, config);
+	}
+
 	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false ){
 		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
 		if (leaves.length > 1) console.error('more than one ' + viewTypeName + ' panel');
@@ -165,7 +192,9 @@ export default class SuperchargedLinks extends Plugin {
 			 plugin.updateContainer(container, plugin, selector);
 		});
 		observer.observe(container, { subtree: true, childList: true, attributes: false });
-		plugin.observers.push([observer, viewType, selector]);
+		if (viewType) {
+			plugin.observers.push([observer, viewType, selector]);
+		}
 	}
 
 	_watchContainerDynamic(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, own_class='tree-item-inner', parent_class='tree-item') {
@@ -303,6 +332,7 @@ export default class SuperchargedLinks extends Plugin {
 				this.removeFromContainer(leaf.view.containerEl, own_class);
 			})
 		});
+		this.modalObserver.disconnect();
 		console.log('Supercharged links unloaded');
 	}
 
