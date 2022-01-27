@@ -21,15 +21,15 @@ The preset values for those properties can be managed globally in the plugin's s
 
 <img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/e147ac10179d2c351d9a9f222e4637ee7fe32aed/images/superchargeLink.gif alt="drawing" style="width:600px;"/>
 
-## 1. Basic link styling
+## Basic link styling
 
 The plugin scans your workspace to find links to your files. For each of those links, it will use the front-matter and tags, and adds them as CSS attributes to the html element of the link. 
 
-Complicated 😰....! Let's break it down step by step :)
+This might sound a bit complicated! So let's break it down step by step :)
 
-### 1.a Front-matter
+### Front-matter
 
-The front-matter section is an optional section of your note written in Yaml. 
+The front-matter section is an optional section of your note written in Yaml. It can be used to add meta-data to your notes.
 For documentation, see https://help.obsidian.md/Advanced+topics/YAML+front+matter
 
 Let's say I have a note about Jim : Jim.md
@@ -46,11 +46,11 @@ Jim is one of my colleagues
 
 ```
 
-I want to have a specific display of the internal-links linking to Jim's note to display a blue tag-like rounded rectangle <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling.png" style="height:30px;vertical-align:bottom">  and display <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling-hover.png" style="height:30px;vertical-align:bottom">  when hovering the link
+I want to have a specific display of the places in Obsidian that link to Jim's note. In particular, I wantjk to display a blue tag-like rounded rectangle <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling.png" style="height:30px;vertical-align:bottom">  and display <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling-hover.png" style="height:30px;vertical-align:bottom">  when hovering the link
 
-### 1.b Settings
+### Plugin settings
 
-First you have to tell the plugin what front-matter properties you want your internal-link to be supercharged with in the `Target Attributes for Styling` section of the plugin's settings.
+First, you have to tell the plugin what front-matter properties you want your internal-link to be supercharged with in the `Target Attributes for Styling` section of the plugin's settings.
 
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-settings.png" alt="drawing" style="width:400px;"/>
 
@@ -58,9 +58,11 @@ So in this case the plugin will only include `category` and `next-actions` and `
 
 You can choose not to search for Dataview inline fields, which will improve performance if you are not using those.
 
-### 1.c a.internal-links
+By default, it will also add the tags in your note as a property.
 
-When a file is opened or when one of the files of your vault has changed, the plugin is "supercharging" all internal-links with the front-matter properties set previously. This only happens if these properties are present in the file targeted by the link.
+### Supercharged links!
+
+When a file is opened or when one of the files of your vault has changed, the plugin is "supercharging" all internal links with the front-matter properties set previously. This only happens if these properties are present in the file targeted by the link.
 
 Let's say that I have a file daily.md like this:
 
@@ -70,25 +72,25 @@ Daily.md
 [[Jim]] will be organizing the weekly steering committee
 ```
 
-Without the plugin activated, the html link element would normally look like this: 
+Without the plugin activated, the HTML link element would normally look like this: 
 
 ```
 <a data-href="Jim" href="Jim" class="internal-link" target="_blank" rel="noopener">Jim</a>
 ```
 
-You wouldn't really know anything about Jim.md's specificity here and therefore wouldn't be able to customize it a lot.
+This does not give any information about what is in the Jim.md note! So, we wouldn't be able to customize it.
 
-That's where the plugin comes in: it will add two extra properties in the `<a>` element : `next-actions` and `tags`. `tags` is a special property as it will also include tags such as `#person` that might be in your file. 
+That's where the plugin comes in: it will add two extra properties in the `<a>` element : `data-link-next-actions` and `data-link-tags`. `data-link-tags` is a special property, which will also include tags like `#person` that might be in your file. 
 
 **Importantly**, the plugin adds these properties by prefixing them with `data-link` so that it will not conflict with other attributes in other plugins or Obsidian itself.
 
 So... with the plugin activated the `<a>`element will be supercharged like this: `<a data-href="Jim" href="Jim" class="internal-link" target="_blank" rel="noopener" data-link-next-actions="👥 ☎️ 🍻 say hi" data-link-tags="#person" >Jim</a>`
 
-Although `category` is included in settings as a property to track, since it's not included in Jim.md front-matter section, the property `data-link-tags` isn't included in the `<a>` element
+Although `category` is included in settings as a property to track, since it's not included in Jim.md front-matter section, the property `data-link-category` is not included in the `<a>` element
 
-### 1.d css
+### Style your links with CSS!
 
-Now you can enjoy the flexibilty of css to customize your links by setting css properties in a CSS snippet like `links.css`
+Now you can enjoy the flexibilty of css to customize your links by setting CSS properties in a CSS snippet like `links.css`. To create a CSS snippet, go to the Obsidian settings, then to Appearance and scroll to the CSS snippets section. Click on the little folder icon, then create a new file in the opened folder called `links.css`. 
 
 #### Examples
 
@@ -151,7 +153,7 @@ a.internal-link[data-link-tags *="hide"],
 ```
 
 
-### 1.e Demos 
+### Demos 
 
 #### Live Preview
 <img src="https://i.imgur.com/8VJm1TJ.gif" style="width:500px">
@@ -165,7 +167,7 @@ https://youtu.be/Ofm6gIRP-7o
 #### Multiple values for a property
 https://youtu.be/aaSZnkEuH4w
 
-## 2. Link context menu extra options
+## Link context menu extra options
 
 Right click on a link will automatically display an item per target note's frontmatter property and "inline fields" (dataview syntax)
 
@@ -176,7 +178,7 @@ these options are accessible from:
 - the "more options" menu of a file
 - the command palette "Cmd+P" or by typing the hotkey Alt+O (can be customized in hotkeys settings) 
 
-### 2.a Update text property
+### Update text property
 
 1. Right-click on the link
 1. Click on "Update .... " to change the property's value
@@ -186,7 +188,7 @@ these options are accessible from:
 demo: 
 https://youtu.be/qhtPKstdnhI
 
-### 2.b Update boolean property
+### Update boolean property
 
 1. Right-click on the link
 1. Toggle the swith in the modal to change the value 
@@ -195,7 +197,7 @@ https://youtu.be/qhtPKstdnhI
 demo: 
 https://youtu.be/iwL-HqvoNOs
 
-### 2.c Update multiple values property
+### Update multiple values property
 
 1. Right-click on the link
 1. Change values comma-separated
@@ -206,7 +208,7 @@ https://youtu.be/iwL-HqvoNOs
 demo:
 https://youtu.be/WaW6xElq0T4
 
-### 2.d Preset values for property
+### Preset values for property
 
 1. Add a new Property Manager in the settings
 2. Enter the property name
@@ -222,7 +224,7 @@ Back in a note Right-click on the link
 demo:
 https://youtu.be/GryvvJ6qIg4
 
-### 2.e Multi select preset values for property
+### Multi select preset values for property
 
 1. In the settings, follow the steps 1 to 3 of previous section
 2. Toggle the `isMulti` switch
@@ -237,7 +239,7 @@ Back in a note Right-click on the link
 demo:
 https://youtu.be/iyIG6LmCcuc
 
-### 2.f Cycle through preset values
+### Cycle through preset values
 
 1. In the settings, follow the steps 1 to 3 of previous section
 2. Toggle the `isCycle` switch
@@ -249,7 +251,7 @@ Back in a note Right-click on the link
 demo:
 https://youtu.be/7BqG4sG15jc
 
-### 2.g Add a new property at section
+### Add a new property at section
 
 1. Right-click on the link
 2. Click on "Add field at section"
@@ -260,9 +262,9 @@ https://youtu.be/7BqG4sG15jc
 demo:
 https://youtu.be/JYURK2CM3Es
 
-## 3. Manage Authorized / Ignored fields
+## Manage Authorized / Ignored fields
 
-### 3.a Disable field options in context menu
+### Disable field options in context menu
 
 In the settings
 
@@ -273,7 +275,7 @@ If toggled off, the context menu wont include field options
 demo:
 https://youtu.be/PC3MC0CfG0E
 
-### 3.b Ignore fields globally
+### Ignore fields globally
 
 In the settings
 
@@ -282,9 +284,9 @@ In the settings
 demo:
 https://youtu.be/eFkxECqBvvY
 
-## 4. Manage preset values based on the context of a file (fileClass)
+## Manage preset values based on the context of a file (fileClass)
 
-### 4.a Define a class for a file and authorized fields for this class
+### Define a class for a file and authorized fields for this class
 
 a class file is basically a simple note
 the name of the file will be the name of the class
@@ -312,7 +314,7 @@ fileClass: music
 demo:
 https://youtu.be/Av7DeYZILUk
 
-### 4.b Define preset values for a class
+### Define preset values for a class
 
 You can specify the type of an attribute in a fileClass, and its options. Type and Options are called "attributes settings"
 
