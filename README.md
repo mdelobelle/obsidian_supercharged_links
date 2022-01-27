@@ -290,8 +290,8 @@ a class file is basically a simple note
 the name of the file will be the name of the class
 the lines of the file will be the fields managed for this class
 
-1. Define the folder where you wan't to store your class files
-2. Create a note in this folder, let say `music.md`, containing lines with the name of fields that you want to manage for this class
+1. Define the folder where you want to store your class files
+2. Create a note in this folder, let's say `music.md`, containing lines with the name of fields that you want to manage for this class
 ```md
 music.md
 =========
