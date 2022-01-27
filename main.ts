@@ -140,6 +140,9 @@ export default class SuperchargedLinks extends Plugin {
 		const selector = ".suggestion-item, .suggestion-note";
 		this.modalObserver = new MutationObserver(records => {
 			records.forEach((mutation) => {
+				if (!plugin.settings.enableQuickSwitcher) {
+					return;
+				}
 				if (mutation.type === 'childList') {
 					mutation.addedNodes.forEach(n => {
 						// @ts-ignore

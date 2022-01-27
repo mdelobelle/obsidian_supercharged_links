@@ -63,8 +63,18 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 				toggle.onChange(value => {
 					this.plugin.settings.enableBacklinks = value
 					this.plugin.saveSettings()
-				})
-			})
+				});
+			});
+		new Setting(containerEl)
+			.setName('Enable in Quick Switcher')
+			.setDesc('If true, this will also supercharge the quick switcher.')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.enableQuickSwitcher)
+				toggle.onChange(value => {
+					this.plugin.settings.enableQuickSwitcher = value
+					this.plugin.saveSettings()
+				});
+			});
 
 		// Managing choice wether you want to parse tags both from normal tags and in the frontmatter
 		new Setting(containerEl)

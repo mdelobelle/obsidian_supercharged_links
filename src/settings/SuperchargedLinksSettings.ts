@@ -11,6 +11,7 @@ export interface SuperchargedLinksSettings {
 	enableEditor: boolean;
 	enableFileList: boolean;
 	enableBacklinks: boolean;
+	enableQuickSwitcher: boolean;
 }
 
 export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
@@ -23,5 +24,6 @@ export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	getFromInlineField: true,
 	enableEditor: true,
 	enableFileList: true,
-	enableBacklinks: true
+	enableBacklinks: true,
+	enableQuickSwitcher: true
 }
