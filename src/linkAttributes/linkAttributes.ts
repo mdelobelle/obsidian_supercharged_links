@@ -1,5 +1,6 @@
 import { App, getAllTags, getLinkpath, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile } from "obsidian"
 import { SuperchargedLinksSettings } from "src/settings/SuperchargedLinksSettings"
+import SuperchargedLinks from "../../main";
 
 export function clearExtraAttributes(link: HTMLElement) {
     Object.values(link.attributes).forEach(attr => {
@@ -106,16 +107,17 @@ export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSe
 }
 
 
-export function updateElLinks(app: App, settings: SuperchargedLinksSettings, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
+export function updateElLinks(app: App, plugin: SuperchargedLinks, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
+    const settings = plugin.settings;
     const links = el.querySelectorAll('a.internal-link');
     const destName = ctx.sourcePath.replace(/(.*).md/, "$1");
     links.forEach((link: HTMLElement) => {
-        // clearExtraAttributes(link);
         updateLinkExtraAttributes(app, settings, link, destName);
-    })
+    });
 }
 
-export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings) {
+export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
+    const settings = plugin.settings;
     app.workspace.iterateRootLeaves((leaf) => {
         if (leaf.view instanceof MarkdownView && leaf.view.file) {
             const file: TFile = leaf.view.file;

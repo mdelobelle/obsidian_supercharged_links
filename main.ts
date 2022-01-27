@@ -38,11 +38,12 @@ export default class SuperchargedLinks extends Plugin {
 		})
 		this.addSettingTab(new SuperchargedLinksSettingTab(this.app, this));
 		this.registerMarkdownPostProcessor((el, ctx) => {
-			updateElLinks(this.app, this.settings, el, ctx)
+			updateElLinks(this.app, this, el, ctx)
 		});
 
+		// Plugins watching
 		this.registerEvent(this.app.metadataCache.on('changed', debounce((_file) => {
-			updateVisibleLinks(this.app, this.settings);
+			updateVisibleLinks(this.app, this);
 			this.observers.forEach(([observer, type, own_class ]) => {
 				const leaves = this.app.workspace.getLeavesOfType(type);
 				leaves.forEach(leaf => {
@@ -53,6 +54,7 @@ export default class SuperchargedLinks extends Plugin {
 		}, 4500, true)));
 
 
+		// Live preview
 		const ext = Prec.lowest(this.buildCMViewPlugin(this.app, this.settings));
 		this.registerEditorExtension(ext);
 
@@ -127,8 +129,13 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('BC-tree', plugin, 'a.internal-link');
 		plugin.registerViewType('graph-analysis', plugin, '.internal-link');
 		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
-		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content' );
-		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content' );
+		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
+		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content');
+		// If backlinks in editor is on
+		// @ts-ignore
+		if (plugin.app?.internalPlugins?.plugins?.backlink?.instance?.options?.backlinkInDocument) {
+			plugin.registerViewType('markdown', plugin, '.tree-item-inner', true);
+		}
 	}
 
 	initModalObservers(plugin: SuperchargedLinks) {
