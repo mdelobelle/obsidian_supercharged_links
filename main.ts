@@ -3,7 +3,6 @@ import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTa
 import {
 	updateElLinks,
 	updateVisibleLinks,
-	updateDivLinks,
 	clearExtraAttributes,
 	updateDivExtraAttributes,
 	fetchTargetAttributesSync
@@ -40,11 +39,6 @@ export default class SuperchargedLinks extends Plugin {
 		this.registerMarkdownPostProcessor((el, ctx) => {
 			updateElLinks(this.app, this.settings, el, ctx)
 		});
-
-		this.registerEvent(this.app.workspace.on('file-open', () => {
-			// Removing those in favour of watching the containers
-			// updateDivLinks(this.app, this.settings);
-		}));
 
 		this.registerEvent(this.app.metadataCache.on('changed', debounce((_file) => {
 			updateVisibleLinks(this.app, this.settings);
@@ -154,7 +148,6 @@ export default class SuperchargedLinks extends Plugin {
 		const nodes = container.findAll(selector);
 		for (let i = 0; i < nodes.length; ++i)  {
 			const el = nodes[i] as HTMLElement;
-		    clearExtraAttributes(el);
 			updateDivExtraAttributes(plugin.app, plugin.settings, el, "");
 		}
 	}
@@ -188,7 +181,6 @@ export default class SuperchargedLinks extends Plugin {
 								const fileDivs = (n as HTMLElement).getElementsByClassName(own_class);
 								for (let i = 0; i < fileDivs.length; ++i) {
 									const link = fileDivs[i] as HTMLElement;
-									clearExtraAttributes(link);
 									updateDivExtraAttributes(plugin.app, plugin.settings, link, "");
 								}
 							}

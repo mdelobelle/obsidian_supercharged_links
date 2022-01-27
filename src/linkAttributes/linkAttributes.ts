@@ -60,10 +60,27 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
 }
 
 function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
+    // @ts-ignore
+    for (const a of link.attributes) {
+        if (a.name.includes("data-link") && !(a.name in new_props)) {
+            link.removeAttribute(a.name);
+        }
+    }
     Object.keys(new_props).forEach(key => {
-        link.setAttribute("data-link-" + key, new_props[key])
-        link.addClass("data-link-icon");
-    })
+        const name = "data-link-" + key;
+        const newValue = new_props[key];
+        const curValue = link.getAttribute(name);
+        // Only update if value is different
+        if (curValue != newValue) {
+            if (curValue) {
+                console.log("updating!")
+            }
+            link.setAttribute("data-link-" + key, new_props[key])
+        }
+        if (!link.hasClass("data-link-icon")) {
+            link.addClass("data-link-icon");
+        }
+    });
 }
 
 function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
@@ -89,35 +106,16 @@ export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSe
 }
 
 
-export function updateDivLinks(app: App, settings: SuperchargedLinksSettings) {
-    const divs = fishAll('div.internal-link');
-    divs.push(...fishAll('td.internal-link'));
-
-    divs.forEach((link: HTMLElement) => {
-        clearExtraAttributes(link);
-        updateDivExtraAttributes(app, settings, link, "");
-    })
-
-    const fileDivs = fishAll('div.nav-file-title-content')
-    fileDivs.forEach((link: HTMLElement) => {
-        clearExtraAttributes(link);
-        if (settings.enableFileList) {
-            updateDivExtraAttributes(app, settings, link, "");
-        }
-    })
-}
-
 export function updateElLinks(app: App, settings: SuperchargedLinksSettings, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
     const links = el.querySelectorAll('a.internal-link');
     const destName = ctx.sourcePath.replace(/(.*).md/, "$1");
     links.forEach((link: HTMLElement) => {
-        clearExtraAttributes(link);
+        // clearExtraAttributes(link);
         updateLinkExtraAttributes(app, settings, link, destName);
     })
 }
 
 export function updateVisibleLinks(app: App, settings: SuperchargedLinksSettings) {
-    fishAll("a.internal-link").forEach(internalLink => clearExtraAttributes(internalLink))
     app.workspace.iterateRootLeaves((leaf) => {
         if (leaf.view instanceof MarkdownView && leaf.view.file) {
             const file: TFile = leaf.view.file;
