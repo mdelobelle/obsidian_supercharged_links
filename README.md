@@ -168,14 +168,19 @@ https://youtu.be/Ofm6gIRP-7o
 https://youtu.be/aaSZnkEuH4w
 
 ### Supported plugins
+Core plugins:
 - Backlinks
 - Outgoing links
 - Search
 - Starred files
 - Quick Switcher
+
+Community plugins:
 - Breadcrumbs
-- Graph Anlaysis
+- Graph Analysis
 - Recent files
+- Quicker Switcher++
+- Another Quick Switcher
 
 Want support for another plugin? Create an issue here in the repo!
 
