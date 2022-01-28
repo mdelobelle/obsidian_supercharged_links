@@ -154,7 +154,7 @@ export default class SuperchargedLinks extends Plugin {
 							(n.className.includes('modal-container') && plugin.settings.enableQuickSwitcher
 								// @ts-ignore
 								|| n.className.includes('suggestion-container') && plugin.settings.enableSuggestor)) {
-							let selector = ".suggestion-item, .suggestion-note";
+							let selector = ".suggestion-item, .suggestion-note, .another-quick-switcher__item__file";
 							// @ts-ignore
 							if (n.className.includes('suggestion-container')) {
 								selector = ".suggestion-content, .suggestion-note";
