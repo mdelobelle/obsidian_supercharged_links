@@ -12,6 +12,7 @@ export interface SuperchargedLinksSettings {
 	enableFileList: boolean;
 	enableBacklinks: boolean;
 	enableQuickSwitcher: boolean;
+	enableSuggestor: boolean;
 }
 
 export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
@@ -25,5 +26,6 @@ export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	enableEditor: true,
 	enableFileList: true,
 	enableBacklinks: true,
-	enableQuickSwitcher: true
+	enableQuickSwitcher: true,
+	enableSuggestor: true
 }

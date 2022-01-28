@@ -75,6 +75,16 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 					this.plugin.saveSettings()
 				});
 			});
+		new Setting(containerEl)
+			.setName('Enable in Link Autocompleter')
+			.setDesc('If true, this will also supercharge the link autocompleter.')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.enableSuggestor)
+				toggle.onChange(value => {
+					this.plugin.settings.enableSuggestor = value
+					this.plugin.saveSettings()
+				});
+			});
 
 		// Managing choice wether you want to parse tags both from normal tags and in the frontmatter
 		new Setting(containerEl)

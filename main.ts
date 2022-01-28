@@ -144,16 +144,21 @@ export default class SuperchargedLinks extends Plugin {
 			childList: true,
 			attributes: false
 		};
-		const selector = ".suggestion-item, .suggestion-note";
+
 		this.modalObserver = new MutationObserver(records => {
 			records.forEach((mutation) => {
-				if (!plugin.settings.enableQuickSwitcher) {
-					return;
-				}
 				if (mutation.type === 'childList') {
 					mutation.addedNodes.forEach(n => {
-						// @ts-ignore
-						if ('className' in n && n.className.includes('modal-container')) {
+						if ('className' in n &&
+							// @ts-ignore
+							(n.className.includes('modal-container') && plugin.settings.enableQuickSwitcher
+								// @ts-ignore
+								|| n.className.includes('suggestion-container') && plugin.settings.enableSuggestor)) {
+							let selector = ".suggestion-item, .suggestion-note";
+							// @ts-ignore
+							if (n.className.includes('suggestion-container')) {
+								selector = ".suggestion-content, .suggestion-note";
+							}
 							plugin.updateContainer(n as HTMLElement, plugin, selector);
 							plugin._watchContainer(null, n as HTMLElement, plugin, selector);
 						}
