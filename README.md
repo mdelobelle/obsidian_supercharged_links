@@ -167,6 +167,18 @@ https://youtu.be/Ofm6gIRP-7o
 #### Multiple values for a property
 https://youtu.be/aaSZnkEuH4w
 
+### Supported plugins
+- Backlinks
+- Outgoing links
+- Search
+- Starred files
+- Quick Switcher
+- Breadcrumbs
+- Graph Anlaysis
+- Recent files
+
+Want support for another plugin? Create an issue here in the repo!
+
 ## Link context menu extra options
 
 Right click on a link will automatically display an item per target note's frontmatter property and "inline fields" (dataview syntax)
