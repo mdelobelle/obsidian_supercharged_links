@@ -27,6 +27,9 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.targetAttributes.join(', '))
 				.onChange(async (value) => {
 					this.plugin.settings.targetAttributes = value.replace(/\s/g,'').split(',');
+					if (this.plugin.settings.targetAttributes.length === 1 && !this.plugin.settings.targetAttributes[0]) {
+						this.plugin.settings.targetAttributes = [];
+					}
 					await this.plugin.saveSettings();
 				})
 				text.inputEl.rows = 6;

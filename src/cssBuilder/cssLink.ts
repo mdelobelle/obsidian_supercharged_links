@@ -1,30 +1,22 @@
+export type MatchTypes = 'exact' | 'contains' | 'startswith' | 'endswith' | 'whiteSpace';
+export type SelectorTypes = 'attribute' | 'tag' | 'path';
 interface CSSLink {
-    isTag: boolean
+    type: SelectorTypes
     name: string
     value: string
     matchCaseSensitive: boolean
-    match: 'exact' | 'contains' | 'startswith' | 'endswith'
-    linksTypes: string[]
+    match: MatchTypes
 }
 
-const linkTypes: Record<string, string[]> = {
-    "backLinks": ["a.internal-link"],
-    "outgoingLinks": ["a.internal-link"],
-    "fileExplorer": ["div.nav-file-title-content"],
-    "search": [".tree-item-inner"],
-    "breadcrumb": ["div.internal-link", "td.internal-link"],
-    "editor": ["span.cm-hmd-internal-link"]
-}
-
-const matchTypes: Record<string, string> = {
-    'exact': "Exact word",
-    'contains': "Contains this value",
+const matchTypes: Record<MatchTypes, string> = {
+    'exact': "Exact match",
+    'contains': "Contains value",
     'whiteSpace': "Value within whitespace separated words",
-    'startswith': "Start with this value",
+    'startswith': "Starts with this value",
     'endswith': "Ends with this value"
 }
 
-const matchSign: Record<string, string> = {
+const matchSign: Record<MatchTypes, string> = {
     'exact': "",
     'contains': "*",
     'startswith': "^",
@@ -32,47 +24,68 @@ const matchSign: Record<string, string> = {
     'whiteSpace': "~"
 }
 
+export const matchPreview: Record<MatchTypes, string> = {
+    'exact': "with value",
+    'contains': "containing",
+    'whiteSpace': "containing",
+    'startswith': "starting with",
+    'endswith': "ending with"
+}
+
+export const matchPreviewPath: Record<MatchTypes, string> = {
+    'exact': "is",
+    'contains': "contains",
+    'whiteSpace': "contains",
+    'startswith': "starts with",
+    'endswith': "ends with"
+}
+
+export const selectorType: Record<SelectorTypes, string> = {
+    'attribute': 'Select with attribute value',
+    'tag': 'Select with tag',
+    'path': 'Select with note path'
+}
+
 class CSSLink {
     constructor() {
-        this.isTag = false
+        this.type = 'attribute'
         this.name = ""
         this.value = ""
         this.matchCaseSensitive = false
         this.match = "exact"
-        this.linksTypes = Object.keys(linkTypes)
+        // this.linksTypes = Object.keys(linkTypes)
     }
 
     render(): string {
-        console.log(this.linksTypes.length == Object.keys(linkTypes).length)
+        // TODO
+        // console.log(this.linksTypes.length == Object.keys(linkTypes).length)
         const selectedLinksTypes: string[] = []
 
         const instructions: string[] = ["/*Supercharged links styling\ncopy and paste this in your css snippet\n"]
-        if (this.linksTypes.length == Object.keys(linkTypes).length) {
-            // if everything is selected : a single css selector is needed
-            console.log("been here")
-            const instruction = `[data-link-${this.isTag ?
-                "tags" : this.name}${matchSign[this.match]}="${this.isTag ? "#" : ""}${this.value}"${this.matchCaseSensitive ?
-                    "" : " i"}]{\n    //put your styles here\n}\n`
-            instructions.push(instruction)
-        } else {
-            // if not: create specific selectors
-            console.log("been there")
-            Object.keys(linkTypes).forEach(element => {
-                if (this.linksTypes.contains(element)) {
-                    selectedLinksTypes.push(...linkTypes[element])
-                }
-            });
-            selectedLinksTypes.forEach(selector => {
-                console.log("selector ", selector)
-                const instruction = `${selector}[data-link-${this.isTag ?
-                    "tags" : this.name}${matchSign[this.match]}="${this.isTag ? "#" : ""}${this.value}"${this.matchCaseSensitive ?
-                        "" : " i"}]{\n"    //put your styles here\n}\n`
-                instructions.push(instruction)
-            })
-        }
+        // if (this.linksTypes.length == Object.keys(linkTypes).length) {
+        //     // if everything is selected : a single css selector is needed
+        //     const instruction = `[data-link-${this.isTag ?
+        //         "tags" : this.name}${matchSign[this.match]}="${this.isTag ? "#" : ""}${this.value}"${this.matchCaseSensitive ?
+        //             "" : " i"}]{\n    //put your styles here\n}\n`
+        //     instructions.push(instruction)
+        // } else {
+        //     // if not: create specific selectors
+        //     Object.keys(linkTypes).forEach(element => {
+        //         if (this.linksTypes.contains(element)) {
+        //             selectedLinksTypes.push(...linkTypes[element])
+        //         }
+        //     });
+        //     selectedLinksTypes.forEach(selector => {
+        //         console.log("selector ", selector)
+        //         const instruction = `${selector}[data-link-${this.isTag ?
+        //             "tags" : this.name}${matchSign[this.match]}="${this.isTag ? "#" : ""}${this.value}"${this.matchCaseSensitive ?
+        //                 "" : " i"}]{\n"    //put your styles here\n}\n`
+        //         instructions.push(instruction)
+        //     })
+        // }
 
         return instructions.join('\n')
     }
 }
 
-export { linkTypes, matchTypes, CSSLink }
+export { matchTypes, CSSLink }
