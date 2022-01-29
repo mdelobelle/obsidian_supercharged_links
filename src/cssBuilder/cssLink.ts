@@ -6,6 +6,7 @@ interface CSSLink {
     value: string
     matchCaseSensitive: boolean
     match: MatchTypes
+    uid: string
 }
 
 const matchTypes: Record<MatchTypes, string> = {
@@ -53,39 +54,17 @@ class CSSLink {
         this.value = ""
         this.matchCaseSensitive = false
         this.match = "exact"
+        let s4 = () => {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+        }
+        //return id of format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
+        this.uid = s4() + "-" + s4();
         // this.linksTypes = Object.keys(linkTypes)
     }
+    //generates random id;
 
-    render(): string {
-        // TODO
-        // console.log(this.linksTypes.length == Object.keys(linkTypes).length)
-        const selectedLinksTypes: string[] = []
-
-        const instructions: string[] = ["/*Supercharged links styling\ncopy and paste this in your css snippet\n"]
-        // if (this.linksTypes.length == Object.keys(linkTypes).length) {
-        //     // if everything is selected : a single css selector is needed
-        //     const instruction = `[data-link-${this.isTag ?
-        //         "tags" : this.name}${matchSign[this.match]}="${this.isTag ? "#" : ""}${this.value}"${this.matchCaseSensitive ?
-        //             "" : " i"}]{\n    //put your styles here\n}\n`
-        //     instructions.push(instruction)
-        // } else {
-        //     // if not: create specific selectors
-        //     Object.keys(linkTypes).forEach(element => {
-        //         if (this.linksTypes.contains(element)) {
-        //             selectedLinksTypes.push(...linkTypes[element])
-        //         }
-        //     });
-        //     selectedLinksTypes.forEach(selector => {
-        //         console.log("selector ", selector)
-        //         const instruction = `${selector}[data-link-${this.isTag ?
-        //             "tags" : this.name}${matchSign[this.match]}="${this.isTag ? "#" : ""}${this.value}"${this.matchCaseSensitive ?
-        //                 "" : " i"}]{\n"    //put your styles here\n}\n`
-        //         instructions.push(instruction)
-        //     })
-        // }
-
-        return instructions.join('\n')
-    }
 }
 
 export { matchTypes, CSSLink }

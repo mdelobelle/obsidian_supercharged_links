@@ -3,6 +3,7 @@ import SuperchargedLinks from "main"
 import FieldSettingsModal from "src/settings/FieldSettingsModal"
 import Field from "src/Field"
 import FieldSetting from "src/settings/FieldSetting"
+import {CSSBuilderModal, updateDisplay} from "../cssBuilder/cssBuilderModal";
 
 export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 	plugin: SuperchargedLinks;
@@ -17,7 +18,6 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Settings for Supercharged Links.'});
         /* Managing extra attirbutes for a.internal-link */
 		new Setting(containerEl)
 			.setName('Target Attributes for styling')
@@ -36,6 +36,31 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 				text.inputEl.cols = 25;
 			});
 
+		containerEl.createEl('h4', {text: 'Styling'});
+		const styleSettingDescription = containerEl.createDiv();
+		styleSettingDescription.innerHTML = `
+Styling can be done using CSS snippets or (easier!) using the Style settings plugin. Follow the steps below:
+ <ol>
+ <li>Create selectors down below.</li>
+ <li>Generate a snippet using the button at the bottom.</li>
+ <li>Go to the Appearance settings, reload snippets, and enable supercharged-links-gen.css.</li>
+ <li>Go to the Style Settings tab and style your links!</li>
+</ol>`
+		const selectorDiv = containerEl.createDiv();
+		this.drawSelectors(selectorDiv);
+
+		new Setting(containerEl)
+			.setName("Generate snippet")
+			.setDesc("Generates a CSS snippet in the snippets folder. Activate in the Appearance settings!")
+			.addButton(button => {
+				button.onClick(() => {
+
+				});
+				button.setButtonText("Generate!");
+			});
+
+
+		containerEl.createEl('h4', {text: 'Settings'});
 		new Setting(containerEl)
 			.setName('Enable in Editor')
 			.setDesc('If true, this will also supercharge internal links in the editor view of a note.')
@@ -175,5 +200,48 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
             Object.assign(property, prop)
 			new FieldSetting(containerEl, property, this.app, this.plugin)
 		})
+	}
+
+	drawSelectors(div: HTMLElement) {
+		div.empty();
+		this.plugin.settings.selectors.forEach((selector, i) => {
+			const s = new Setting(div)
+				.addButton(button => {
+					button.onClick(() =>{
+						const formModal = new CSSBuilderModal(this.plugin, (newSelector) => {
+							console.log({newSelector});
+							this.plugin.settings.selectors[i] = newSelector;
+							this.plugin.saveSettings();
+							updateDisplay(s.nameEl, selector, this.plugin.settings);
+						}, selector);
+						formModal.open();
+					});
+					button.setButtonText("Edit");
+				})
+				.addButton(button => {
+					button.onClick(() => {
+						this.plugin.settings.selectors.remove(selector);
+						this.plugin.saveSettings();
+						this.drawSelectors(div);
+					}).setButtonText("Remove");
+				})
+			updateDisplay(s.nameEl, selector, this.plugin.settings);
+		});
+
+		new Setting(div)
+			.setName("New selector")
+			.setDesc("Create a new selector to style with Style Settings.")
+			.addButton(button => {
+				button.onClick(() => {
+					const formModal = new CSSBuilderModal(this.plugin, (newSelector) => {
+						this.plugin.settings.selectors.push(newSelector);
+						this.plugin.saveSettings();
+						this.drawSelectors(div);
+						// TODO: Force redraw somehow?
+					});
+					formModal.open();
+				});
+				button.setButtonText("New");
+			});
 	}
 }

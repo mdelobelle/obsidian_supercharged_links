@@ -105,14 +105,14 @@ export default class SuperchargedLinks extends Plugin {
 			},
 		});
 
-		this.addCommand({
-			id: "css_snippet_helper",
-			name: "CSS Snippet helper",
-			callback: () => {
-				const formModal = new CSSBuilderModal(this)
-				formModal.open()
-			},
-		});
+		// this.addCommand({
+		// 	id: "css_snippet_helper",
+		// 	name: "CSS Snippet helper",
+		// 	callback: () => {
+		// 		const formModal = new CSSBuilderModal(this, )
+		// 		formModal.open()
+		// 	},
+		// });
 
 		new linkContextMenu(this)
 	}

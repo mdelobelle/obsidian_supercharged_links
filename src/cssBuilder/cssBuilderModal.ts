@@ -1,60 +1,67 @@
 import SuperchargedLinks from "main"
 import { DropdownComponent, ToggleComponent, Modal, App, TextComponent, TextAreaComponent, ButtonComponent, ExtraButtonComponent } from "obsidian"
 import {matchTypes, matchPreview, CSSLink, matchPreviewPath, selectorType, SelectorTypes, MatchTypes} from './cssLink'
+import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
+
+export function updateDisplay(textArea: HTMLElement, link: CSSLink, settings: SuperchargedLinksSettings): boolean {
+    let toDisplay: string;
+    let disabled = false;
+    if (link.type === 'tag') {
+        if (!link.value) {
+            toDisplay = "<b>Please choose a tag</b>";
+            disabled = true;
+        }
+        else {
+            toDisplay = `<span class="data-link-icon" data-link-tags="${link.value}">Note</span> has tag <b>#${link.value}</b>`;
+        }
+    }
+    else if (link.type === 'attribute') {
+        if (settings.targetAttributes.length === 0) {
+            toDisplay = `<b>No attributes added to "Target attributes". Go to plugin settings to add them.</b>`
+            disabled = true;
+        }
+        else if (!link.name) {
+            toDisplay = "<b>Please choose an attribute name.</b>";
+            disabled = true;
+        }
+        else if (!link.value){
+            toDisplay = "<b>Please choose an attribute value.</b>"
+            disabled = true;
+        }
+        else {
+            toDisplay = `<span class="data-link-icon" data-link-${link.name}="${link.name}">Note</span> has attribute <b>${link.name}</b> ${matchPreview[link.match]} <b>${link.value}</b>.`;
+        }
+    }
+    else {
+        if (!link.value) {
+            toDisplay = "<b>Please choose a path.</b>"
+            disabled = true;
+        }
+        else {
+            toDisplay = `The path of the <span class="data-link-icon" data-link-href="${link.value}">note</span> ${matchPreviewPath[link.match]} <b>${link.value}</b>`
+        }
+    }
+    textArea.innerHTML = toDisplay;
+    return disabled;
+}
 
 class CSSBuilderModal extends Modal {
 
     plugin: SuperchargedLinks
     cssLink: CSSLink
+    saveCallback: (cssLink: CSSLink) => void;
 
-    constructor(plugin: SuperchargedLinks) {
+    constructor(plugin: SuperchargedLinks, saveCallback: (cssLink: CSSLink) => void, cssLink: CSSLink=null) {
         super(plugin.app)
-        this.cssLink = new CSSLink();
+        this.cssLink = cssLink;
+        if (!cssLink) {
+            this.cssLink = new CSSLink();
+        }
         this.plugin = plugin;
+        this.saveCallback = saveCallback;
     }
 
-    updateDisplay(textArea: HTMLElement, saveButton: ButtonComponent) {
-        let toDisplay: string;
-        let disabled = false;
-        if (this.cssLink.type === 'tag') {
-            if (!this.cssLink.value) {
-                toDisplay = "<b>Please choose a tag</b>";
-                disabled = true;
-            }
-            else {
-                toDisplay = `<span class="data-link-icon" data-link-tags="${this.cssLink.value}">Note</span> has tag <b>#${this.cssLink.value}</b>`;
-            }
-        }
-        else if (this.cssLink.type === 'attribute') {
-            console.log(this.plugin.settings.targetAttributes)
-            if (this.plugin.settings.targetAttributes.length === 0) {
-                toDisplay = "<b>No attributes added to attributes to target. Go to plugin settings to add them.</b>"
-                disabled = true;
-            }
-            else if (!this.cssLink.name) {
-                toDisplay = "<b>Please choose an attribute name.</b>";
-                disabled = true;
-            }
-            else if (!this.cssLink.value){
-                toDisplay = "<b>Please choose an attribute value.</b>"
-                disabled = true;
-            }
-            else {
-                toDisplay = `<span class="data-link-icon" data-link-${this.cssLink.name}="${this.cssLink.name}">Note</span> has attribute <b>${this.cssLink.name}</b> ${matchPreview[this.cssLink.match]} <b>${this.cssLink.value}</b>.`;
-            }
-        }
-        else {
-            if (!this.cssLink.value) {
-                toDisplay = "<b>Please choose a path.</b>"
-                disabled = true;
-            }
-            else {
-                toDisplay = `The path of the <span class="data-link-icon" data-link-href="${this.cssLink.value}">note</span> ${matchPreviewPath[this.cssLink.match]} <b>${this.cssLink.value}</b>`
-            }
-        }
-        textArea.innerHTML = toDisplay;
-        saveButton.setDisabled(disabled);
-    }
+
 
     onOpen() {
         this.titleEl.setText(`Select what links to style!`)
@@ -80,7 +87,7 @@ class CSSBuilderModal extends Modal {
         typeSelect.onChange((type: SelectorTypes) => {
             this.cssLink.type = type;
             updateContainer(this.cssLink.type);
-            this.updateDisplay(preview, saveButton);
+            saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
         })
         // attribute name
         const attrNameContainer = this.contentEl.createDiv();
@@ -95,7 +102,7 @@ class CSSBuilderModal extends Modal {
         });
         attrName.onChange(name => {
             this.cssLink.name = name;
-            this.updateDisplay(preview, saveButton);
+            saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
         });
 
         // attribute value
@@ -104,7 +111,7 @@ class CSSBuilderModal extends Modal {
         attrValue.inputEl.setAttr("style", "width: 20em");
         attrValue.onChange(value => {
             this.cssLink.value = value;
-            this.updateDisplay(preview, saveButton);
+            saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
         });
 
 
@@ -121,8 +128,8 @@ class CSSBuilderModal extends Modal {
         })
         select.onChange((value: "exact" | "contains" | "startswith" | "endswith") => {
             this.cssLink.match = value;
-            this.updateDisplay(preview, saveButton);
-        })
+            saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
+        });
 
 
         // case sensitive
@@ -132,8 +139,8 @@ class CSSBuilderModal extends Modal {
         caseSensitiveToggler.setValue(this.cssLink.matchCaseSensitive)
         caseSensitiveToggler.onChange(value => {
             this.cssLink.matchCaseSensitive = value;
-            this.updateDisplay(preview, saveButton);
-        })
+            saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
+        });
         if (!this.cssLink.name && this.plugin.settings.targetAttributes.length > 0) {
            this.cssLink.name = this.plugin.settings.targetAttributes[0];
         }
@@ -171,9 +178,11 @@ class CSSBuilderModal extends Modal {
         saveButton.onClick(() => {
             // TODO
             // cssBoilerPlate.setValue(this.cssLink.render())
+            this.saveCallback(this.cssLink);
+            this.close();
         });
         const preview = this.contentEl.createDiv()
-        this.updateDisplay(preview, saveButton);
+        saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
     }
 
     createTogglerContainer(parentNode: HTMLDivElement, label: string): ToggleComponent {

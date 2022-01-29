@@ -1,4 +1,5 @@
 import Field from "src/Field"
+import {CSSLink} from "../cssBuilder/cssLink";
 
 export interface SuperchargedLinksSettings {
 	targetAttributes: Array<string>;
@@ -13,6 +14,7 @@ export interface SuperchargedLinksSettings {
 	enableBacklinks: boolean;
 	enableQuickSwitcher: boolean;
 	enableSuggestor: boolean;
+	selectors: CSSLink[];
 }
 
 export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
@@ -27,5 +29,6 @@ export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	enableFileList: true,
 	enableBacklinks: true,
 	enableQuickSwitcher: true,
-	enableSuggestor: true
+	enableSuggestor: true,
+	selectors: []
 }
