@@ -3,42 +3,53 @@ import { DropdownComponent, ToggleComponent, Modal, App, TextComponent, TextArea
 import {matchTypes, matchPreview, CSSLink, matchPreviewPath, selectorType, SelectorTypes, MatchTypes} from './cssLink'
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
 
+export function displayText(link: CSSLink, settings: SuperchargedLinksSettings): string {
+    if (link.type === 'tag') {
+        if (!link.value) {
+            return "<b>Please choose a tag</b>";
+        }
+        return `<span class="data-link-icon" data-link-tags="${link.value}">Note</span> has tag <b>#${link.value}</b>`;
+    }
+    else if (link.type === 'attribute') {
+        if (settings.targetAttributes.length === 0) {
+            return `<b>No attributes added to "Target attributes". Go to plugin settings to add them.</b>`
+        }
+        if (!link.name) {
+            return "<b>Please choose an attribute name.</b>";
+        }
+        if (!link.value){
+            return "<b>Please choose an attribute value.</b>"
+        }
+        return `<span class="data-link-icon" data-link-${link.name}="${link.value}">Note</span> has attribute <b>${link.name}</b> ${matchPreview[link.match]} <b>${link.value}</b>.`;
+    }
+    if (!link.value) {
+        return "<b>Please choose a path.</b>"
+    }
+    return `The path of the <span class="data-link-icon" data-link-href="${link.value}">note</span> ${matchPreviewPath[link.match]} <b>${link.value}</b>`
+}
+
 export function updateDisplay(textArea: HTMLElement, link: CSSLink, settings: SuperchargedLinksSettings): boolean {
-    let toDisplay: string;
+    let toDisplay: string = displayText(link, settings);
     let disabled = false;
     if (link.type === 'tag') {
         if (!link.value) {
-            toDisplay = "<b>Please choose a tag</b>";
             disabled = true;
-        }
-        else {
-            toDisplay = `<span class="data-link-icon" data-link-tags="${link.value}">Note</span> has tag <b>#${link.value}</b>`;
         }
     }
     else if (link.type === 'attribute') {
         if (settings.targetAttributes.length === 0) {
-            toDisplay = `<b>No attributes added to "Target attributes". Go to plugin settings to add them.</b>`
             disabled = true;
         }
         else if (!link.name) {
-            toDisplay = "<b>Please choose an attribute name.</b>";
             disabled = true;
         }
         else if (!link.value){
-            toDisplay = "<b>Please choose an attribute value.</b>"
             disabled = true;
-        }
-        else {
-            toDisplay = `<span class="data-link-icon" data-link-${link.name}="${link.name}">Note</span> has attribute <b>${link.name}</b> ${matchPreview[link.match]} <b>${link.value}</b>.`;
         }
     }
     else {
         if (!link.value) {
-            toDisplay = "<b>Please choose a path.</b>"
             disabled = true;
-        }
-        else {
-            toDisplay = `The path of the <span class="data-link-icon" data-link-href="${link.value}">note</span> ${matchPreviewPath[link.match]} <b>${link.value}</b>`
         }
     }
     textArea.innerHTML = toDisplay;

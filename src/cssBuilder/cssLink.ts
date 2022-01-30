@@ -17,7 +17,7 @@ const matchTypes: Record<MatchTypes, string> = {
     'endswith': "Ends with this value"
 }
 
-const matchSign: Record<MatchTypes, string> = {
+export const matchSign: Record<MatchTypes, string> = {
     'exact': "",
     'contains': "*",
     'startswith': "^",

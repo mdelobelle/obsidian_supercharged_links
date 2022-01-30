@@ -1,9 +1,10 @@
-import {App, PluginSettingTab, Setting, ButtonComponent, ToggleComponent} from "obsidian"
+import {App, PluginSettingTab, Setting, ButtonComponent, ToggleComponent, Notice} from "obsidian"
 import SuperchargedLinks from "main"
 import FieldSettingsModal from "src/settings/FieldSettingsModal"
 import Field from "src/Field"
 import FieldSetting from "src/settings/FieldSetting"
 import {CSSBuilderModal, updateDisplay} from "../cssBuilder/cssBuilderModal";
+import {buildCSS} from "../cssBuilder/cssBuilder";
 
 export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 	plugin: SuperchargedLinks;
@@ -51,10 +52,11 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 
 		new Setting(containerEl)
 			.setName("Generate snippet")
-			.setDesc("Generates a CSS snippet in the snippets folder. Activate in the Appearance settings!")
+			.setDesc("Generates a CSS snippet in the snippets folder. Activate the supercharged-links-gen.css snippet in the Appearance settings!")
 			.addButton(button => {
-				button.onClick(() => {
-
+				button.onClick(async () => {
+					await buildCSS(this.plugin.settings.selectors, this.plugin);
+					new Notice("Generated supercharged-links-gen.css");
 				});
 				button.setButtonText("Generate!");
 			});
@@ -132,9 +134,9 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 		.setDesc('Sets the `data-link-<field>`-attribute to the value of inline fields')
 		.addToggle(toggle => {
 			toggle.setValue(this.plugin.settings.getFromInlineField)
-				toggle.onChange(value => {
+				toggle.onChange(async value => {
 					this.plugin.settings.getFromInlineField = value
-					this.plugin.saveSettings()
+					await this.plugin.saveSettings()
 				})
 		})
 
@@ -145,9 +147,9 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 			.setDesc("Choose to show or hide fields options in the context menu of a link or a file")
 			.addToggle((toggle: ToggleComponent) => {
 				toggle.setValue(this.plugin.settings.displayFieldsInContextMenu)
-				toggle.onChange(value => {
+				toggle.onChange(async value => {
 					this.plugin.settings.displayFieldsInContextMenu = value
-					this.plugin.saveSettings()
+					await this.plugin.saveSettings()
 				})
 			})
 		/* Exclude Fields from context menu*/
