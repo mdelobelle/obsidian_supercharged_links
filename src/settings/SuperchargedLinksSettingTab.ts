@@ -1,4 +1,4 @@
-import {App, PluginSettingTab, Setting, ButtonComponent, ToggleComponent, Notice} from "obsidian"
+import {App, PluginSettingTab, Setting, ButtonComponent, ToggleComponent, Notice, debounce} from "obsidian"
 import SuperchargedLinks from "main"
 import FieldSettingsModal from "src/settings/FieldSettingsModal"
 import Field from "src/Field"
@@ -8,10 +8,12 @@ import {buildCSS} from "../cssBuilder/cssBuilder";
 
 export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 	plugin: SuperchargedLinks;
+	debouncedGenerate: Function;
 
 	constructor(app: App, plugin: SuperchargedLinks) {
 		super(app, plugin);
 		this.plugin = plugin;
+		this.debouncedGenerate = debounce(this._generateSnippet, 1000, true);
 	}
 
 	display(): void {
@@ -49,17 +51,6 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 </ol>`
 		const selectorDiv = containerEl.createDiv();
 		this.drawSelectors(selectorDiv);
-
-		new Setting(containerEl)
-			.setName("Generate snippet")
-			.setDesc("Generates a CSS snippet in the snippets folder. Activate the supercharged-links-gen.css snippet in the Appearance settings!")
-			.addButton(button => {
-				button.onClick(async () => {
-					await buildCSS(this.plugin.settings.selectors, this.plugin);
-					new Notice("Generated supercharged-links-gen.css");
-				});
-				button.setButtonText("Generate!");
-			});
 
 
 		containerEl.createEl('h4', {text: 'Settings'});
@@ -185,15 +176,13 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 			.setName("Add New Property Manager")
 			.setDesc("Add a new Frontmatter property for which you want preset values.")
 			.addButton((button: ButtonComponent): ButtonComponent => {
-				let b = button
+				return button
 					.setTooltip("Add New Property Manager")
 					.setButtonText("+")
 					.onClick(async () => {
 						let modal = new FieldSettingsModal(this.app, this.plugin, containerEl);
 						modal.open();
 					});
-
-				return b;
 			});
 
         /* Managed properties that currently have preset values */
@@ -204,17 +193,28 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 		})
 	}
 
+	generateSnippet() {
+		this.debouncedGenerate();
+	}
+
+	async _generateSnippet() {
+		await buildCSS(this.plugin.settings.selectors, this.plugin);
+		new Notice("Generated supercharged-links-gen.css");
+	}
+
 	drawSelectors(div: HTMLElement) {
 		div.empty();
+		this.generateSnippet();
+
 		this.plugin.settings.selectors.forEach((selector, i) => {
 			const s = new Setting(div)
 				.addButton(button => {
 					button.onClick(() =>{
 						const formModal = new CSSBuilderModal(this.plugin, (newSelector) => {
-							console.log({newSelector});
 							this.plugin.settings.selectors[i] = newSelector;
 							this.plugin.saveSettings();
 							updateDisplay(s.nameEl, selector, this.plugin.settings);
+							this.generateSnippet();
 						}, selector);
 						formModal.open();
 					});
