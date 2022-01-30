@@ -45,7 +45,6 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 Styling can be done using CSS snippets or (easier!) using the Style settings plugin. Follow the steps below:
  <ol>
  <li>Create selectors down below.</li>
- <li>Generate a snippet using the button at the bottom.</li>
  <li>Go to the Appearance settings, reload snippets, and enable supercharged-links-gen.css.</li>
  <li>Go to the Style Settings tab and style your links!</li>
 </ol>`

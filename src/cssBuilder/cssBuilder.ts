@@ -83,7 +83,7 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
             cssSelector = `[data-link-tags*="${selector.value}" i]`;
         }
         else {
-            cssSelector = `[data-link-data-href${matchSign[selector.match]}="${selector.value}" ${selector.matchCaseSensitive ?"" : "i"}]`;
+            cssSelector = `[data-link-path${matchSign[selector.match]}="${selector.value}" ${selector.matchCaseSensitive ?"" : "i"}]`;
         }
 
         instructions.push(...[

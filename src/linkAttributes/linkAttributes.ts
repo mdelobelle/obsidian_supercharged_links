@@ -36,6 +36,7 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
     if (addDataHref) {
         new_props['data-href'] = dest.basename;
     }
+    new_props['path'] = dest.path;
     //@ts-ignore
     const getResults = (api) => {
         settings.targetAttributes.forEach((field: string) => {
