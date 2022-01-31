@@ -25,7 +25,7 @@ export function displayText(link: CSSLink, settings: SuperchargedLinksSettings):
     if (!link.value) {
         return "<b>Please choose a path.</b>"
     }
-    return `The path of the <span class="data-link-icon" data-link-href="${link.value}">note</span> ${matchPreviewPath[link.match]} <b>${link.value}</b>`
+    return `The path of the <span class="data-link-icon" data-link-path="${link.value}">note</span> ${matchPreviewPath[link.match]} <b>${link.value}</b>`
 }
 
 export function updateDisplay(textArea: HTMLElement, link: CSSLink, settings: SuperchargedLinksSettings): boolean {

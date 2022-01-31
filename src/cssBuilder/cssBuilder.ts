@@ -39,7 +39,7 @@ const colorSet = [[
     '#AC7C26',
     '#006F5F',
 ], [
-    '#F9F871',
+    '#d9d867',
     '#2FAB63',
     '#B8E067',
     '#008E63',
@@ -88,12 +88,12 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
 
         instructions.push(...[
             "",
-            `div[data-id="${selector.uid}"] div.setting-item-name,`,
+            `div[data-id="${selector.uid}"] div.setting-item-description,`,
             cssSelector + " {",
             `   color: var(--${selector.uid}-color) !important;`,
             "}",
             "",
-            `div[data-id="${selector.uid}"] div.setting-item-name,`,
+            `div[data-id="${selector.uid}"] div.setting-item-description::before,`,
             `.data-link-icon${cssSelector}::before {`,
             `   content: var(--${selector.uid}-before);`,
             "}"
@@ -121,6 +121,7 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
             "    - ",
             `        id: ${selector.uid}`,
             `        title: ${name} is ${value}`,
+            `        description: Example note`,
             "        type: heading",
             "        collapsed: true",
             "        level: 3",
@@ -135,7 +136,8 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
             `        title: Prepend text`,
             `        description: Add some text, such as an emoji, before the links.`,
             "        type: variable-text",
-            `        default: 'asd'`,
+            `        default: ''`,
+            `        quotes: true`,
         ]);
     });
     instructions.push("*/")
