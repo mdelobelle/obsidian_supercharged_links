@@ -17,6 +17,7 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
     if (!cache) return;
 
     const frontmatter = cache.frontmatter
+
     if (frontmatter) {
         settings.targetAttributes.forEach(attribute => {
             if (Object.keys(frontmatter).includes(attribute)) {
@@ -39,9 +40,13 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
     new_props['path'] = dest.path;
     //@ts-ignore
     const getResults = (api) => {
+        const page = api.page(dest.path);
+        if (!page) {
+            return;
+        }
         settings.targetAttributes.forEach((field: string) => {
-            const value = api.page(dest.path) ? api.page(dest.path)[field] : null
-            if (value) new_props[field] = value
+            const value = page[field];
+            if (value) new_props[field] = value;
         })
     };
 
@@ -72,11 +77,9 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
         const name = "data-link-" + key;
         const newValue = new_props[key];
         const curValue = link.getAttribute(name);
+
         // Only update if value is different
-        if (curValue != newValue) {
-            if (curValue) {
-                console.log("updating!")
-            }
+        if (!newValue || curValue != newValue) {
             link.setAttribute("data-link-" + key, new_props[key])
         }
         if (!link.hasClass("data-link-icon")) {
@@ -87,11 +90,11 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
 
 function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
     const linkHref = link.getAttribute('href').split('#')[0];
-    const dest = app.metadataCache.getFirstLinkpathDest(linkHref, destName)
+    const dest = app.metadataCache.getFirstLinkpathDest(linkHref, destName);
 
     if (dest) {
-        const new_props = fetchTargetAttributesSync(app, settings, dest, false)
-        if (new_props) setLinkNewProps(link, new_props)
+        const new_props = fetchTargetAttributesSync(app, settings, dest, false);
+        setLinkNewProps(link, new_props);
     }
 }
 
@@ -102,8 +105,8 @@ export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSe
     const dest = app.metadataCache.getFirstLinkpathDest(getLinkpath(linkName), destName)
 
     if (dest) {
-        const new_props = fetchTargetAttributesSync(app, settings, dest, true)
-        if (new_props) setLinkNewProps(link, new_props)
+        const new_props = fetchTargetAttributesSync(app, settings, dest, true);
+        setLinkNewProps(link, new_props);
     }
 }
 
