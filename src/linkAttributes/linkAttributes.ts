@@ -85,6 +85,12 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
         if (!link.hasClass("data-link-icon")) {
             link.addClass("data-link-icon");
         }
+        if (!link.hasClass("data-link-icon-after")) {
+            link.addClass("data-link-icon-after");
+        }
+        if (!link.hasClass("data-link-text")) {
+            link.addClass("data-link-text");
+        }
     });
 }
 

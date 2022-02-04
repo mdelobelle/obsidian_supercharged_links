@@ -70,6 +70,8 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
         instructions.push(...[
             `    --${selector.uid}-color: ${colors[i % 36]};`,
             `    --${selector.uid}-before: '';`,
+            `    --${selector.uid}-after: '';`,
+            `    --${selector.uid}-background-color: #ffffff;`,
         ]);
     });
     instructions.push("}");
@@ -90,12 +92,26 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
             "",
             `div[data-id="${selector.uid}"] div.setting-item-description,`,
             cssSelector + " {",
-            `   color: var(--${selector.uid}-color) !important;`,
+            `    color: var(--${selector.uid}-color) !important;`,
+            "}",
+            "",
+            "",
+            `.c-${selector.uid}-use-background div[data-id="${selector.uid}"] div.setting-item-description,`,
+            `.c-${selector.uid}-use-background .data-link-text${cssSelector} {`,
+            `    background-color: var(--${selector.uid}-background-color) !important;`,
+            `    border-radius: 5px;`,
+            `    padding-left: 2px;`,
+            `    padding-right: 2px;`,
             "}",
             "",
             `div[data-id="${selector.uid}"] div.setting-item-description::before,`,
             `.data-link-icon${cssSelector}::before {`,
-            `   content: var(--${selector.uid}-before);`,
+            `    content: var(--${selector.uid}-before);`,
+            "}",
+            "",
+            `div[data-id="${selector.uid}"] div.setting-item-description::after,`,
+            `.data-link-icon-after${cssSelector}::after {`,
+            `    content: var(--${selector.uid}-after);`,
             "}"
         ]);
     });
@@ -138,9 +154,27 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
             "        type: variable-text",
             `        default: ''`,
             `        quotes: true`,
+            "    - ",
+            `        id: ${selector.uid}-after`,
+            `        title: Append text`,
+            `        description: Add some text, such as an emoji, after the links.`,
+            "        type: variable-text",
+            `        default: ''`,
+            `        quotes: true`,
+            "    - ",
+            `        id: c-${selector.uid}-use-background`,
+            `        title: Use background color`,
+            `        description: Adds a background color to the link. This can look buggy in live preview.`,
+            "        type: class-toggle",
+            "    - ",
+            `        id: ${selector.uid}-background-color`,
+            `        title: Background color`,
+            "        type: variable-color",
+            "        format: hex",
+            `        default: '#ffffff'`,
         ]);
     });
-    instructions.push("*/")
+    instructions.push("*/");
 
     const vault = plugin.app.vault;
     const path = ".obsidian/snippets/supercharged-links-gen.css";
