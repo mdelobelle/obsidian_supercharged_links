@@ -204,9 +204,37 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 	drawSelectors(div: HTMLElement) {
 		div.empty();
 		this.generateSnippet();
-
-		this.plugin.settings.selectors.forEach((selector, i) => {
+		const selectors = this.plugin.settings.selectors;
+		selectors.forEach((selector, i) => {
 			const s = new Setting(div)
+				.addButton(button => {
+					button.onClick(() => {
+						const oldSelector = selectors[i+1];
+						selectors[i+1] = selector;
+						selectors[i] = oldSelector;
+						this.drawSelectors(div);
+
+					});
+					button.setIcon("down-arrow-with-tail");
+					button.setTooltip("Move selector down");
+					if (i === selectors.length - 1) {
+						button.setDisabled(true);
+					}
+				})
+				.addButton(button => {
+					button.onClick(() => {
+						const oldSelector = selectors[i-1];
+						selectors[i-1] = selector;
+						selectors[i] = oldSelector;
+						this.drawSelectors(div);
+
+					});
+					button.setIcon("up-arrow-with-tail");
+					button.setTooltip("Move selector up");
+					if (i === 0) {
+						button.setDisabled(true);
+					}
+				})
 				.addButton(button => {
 					button.onClick(() =>{
 						const formModal = new CSSBuilderModal(this.plugin, (newSelector) => {
@@ -218,6 +246,7 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 						formModal.open();
 					});
 					button.setIcon("pencil");
+					button.setTooltip("Edit selector")
 				})
 				.addButton(button => {
 					button.onClick(() => {
@@ -226,7 +255,8 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 						this.drawSelectors(div);
 					});
 					button.setIcon("cross");
-				})
+					button.setTooltip("Remove selector");
+				});
 			updateDisplay(s.nameEl, selector, this.plugin.settings);
 		});
 
