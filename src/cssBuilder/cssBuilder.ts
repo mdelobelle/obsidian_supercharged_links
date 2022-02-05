@@ -53,6 +53,17 @@ for (const i of Array(6).keys()) {
     }
 }
 
+function hash(uid: string) {
+    let hash = 0;
+    for (let i = 0; i < uid.length; i++) {
+        const char = uid.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    hash = Math.abs(hash);
+    return hash
+}
+
 export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) {
     const instructions: string[] = [
         "/* WARNING: This file will be overwritten by the plugin.",
@@ -63,16 +74,8 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
 
 
     selectors.forEach((selector, i) => {
-        let hash = 0;
-        for (let i = 0; i < selector.uid.length; i++) {
-            const char = selector.uid.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32bit integer
-        }
-        hash = Math.abs(hash);
-
         if (selector.selectText) {
-            instructions.push(`    --${selector.uid}-color: ${colors[hash % 36]};`);
+            instructions.push(`    --${selector.uid}-color: ${colors[hash(selector.uid) % 36]};`);
             instructions.push(`    --${selector.uid}-weight: initial;`);
         }
         if (selector.selectPrepend) {
@@ -168,7 +171,7 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
                 `        title: Link color`,
                 "        type: variable-color",
                 "        format: hex",
-                `        default: '${colors[i % 36]}'`,
+                `        default: '${colors[hash(selector.uid) % 36]}'`,
                 "    - ",
                 `        id: ${selector.uid}-weight`,
                 `        title: Font weight`,

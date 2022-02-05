@@ -177,7 +177,6 @@ class CSSBuilderModal extends Modal {
         }
 
         const updateContainer = function(type: SelectorTypes) {
-            console.log({type});
             if (type === 'attribute') {
                 attrName.settingEl.show();
                 attrValue.nameEl.setText(matchAttrTxt);
