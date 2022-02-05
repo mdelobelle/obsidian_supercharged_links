@@ -11,7 +11,7 @@ export function displayText(link: CSSLink, settings: SuperchargedLinksSettings):
         if (!link.value) {
             return "<b>Please choose a tag</b>";
         }
-        return `<span class="data-link-icon" data-link-tags="${link.value}">Note</span> has tag <a class="tag">#${link.value}</a>`;
+        return `<span class="data-link-icon data-link-text data-link-icon-after" data-link-tags="${link.value}">Note</span> has tag <a class="tag">#${link.value}</a>`;
     }
     else if (link.type === 'attribute') {
         if (settings.targetAttributes.length === 0) {
@@ -23,12 +23,12 @@ export function displayText(link: CSSLink, settings: SuperchargedLinksSettings):
         if (!link.value){
             return "<b>Please choose an attribute value.</b>"
         }
-        return `<span class="data-link-icon" data-link-${link.name}="${link.value}">Note</span> has attribute <b>${link.name}</b> ${matchPreview[link.match]} <b>${link.value}</b>.`;
+        return `<span class="data-link-icon data-link-text data-link-icon-after" data-link-${link.name}="${link.value}">Note</span> has attribute <b>${link.name}</b> ${matchPreview[link.match]} <b>${link.value}</b>.`;
     }
     if (!link.value) {
         return "<b>Please choose a path.</b>"
     }
-    return `The path of the <span class="data-link-icon" data-link-path="${link.value}">note</span> ${matchPreviewPath[link.match]} <b>${link.value}</b>`
+    return `The path of the <span class="data-link-icon data-link-text data-link-icon-after" data-link-path="${link.value}">note</span> ${matchPreviewPath[link.match]} <b>${link.value}</b>`
 }
 
 export function updateDisplay(textArea: HTMLElement, link: CSSLink, settings: SuperchargedLinksSettings): boolean {
@@ -231,7 +231,7 @@ class CSSBuilderModal extends Modal {
                     cssLink.selectBackground = value;
                 })
                 t.setValue(cssLink.selectBackground);
-                t.setTooltip("Add optional background to link");
+                t.setTooltip("Add optional background or underline to link");
             });
 
 

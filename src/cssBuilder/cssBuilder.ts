@@ -73,15 +73,17 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
 
         if (selector.selectText) {
             instructions.push(`    --${selector.uid}-color: ${colors[hash % 36]};`);
+            instructions.push(`    --${selector.uid}-weight: initial;`);
         }
         if (selector.selectPrepend) {
             instructions.push(`    --${selector.uid}-before: '';`);
         }
         if (selector.selectAppend) {
-            instructions.push(`    --${selector.uid}-after: '';`,);
+            instructions.push(`    --${selector.uid}-after: '';`);
         }
         if (selector.selectBackground) {
             instructions.push(`    --${selector.uid}-background-color: #ffffff;`);
+            instructions.push(`    --${selector.uid}-decoration: initial;`);
         }
     });
     instructions.push("}");
@@ -104,6 +106,7 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
                 `div[data-id="${selector.uid}"] div.setting-item-description,`,
                 cssSelector + " {",
                 `    color: var(--${selector.uid}-color) !important;`,
+                `    font-weight: var(--${selector.uid}-weight);`,
                 "}"]);
         }
         if (selector.selectBackground) {
@@ -114,6 +117,7 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
                 `    border-radius: 5px;`,
                 `    padding-left: 2px;`,
                 `    padding-right: 2px;`,
+                `    text-decoration: var(--${selector.uid}-decoration) !important;`,
                 "}"]);
         }
         if (selector.selectPrepend) {
@@ -164,7 +168,28 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
                 `        title: Link color`,
                 "        type: variable-color",
                 "        format: hex",
-                `        default: '${colors[i % 36]}'`])
+                `        default: '${colors[i % 36]}'`,
+                "    - ",
+                `        id: ${selector.uid}-weight`,
+                `        title: Font weight`,
+                "        type: variable-select",
+                `        default: initial`,
+                `        options:`,
+                `            - initial`,
+                `            - lighter`,
+                `            - normal`,
+                `            - bold`,
+                `            - bolder`,
+                "    - ",
+                `        id: ${selector.uid}-decoration`,
+                `        title: Font decoration`,
+                "        type: variable-select",
+                `        default: initial`,
+                `        options:`,
+                `            - initial`,
+                `            - underline`,
+                `            - overline`,
+                `            - line-through`])
         }
         if (selector.selectPrepend) {
             instructions.push(...["    - ",
