@@ -1,7 +1,7 @@
 {
   "name": "supercharged-links-obsidian",
-  "version": "0.6.3",
-  "description": "Adds properties and menu options to internal links",
+  "version": "0.6.4",
+  "description": "Add properties and menu options to links and style them!",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
