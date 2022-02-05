@@ -230,7 +230,7 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
 
     const vault = plugin.app.vault;
     const path = ".obsidian/snippets/supercharged-links-gen.css";
-    if (vault.adapter.exists(path)) {
+    if (await vault.adapter.exists(path)) {
         await vault.adapter.remove(path);
     }
     await plugin.app.vault.create(path, instructions.join('\n'));
