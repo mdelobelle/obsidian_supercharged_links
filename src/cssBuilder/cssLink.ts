@@ -7,6 +7,10 @@ interface CSSLink {
     matchCaseSensitive: boolean
     match: MatchTypes
     uid: string
+    selectText: boolean
+    selectBackground: boolean
+    selectAppend: boolean
+    selectPrepend: boolean
 }
 
 const matchTypes: Record<MatchTypes, string> = {
@@ -42,18 +46,18 @@ export const matchPreviewPath: Record<MatchTypes, string> = {
 }
 
 export const selectorType: Record<SelectorTypes, string> = {
-    'attribute': 'Select with attribute value',
-    'tag': 'Select with tag',
-    'path': 'Select with note path'
+    'attribute': 'Attribute value',
+    'tag': 'Tag',
+    'path': 'Note path'
 }
 
 class CSSLink {
     constructor() {
-        this.type = 'attribute'
-        this.name = ""
-        this.value = ""
-        this.matchCaseSensitive = false
-        this.match = "exact"
+        this.type = 'attribute';
+        this.name = "";
+        this.value = "";
+        this.matchCaseSensitive = false;
+        this.match = "exact";
         let s4 = () => {
             return Math.floor((1 + Math.random()) * 0x10000)
                 .toString(16)
@@ -61,10 +65,11 @@ class CSSLink {
         }
         //return id of format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
         this.uid = s4() + "-" + s4();
-        // this.linksTypes = Object.keys(linkTypes)
+        this.selectText = true;
+        this.selectAppend = true;
+        this.selectPrepend = true;
+        this.selectBackground = true;
     }
-    //generates random id;
-
 }
 
 export { matchTypes, CSSLink }

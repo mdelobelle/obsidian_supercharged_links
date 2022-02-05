@@ -1,5 +1,8 @@
 import SuperchargedLinks from "main"
-import { DropdownComponent, ToggleComponent, Modal, App, TextComponent, TextAreaComponent, ButtonComponent, ExtraButtonComponent } from "obsidian"
+import {
+    Modal,
+    Setting
+} from "obsidian"
 import {matchTypes, matchPreview, CSSLink, matchPreviewPath, selectorType, SelectorTypes, MatchTypes} from './cssLink'
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
 
@@ -8,7 +11,7 @@ export function displayText(link: CSSLink, settings: SuperchargedLinksSettings):
         if (!link.value) {
             return "<b>Please choose a tag</b>";
         }
-        return `<span class="data-link-icon" data-link-tags="${link.value}">Note</span> has tag <b>#${link.value}</b>`;
+        return `<span class="data-link-icon" data-link-tags="${link.value}">Note</span> has tag <a class="tag">#${link.value}</a>`;
     }
     else if (link.type === 'attribute') {
         if (settings.targetAttributes.length === 0) {
@@ -77,141 +80,180 @@ class CSSBuilderModal extends Modal {
     onOpen() {
         this.titleEl.setText(`Select what links to style!`)
         // is tag
-        const matchAttrPlaceholder = "Attribute value to match";
-        const matchTagPlaceholder = "Tag to match (without #)";
-        const matchPathPlaceholder = "Path to match";
+        const matchAttrPlaceholder = "Attribute value to match.";
+        const matchTagPlaceholder = "Note tag to match (without #).";
+        const matchPathPlaceholder = "File path to match.";
         const matchAttrTxt = "Attribute value";
         const matchTagTxt = "Tag";
         const matchPathTxt = "Path";
 
-        const tagTogglerContainer = this.contentEl.createDiv()
-        const labelType = tagTogglerContainer.createDiv();
-        labelType.setText("Type of selector");
+        const cssLink = this.cssLink;
+        const plugin = this.plugin;
 
-        const typeSelect = new DropdownComponent(tagTogglerContainer);
-        Object.keys(selectorType).forEach((type: SelectorTypes) => {
-            typeSelect.addOption(type, selectorType[type]);
-            if (type === this.cssLink.type) {
-                typeSelect.setValue(type);
-            }
-        });
-        typeSelect.onChange((type: SelectorTypes) => {
-            this.cssLink.type = type;
-            updateContainer(this.cssLink.type);
-            saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
-        })
+        this.contentEl.addClass("supercharged-modal");
+
+        // Type
+        new Setting(this.contentEl)
+            .setName("Type of selector")
+            .setDesc("Attributes selects YAML and DataView attributes" +
+                ", tags chooses the tags of a note, and path considers the name of the note including in what folder it is.")
+            .addDropdown(dc => {
+                Object.keys(selectorType).forEach((type: SelectorTypes) => {
+                    dc.addOption(type, selectorType[type]);
+                    if (type === this.cssLink.type) {
+                        dc.setValue(type);
+                    }
+                });
+                dc.onChange((type: SelectorTypes) => {
+                    cssLink.type = type;
+                    updateContainer(cssLink.type);
+                    saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
+                });
+            });
+
         // attribute name
-        const attrNameContainer = this.contentEl.createDiv();
-        const labelName = attrNameContainer.createDiv();
-        labelName.setText("Attribute name");
-        const attrName = new DropdownComponent(attrNameContainer);
-        this.plugin.settings.targetAttributes.forEach((attribute: string) => {
-            attrName.addOption(attribute, attribute);
-            if (attribute === this.cssLink.name) {
-                attrName.setValue(attribute);
-            }
-        });
-        attrName.onChange(name => {
-            this.cssLink.name = name;
-            saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
-        });
+        const attrName = new Setting(this.contentEl)
+            .setName("Attribute name")
+            .setDesc("What attribute to target? Make sure to first add target attributes to the settings at the top!")
+            .addDropdown(dc => {
+                plugin.settings.targetAttributes.forEach((attribute: string) => {
+                    dc.addOption(attribute, attribute);
+                    if (attribute === cssLink.name) {
+                        dc.setValue(attribute);
+                    }
+                });
+                dc.onChange(name => {
+                    cssLink.name = name;
+                    saveButton.setDisabled(updateDisplay(preview, cssLink, plugin.settings));
+                });
+            })
+
 
         // attribute value
-        const attrValueContainer = this.contentEl.createDiv();
-        const [labelValue, attrValue] = this.createInputContainer(attrValueContainer, "Value to match", matchAttrPlaceholder)
-        attrValue.inputEl.setAttr("style", "width: 20em");
-        attrValue.onChange(value => {
-            this.cssLink.value = value;
-            saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
-        });
+        const attrValue = new Setting(this.contentEl)
+            .setName("Value to match")
+            .setDesc("TODO")
+            .addText(t => {
+                t.setValue(cssLink.value);
+                t.onChange(value => {
+                        cssLink.value = value;
+                        saveButton.setDisabled(updateDisplay(preview, cssLink, plugin.settings));
+                });
+            });
 
-
+        this.contentEl.createEl('h4', {text: 'Advanced'});
         // matching type
-        const matchingTypeSelectContainer = this.contentEl.createDiv()
-        const matchingTypeSelectLabel = matchingTypeSelectContainer.createDiv()
-        matchingTypeSelectLabel.setText("Matching type: ")
-        const select = new DropdownComponent(matchingTypeSelectContainer)
-        Object.keys(matchTypes).forEach((key: MatchTypes)=> {
-            select.addOption(key, matchTypes[key])
-            if (key == this.cssLink.match) {
-                select.setValue(key)
-            }
-        })
-        select.onChange((value: "exact" | "contains" | "startswith" | "endswith") => {
-            this.cssLink.match = value;
-            saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
-        });
+        const matchingType = new Setting(this.contentEl)
+            .setName("Matching type")
+            .setDesc("How to compare the attribute or path with the given value.")
+            .addDropdown(dc => {
+                Object.keys(matchTypes).forEach((key: MatchTypes)=> {
+                    dc.addOption(key, matchTypes[key])
+                    if (key == cssLink.match) {
+                        dc.setValue(key)
+                    }
+                })
+                dc.onChange((value: "exact" | "contains" | "startswith" | "endswith") => {
+                    cssLink.match = value;
+                    saveButton.setDisabled(updateDisplay(preview, cssLink, plugin.settings));
+                });
+            })
 
 
         // case sensitive
-        const caseSensitiveTogglerContainer = this.contentEl.createDiv()
-        const caseSensitiveToggler = this.createTogglerContainer(caseSensitiveTogglerContainer, "Case sensitive")
-        caseSensitiveToggler.setTooltip("Should the css selector be case sensitive?")
-        caseSensitiveToggler.setValue(this.cssLink.matchCaseSensitive)
-        caseSensitiveToggler.onChange(value => {
-            this.cssLink.matchCaseSensitive = value;
-            saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
-        });
+        const caseSensitiveTogglerContainer = new Setting(this.contentEl)
+            .setName("Case sensitive matching")
+            .setDesc("Should the matching of the value be case sensitive?")
+            .addToggle(b => {
+                b.setValue(cssLink.matchCaseSensitive);
+                b.onChange(value => {
+                    cssLink.matchCaseSensitive = value;
+                    b.setDisabled(updateDisplay(preview, cssLink, plugin.settings));
+                });
+            })
+
         if (!this.cssLink.name && this.plugin.settings.targetAttributes.length > 0) {
            this.cssLink.name = this.plugin.settings.targetAttributes[0];
         }
-        const updateContainer = function(type: SelectorTypes) {
 
+        const updateContainer = function(type: SelectorTypes) {
+            console.log({type});
             if (type === 'attribute') {
-                attrNameContainer.show();
-                attrValue.setPlaceholder(matchAttrPlaceholder);
-                labelValue.setText(matchAttrTxt);
-                matchingTypeSelectContainer.show();
-                caseSensitiveTogglerContainer.show();
+                attrName.settingEl.show();
+                attrValue.nameEl.setText(matchAttrTxt);
+                attrValue.descEl.setText(matchAttrPlaceholder);
+                matchingType.settingEl.show();
+                caseSensitiveTogglerContainer.settingEl.show();
             }
             else if (type === 'tag') {
-                attrNameContainer.hide();
-                labelValue.setText(matchTagTxt);
-                attrValue.setPlaceholder(matchTagPlaceholder);
-                matchingTypeSelectContainer.hide();
-                caseSensitiveTogglerContainer.hide();
+                attrName.settingEl.hide();
+                attrValue.nameEl.setText(matchTagTxt);
+                attrValue.descEl.setText(matchTagPlaceholder);
+                matchingType.settingEl.hide();
+                caseSensitiveTogglerContainer.settingEl.hide();
             }
             else {
-                attrNameContainer.hide();
-                attrValue.setPlaceholder(matchPathPlaceholder);
-                labelValue.setText(matchPathTxt);
-                matchingTypeSelectContainer.show();
-                caseSensitiveTogglerContainer.show();
+                attrName.settingEl.hide();
+                attrValue.nameEl.setText(matchPathTxt);
+                attrValue.descEl.setText(matchPathPlaceholder);
+                matchingType.settingEl.show();
+                caseSensitiveTogglerContainer.settingEl.show();
             }
         }
 
-        updateContainer(this.cssLink.type);
+        new Setting(this.contentEl)
+            .setName("Style options")
+            .setDesc("What styling options are active? " +
+                "Disabling options you won't use can improve performance slightly.")
+            .addToggle(t => {
+                t.onChange(value => {
+                    cssLink.selectText = value;
+                })
+                t.setValue(cssLink.selectText);
+                t.setTooltip("Style link text");
+            })
+            .addToggle(t => {
+                t.onChange(value => {
+                    cssLink.selectPrepend = value;
+                })
+                t.setValue(cssLink.selectPrepend);
+                t.setTooltip("Add content before link");
+            })
+            .addToggle(t => {
+                t.onChange(value => {
+                    cssLink.selectAppend = value;
+                })
+                t.setValue(cssLink.selectAppend);
+                t.setTooltip("Add content after link");
+            })
+            .addToggle(t => {
+                t.onChange(value => {
+                    cssLink.selectBackground = value;
+                })
+                t.setValue(cssLink.selectBackground);
+                t.setTooltip("Add optional background to link");
+            });
 
+
+        this.contentEl.createEl('h4', {text: 'Result'});
+        const modal = this;
+        const saveButton = new Setting(this.contentEl)
+            .setName("Preview")
+            .setDesc("")
+            .addButton(b => {
+                b.setButtonText("Save")
+                b.onClick(() => {
+                    modal.saveCallback(cssLink);
+                    modal.close();
+                });
+            });
         // generate button
-        const footer = this.contentEl.createDiv()
-        const saveButton = new ButtonComponent(footer)
-        saveButton.setButtonText("Save")
-        saveButton.onClick(() => {
-            // TODO
-            // cssBoilerPlate.setValue(this.cssLink.render())
-            this.saveCallback(this.cssLink);
-            this.close();
-        });
-        const preview = this.contentEl.createDiv()
+
+        const preview = saveButton.nameEl;
+        updateContainer(cssLink.type);
         saveButton.setDisabled(updateDisplay(preview, this.cssLink, this.plugin.settings));
     }
 
-    createTogglerContainer(parentNode: HTMLDivElement, label: string): ToggleComponent {
-        const propertyContainerLabel = parentNode.createDiv({
-            cls: 'frontmatter-checkbox-toggler'
-        });
-        propertyContainerLabel.setText(label);
-        const toggler = new ToggleComponent(parentNode);
-        return toggler;
-    }
-
-    createInputContainer(parentNode: HTMLDivElement, label: string, placeholder: string = ""): [HTMLDivElement, TextComponent] {
-        const propertyNameContainerLabel = parentNode.createDiv()
-        propertyNameContainerLabel.setText(label)
-        const input = new TextComponent(parentNode)
-        input.setPlaceholder(placeholder)
-        return [propertyNameContainerLabel, input]
-    }
 }
 
 export { CSSBuilderModal }

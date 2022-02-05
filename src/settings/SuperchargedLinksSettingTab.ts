@@ -217,14 +217,15 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 						}, selector);
 						formModal.open();
 					});
-					button.setButtonText("Edit");
+					button.setIcon("pencil");
 				})
 				.addButton(button => {
 					button.onClick(() => {
 						this.plugin.settings.selectors.remove(selector);
 						this.plugin.saveSettings();
 						this.drawSelectors(div);
-					}).setButtonText("Remove");
+					});
+					button.setIcon("cross");
 				})
 			updateDisplay(s.nameEl, selector, this.plugin.settings);
 		});
