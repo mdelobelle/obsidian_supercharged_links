@@ -14,7 +14,7 @@ export function clearExtraAttributes(link: HTMLElement) {
 export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Record<string, string> {
     let new_props: Record<string, string> = { tags: "" }
     const cache = app.metadataCache.getFileCache(dest)
-    if (!cache) return;
+    if (!cache) return new_props;
 
     const frontmatter = cache.frontmatter
 
@@ -82,16 +82,16 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
         if (!newValue || curValue != newValue) {
             link.setAttribute("data-link-" + key, new_props[key])
         }
-        if (!link.hasClass("data-link-icon")) {
-            link.addClass("data-link-icon");
-        }
-        if (!link.hasClass("data-link-icon-after")) {
-            link.addClass("data-link-icon-after");
-        }
-        if (!link.hasClass("data-link-text")) {
-            link.addClass("data-link-text");
-        }
     });
+    if (!link.hasClass("data-link-icon")) {
+        link.addClass("data-link-icon");
+    }
+    if (!link.hasClass("data-link-icon-after")) {
+        link.addClass("data-link-icon-after");
+    }
+    if (!link.hasClass("data-link-text")) {
+        link.addClass("data-link-text");
+    }
 }
 
 function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
