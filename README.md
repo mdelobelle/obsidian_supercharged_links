@@ -76,7 +76,11 @@ This does not give any information about what is in the Jim.md note! So, we woul
 
 That's where this plugin comes in: it will add two extra properties in the `<a>` element : `data-link-status` and `data-link-tags`. **Importantly**, these attributes are prefixed with `data-link` so that it will not conflict with other attributes in Obsidian.
 
-With the plugin active, the `<a>`element will be supercharged like this: `<a data-href="Jim" href="Jim" class="internal-link data-link-text data-link-icon data-link-icon-after" target="_blank" rel="noopener" data-link-status="call soon" data-link-tags="#person" >Jim</a>`
+With the plugin active, the `<a>`element will be supercharged like this: 
+
+```
+<a data-href="Jim" href="Jim" class="internal-link data-link-text data-link-icon data-link-icon-after" target="_blank" rel="noopener" data-link-status="call soon" data-link-tags="#person" >Jim</a>
+```
 
 ### Style your links with CSS!
 
