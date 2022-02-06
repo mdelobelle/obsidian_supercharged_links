@@ -1,22 +1,16 @@
-import {Plugin, MarkdownView, Notice, App, editorViewField, debounce} from 'obsidian';
+import {Plugin, MarkdownView, Notice, debounce} from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {
 	updateElLinks,
 	updateVisibleLinks,
 	clearExtraAttributes,
 	updateDivExtraAttributes,
-	fetchTargetAttributesSync
 } from "src/linkAttributes/linkAttributes"
 import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
 import Field from 'src/Field';
 import linkContextMenu from "src/options/linkContextMenu"
 import NoteFieldsCommandsModal from "src/options/NoteFieldsCommandsModal"
 import FileClassAttributeSelectModal from 'src/fileClass/FileClassAttributeSelectModal';
-import { CSSBuilderModal } from 'src/cssBuilder/cssBuilderModal'
-import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType } from "@codemirror/view";
-import { RangeSetBuilder } from "@codemirror/rangeset";
-import { syntaxTree } from "@codemirror/language";
-import { tokenClassNodeProp } from "@codemirror/stream-parser";
 import { Prec } from "@codemirror/state";
 import {buildCMViewPlugin} from "./src/linkAttributes/livePreview";
 
@@ -122,6 +116,7 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.observers.forEach(([observer, type ]) => {
 			observer.disconnect();
 		});
+		plugin.observers = [];
 		plugin.registerViewType('backlink', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('outgoing-link', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('search', plugin, ".tree-item-inner");
