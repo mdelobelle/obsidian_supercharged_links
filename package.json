@@ -1,6 +1,6 @@
 {
   "name": "supercharged-links-obsidian",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "Add properties and menu options to links and style them!",
   "main": "main.js",
   "scripts": {

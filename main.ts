@@ -59,7 +59,7 @@ export default class SuperchargedLinks extends Plugin {
 			this.initViewObservers(this);
 			this.initModalObservers(this);
 		});
-		this.app.workspace.on("layout-change", () => this.initViewObservers(this));
+		this.registerEvent(this.app.workspace.on("layout-change", () => this.initViewObservers(this)));
 
 		this.addCommand({
 			id: "field_options",
@@ -100,23 +100,17 @@ export default class SuperchargedLinks extends Plugin {
 			},
 		});
 
-		// this.addCommand({
-		// 	id: "css_snippet_helper",
-		// 	name: "CSS Snippet helper",
-		// 	callback: () => {
-		// 		const formModal = new CSSBuilderModal(this, )
-		// 		formModal.open()
-		// 	},
-		// });
-
 		new linkContextMenu(this)
 	}
 
 	initViewObservers(plugin: SuperchargedLinks) {
+		// Reset observers
 		plugin.observers.forEach(([observer, type ]) => {
 			observer.disconnect();
 		});
 		plugin.observers = [];
+
+		// Register new observers
 		plugin.registerViewType('backlink', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('outgoing-link', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('search', plugin, ".tree-item-inner");
@@ -167,7 +161,17 @@ export default class SuperchargedLinks extends Plugin {
 
 	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false ){
 		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
-		if (leaves.length > 1) console.error('more than one ' + viewTypeName + ' panel');
+		if (leaves.length > 1) {
+			for (let i=0; i < leaves.length; i++) {
+				const container = leaves[i].view.containerEl;
+				if (updateDynamic) {
+					plugin._watchContainerDynamic(viewTypeName + i, container, plugin, selector)
+				}
+				else {
+					plugin._watchContainer(viewTypeName + i, container, plugin, selector);
+				}
+			}
+		}
 		else if (leaves.length < 1) return;
 		else {
 			const container = leaves[0].view.containerEl;
