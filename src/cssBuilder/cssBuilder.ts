@@ -1,6 +1,5 @@
 import {CSSLink, matchSign} from "./cssLink";
 import SuperchargedLinks from "../../main";
-import {displayText} from "./cssBuilderModal";
 
 
 const colorSet = [[
@@ -237,7 +236,14 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
     }
     await plugin.app.vault.create(path, instructions.join('\n'));
 
-    plugin.app.workspace.trigger("parse-style-settings");
+    // Activate snippet
+    if (plugin.settings.activateSnippet) {
+        // @ts-ignore
+        const customCss = plugin.app.customCss;
+        customCss.readCssFolders();
+        customCss.setCssEnabledStatus('supercharged-links-gen', true);
+    }
 
-    // return instructions.join('\n')
+    // Ensure Style Settings reads changes
+    plugin.app.workspace.trigger("parse-style-settings");
 }

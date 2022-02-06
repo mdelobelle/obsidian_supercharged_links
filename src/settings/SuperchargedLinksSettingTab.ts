@@ -42,10 +42,9 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 		containerEl.createEl('h4', {text: 'Styling'});
 		const styleSettingDescription = containerEl.createDiv();
 		styleSettingDescription.innerHTML = `
-Styling can be done using CSS snippets or (easier!) using the Style settings plugin. Follow the steps below:
+Styling can be done using the Style Settings plugin. Follow the steps below:
  <ol>
  <li>Create selectors down below.</li>
- <li>Go to the Appearance settings, reload snippets, and enable supercharged-links-gen.css.</li>
  <li>Go to the Style Settings tab and style your links!</li>
 </ol>`
 		const selectorDiv = containerEl.createDiv();
@@ -106,15 +105,16 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 				});
 			});
 
+		containerEl.createEl('h4', {text: 'Advanced'});
 		// Managing choice wether you want to parse tags both from normal tags and in the frontmatter
 		new Setting(containerEl)
 			.setName('Parse all tags in the file')
 			.setDesc('Sets the `data-link-tags`-attribute to look for tags both in the frontmatter and in the file as #tag-name')
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.targetTags)
-				toggle.onChange(value => {
+				toggle.onChange(async value => {
 					this.plugin.settings.targetTags = value
-					this.plugin.saveSettings()
+					await this.plugin.saveSettings();
 				})
 			})
 
@@ -127,8 +127,21 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 				toggle.onChange(async value => {
 					this.plugin.settings.getFromInlineField = value
 					await this.plugin.saveSettings()
-				})
-		})
+				});
+		});
+
+		// Managing choice wether you get attributes from inline fields and frontmatter or only frontmater
+		new Setting(containerEl)
+			.setName('Automatically activate snippet')
+			.setDesc('If true, this will automatically activate the generated CSS snippet "supercharged-links-gen.css". ' +
+				'Turn this off if you don\'t want this to happen.')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.activateSnippet)
+				toggle.onChange(async value => {
+					this.plugin.settings.activateSnippet = value
+					await this.plugin.saveSettings()
+				});
+			});
 
         /* Managing predefined values for properties */
 		/* Manage menu options display*/
@@ -198,7 +211,7 @@ Styling can be done using CSS snippets or (easier!) using the Style settings plu
 
 	async _generateSnippet() {
 		await buildCSS(this.plugin.settings.selectors, this.plugin);
-		new Notice("Generated supercharged-links-gen.css");
+		// new Notice("Generated supercharged-links-gen.css");
 	}
 
 	drawSelectors(div: HTMLElement) {
