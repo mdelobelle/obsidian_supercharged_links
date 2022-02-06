@@ -1,6 +1,6 @@
 ## Supercharged Links
 
-This plugin gives you huge control over the style of links and references in your Obsidian vault!
+This plugin allows you to style the links in your Obsidian vault based on your notes metadata!
 You can, for example, automatically add colors and emojis to the links:
 
 <img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-workspace.png alt="drawing" style="width:600px;"/>
