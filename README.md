@@ -3,40 +3,24 @@
 This plugin allows you to style the links in your Obsidian vault based on your notes metadata!
 You can, for example, automatically add colors and emojis to the links:
 
-<img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-workspace.png alt="drawing" style="width:600px;"/>
+<img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/overview-screenshot.png alt="drawing" style="width:700px;"/>
 
 Why is this useful?
-Let's take an example, where the notes in your vault represent something, like a paper, a location, a person or a day in the week. Then you can use Supercharged links to make sure that those different links stand out. Another use case might be to give notes with the `#todo` tag a loud color.
-This visual feedback helps you find the right link back quickly!
+For example, when your notes represent something, like a paper, a location, a person or a day in the week. Then you can use Supercharged links to have those notes stand out. Another use case might be to give notes with the `#todo` tag a loud color.
+This visual feedback helps you find the right note back quickly!
 
+Setting Supercharged Links up is easier than ever now with the [Style Settings Plugin](https://github.com/mgmeyers/obsidian-style-settings)! See down below for a tutorial to get started. 
 
-Now how does this work? The plugin adds CSS attributes to the links.
-Those attributes will be based on the tags, frontmatter and Dataview inline links in your notes.
-Combined with css snippets, you will have full control over customizing your links! 
-It supports note preview, live preview (!), backlinks panel, the file browser, the search panel, and supports the Breadcrumbs plugin.
-
-
-It also adds context menu items to modifiy target note's frontmatter properties and "inline fields" (dataview syntax) by right-clicking on the link
-The preset values for those properties can be managed globally in the plugin's settings or on a file-by-file basis thanks to fileClass definition (see section 4)
-
-<img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/e147ac10179d2c351d9a9f222e4637ee7fe32aed/images/superchargeLink.gif alt="drawing" style="width:600px;"/>
-
-## Basic link styling
-
-The plugin scans your workspace to find links to your files. For each of those links, it will use the front-matter and tags, and adds them as CSS attributes to the html element of the link. 
-
-This might sound a bit complicated! So let's break it down step by step :)
-
-### Front-matter
+## Getting started
 
 The front-matter section is an optional section of your note written in Yaml. It can be used to add meta-data to your notes.
-For documentation, see https://help.obsidian.md/Advanced+topics/YAML+front+matter
+For documentation, see 
 
-Let's say I have a note about Jim : Jim.md
+Let's say I have a note about Jim called `Jim.md` with the tag `#person` and some [YAML frontmatter](https://help.obsidian.md/Advanced+topics/YAML+front+matter). 
 
 ```md
 ---
-next-actions: [👥, ☎️, 🍻, say hi]
+status: call soon
 age: 42
 ---
 
@@ -46,32 +30,46 @@ Jim is one of my colleagues
 
 ```
 
-I want to have a specific display of the places in Obsidian that link to Jim's note. In particular, I wantjk to display a blue tag-like rounded rectangle <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling.png" style="height:30px;vertical-align:bottom">  and display <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/simple-styling-hover.png" style="height:30px;vertical-align:bottom">  when hovering the link
+I want to change what links to Jim's note look like. In particular, I want links to persons to have a blue background, and I want persons I have to call to have a telephone emoji ☎️  in front: <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/phone-jim.png" style="height:30px;vertical-align:bottom">.
+### Setting up the plugin
+Time to set up the plugin to get this work! Let's go to the plugin settings.
+First, you have to tell the plugin what front-matter attributes to include for your styling in the `Target Attributes for Styling` option on top. Let's add `status` here, which indicates whether we need to call Jim!
 
-### Plugin settings
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/target-status.png" alt="drawing" style="width:500px;"/>
 
-First, you have to tell the plugin what front-matter properties you want your internal-link to be supercharged with in the `Target Attributes for Styling` section of the plugin's settings.
+Next, we have to tell the plugin to look for notes with the tag `#person`. In the settings, under the Styling header, create a new selector. Under types of selector, select "Tag", and add `person` down below:
 
-<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-settings.png" alt="drawing" style="width:400px;"/>
 
-So in this case the plugin will only include `category` and `next-actions` and `tags` in the internal-links.
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/tag-person.png" alt="drawing" style="width:700px;"/>
 
-You can choose not to search for Dataview inline fields, which will improve performance if you are not using those.
+We also want to add an emoji when notes have `call soon` as its `status`. We will tell the plugin to look for the attribute `status`, and that its value should be `call soon`. Note that this will also look for [inline fields called status from DataView](https://blacksmithgu.github.io/obsidian-dataview/data-annotation/). 
 
-By default, it will also add the tags in your note as a property.
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/call-soon.png" alt="drawing" style="width:700px;"/>
 
-### Supercharged links!
+One important setting for our use case is that we only enable the "Add content before link" option under "Style options", since otherwise this style would override the one from the tag `#person`! 
 
-When a file is opened or when one of the files of your vault has changed, the plugin is "supercharging" all internal links with the front-matter properties set previously. This only happens if these properties are present in the file targeted by the link.
+In addition to styling based on attributes or tags, we can also style notes based on their 'path' (which includes its name, folders and extension). For example, we can style all notes in the folder `dailies`. Make sure to select 'Contains value' under match here instead of 'Exact match':
 
-Let's say that I have a file daily.md like this:
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/path-dailies.png" alt="drawing" style="width:700px;"/>
 
-Daily.md
+### Time to style!
+First, make sure you have the [Style Settings Plugin](https://github.com/mgmeyers/obsidian-style-settings) installed and enabled. Then, under settings, navigate to the settings of Style Settings. Now we are ready to style our links! Let's start with setting up our style for notes with the tag `#person`. We will use a white text color, enable the background, and use a nice blue background there. 
 
-```md
-[[Jim]] will be organizing the weekly steering committee
-```
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/style-person.png" alt="drawing" style="width:700px;"/>
 
+Next, let's add emoji's before notes with the call soon status. All we have to do here is copy the ☎️ into the text area "Prepend text".
+
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/style-call-soon.png" alt="drawing" style="width:700px;"/>
+
+And voila!
+
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/result-call-jim.png" alt="drawing" style="width:700px;"/>
+
+
+## Advanced use
+While the Style Settings integration provides a huge amount of customizability options, if you are comfortable with CSS and HTML, you can go even further with styling your links. For that, let's explain what this plugin does in the background.
+
+Let's say I have some link to `[[Jim]]` somewhere.
 Without the plugin activated, the HTML link element would normally look like this: 
 
 ```
@@ -80,19 +78,15 @@ Without the plugin activated, the HTML link element would normally look like thi
 
 This does not give any information about what is in the Jim.md note! So, we wouldn't be able to customize it.
 
-That's where the plugin comes in: it will add two extra properties in the `<a>` element : `data-link-next-actions` and `data-link-tags`. `data-link-tags` is a special property, which will also include tags like `#person` that might be in your file. 
+That's where this plugin comes in: it will add two extra properties in the `<a>` element : `data-link-status` and `data-link-tags`. **Importantly**, these attributes are prefixed with `data-link` so that it will not conflict with other attributes in Obsidian.
 
-**Importantly**, the plugin adds these properties by prefixing them with `data-link` so that it will not conflict with other attributes in other plugins or Obsidian itself.
-
-So... with the plugin activated the `<a>`element will be supercharged like this: `<a data-href="Jim" href="Jim" class="internal-link" target="_blank" rel="noopener" data-link-next-actions="👥 ☎️ 🍻 say hi" data-link-tags="#person" >Jim</a>`
-
-Although `category` is included in settings as a property to track, since it's not included in Jim.md front-matter section, the property `data-link-category` is not included in the `<a>` element
+With the plugin active, the `<a>`element will be supercharged like this: `<a data-href="Jim" href="Jim" class="internal-link data-link-text data-link-icon data-link-icon-after" target="_blank" rel="noopener" data-link-status="call soon" data-link-tags="#person" >Jim</a>`
 
 ### Style your links with CSS!
 
-Now you can enjoy the flexibilty of css to customize your links by setting CSS properties in a CSS snippet like `links.css`. To create a CSS snippet, go to the Obsidian settings, then to Appearance and scroll to the CSS snippets section. Click on the little folder icon, then create a new file in the opened folder called `links.css`. 
+You can use the flexibility of CSS to customize your links by setting CSS properties in a CSS snippet like `links.css`. To create a CSS snippet, go to the Obsidian settings, then to Appearance and scroll to the CSS snippets section. Click on the little folder icon, then create a new file in the opened folder called `links.css`. 
 
-#### Examples
+#### Example CSS snippets
 
 To change the color of every appearance of a link to a note based on the tag in the file:
 
@@ -103,7 +97,7 @@ To change the color of every appearance of a link to a note based on the tag in 
 ```
 This will target all HTML elements that contain the `data-link-tags` property, that is, all supercharged links.
 
-To put a fancy 👤 emoji before the name of each link to a "category: people" note:
+To put a 👤 emoji before the name of each link to a "category: people" note:
 ```css
 .data-link-icon[data-link-category$="People" i]::before{
     content: "👤 "
@@ -113,10 +107,10 @@ To put a fancy 👤 emoji before the name of each link to a "category: people" n
 
 Selecting specifically `.data-link-icon` is required to prevent bugs in Live Preview.
 
-To highlight the link in a tag-like blue rounded rectangle when there is a property next-actions in the target file:
+To highlight the link in a tag-like blue rounded rectangle when the property `status` is in the note:
 
 ```css
-:not(:empty)[data-link-next-actions]{
+:not(:empty)[data-link-next-status] {
     color: white;
     background-color: rgb(29, 29, 129);
     border-radius: 18px;
@@ -125,22 +119,18 @@ To highlight the link in a tag-like blue rounded rectangle when there is a prope
 ```
 
 
-
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-tag-in-note.png" style="width:500px">
 
-This will only change this in the preview view, because we are explicitly targetting `a.internal-link`.
-
-To display the value of the next actions property at the target file,  whenever you hover on the link:
+To display the value of the `status` property at the target file, but _only_ whenever you hover on the link:
 
 ```css
-a.internal-link[data-link-next-actions]:hover::after{
-    content: " ► "attr(data-link-next-actions)
+.data-link-icon-after[data-link-status]:hover::after{
+    content: " ► "attr(data-link-status)
 }
 ```
 
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/link-styling-hover-in-note.png" style="width:500px">
 
-A small caveat: `::after` may not be completely supported in Live Preview!
 
 To hide the display of links with the tag #hide from your notes (that is, from preview mode and live preview):
 ```css
@@ -154,7 +144,7 @@ a.internal-link[data-link-tags *="hide"],
 
 
 ### Demos 
-
+NOTE: These demos are somewhat outdated.
 #### Live Preview
 <img src="https://i.imgur.com/8VJm1TJ.gif" style="width:500px">
 
@@ -168,8 +158,10 @@ https://youtu.be/Ofm6gIRP-7o
 https://youtu.be/aaSZnkEuH4w
 
 ### Supported plugins
+Live preview, source view, reading mode and the file browser are fully supported in core Obsidian. Other plugins are also supported, as listed below:
+
 Core plugins:
-- Backlinks
+- Backlinks (including Backlinks in edit mode)
 - Outgoing links
 - Search
 - Starred files
@@ -181,10 +173,16 @@ Community plugins:
 - Recent files
 - Quicker Switcher++
 - Another Quick Switcher
+- Dataview (inline fields)
 
 Want support for another plugin? Create an issue here in the repo!
 
 ## Link context menu extra options
+This plugin also adds context menu items to modifiy target note's frontmatter properties and "inline fields" (dataview syntax) by right-clicking on the link
+The preset values for those properties can be managed globally in the plugin's settings or on a file-by-file basis thanks to fileClass definition (see section 4)
+
+<img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/e147ac10179d2c351d9a9f222e4637ee7fe32aed/images/superchargeLink.gif alt="drawing" style="width:600px;"/>
+
 
 Right click on a link will automatically display an item per target note's frontmatter property and "inline fields" (dataview syntax)
 
@@ -366,9 +364,5 @@ Because it can be overwhelming to remember this syntax, you can manage "type" an
 demo:
 https://youtu.be/U0Bo_x1B2TM
 
-## 5. Roadmap
-
-- [x] link context menu to modify frontmatter attributes
+## Roadmap
 - [ ] manage indented lists multi-values frontmatter property
-- [x] extend options management to iinline-fields
-- [x] fileClass fields types and validators
