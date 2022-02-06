@@ -12,10 +12,6 @@ This visual feedback helps you find the right note back quickly!
 Setting Supercharged Links up is easier than ever now with the [Style Settings Plugin](https://github.com/mgmeyers/obsidian-style-settings)! See down below for a tutorial to get started. 
 
 ## Getting started
-
-The front-matter section is an optional section of your note written in Yaml. It can be used to add meta-data to your notes.
-For documentation, see 
-
 Let's say I have a note about Jim called `Jim.md` with the tag `#person` and some [YAML frontmatter](https://help.obsidian.md/Advanced+topics/YAML+front+matter). 
 
 ```md
