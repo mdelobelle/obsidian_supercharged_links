@@ -42,7 +42,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 		containerEl.createEl('h4', {text: 'Styling'});
 		const styleSettingDescription = containerEl.createDiv();
 		styleSettingDescription.innerHTML = `
-Styling can be done using the Style Settings plugin. Follow the steps below:
+Styling can be done using the Style Settings plugin. 
  <ol>
  <li>Create selectors down below.</li>
  <li>Go to the Style Settings tab and style your links!</li>

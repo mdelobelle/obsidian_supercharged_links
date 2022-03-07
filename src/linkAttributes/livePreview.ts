@@ -81,7 +81,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                 const isPipe = props.has("link-alias-pipe");
                                 if (!isPipe && !isAlias) {
                                     if (iconDecoAfter) {
-                                        builder.add(to, to, iconDecoAfter);
+                                        builder.add(iconDecoAfterWhere, iconDecoAfterWhere, iconDecoAfter);
                                         iconDecoAfter = null;
                                         iconDecoAfterWhere = null;
                                     }
@@ -115,7 +115,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                     let deco = Decoration.mark({
                                         attributes: lastAttributes,
                                         class: "data-link-text"
-                                    })
+                                    });
                                     builder.add(from, to, deco);
                                     if (iconDecoAfter) {
                                         builder.add(to, to, iconDecoAfter);
