@@ -66,6 +66,9 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                 let lastAttributes = {};
                 let iconDecoAfter: Decoration = null;
                 let iconDecoAfterWhere: number = null;
+
+                let mdAliasFrom: number = null;
+                let mdAliasTo: number = null;
                 for (let {from, to} of view.visibleRanges) {
                     syntaxTree(view.state).iterate({
                         from,
@@ -79,6 +82,20 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                 const isLink = props.has("hmd-internal-link");
                                 const isAlias = props.has("link-alias");
                                 const isPipe = props.has("link-alias-pipe");
+
+                                // The 'alias' of the md link
+                                const isMDLink = props.has('link');
+                                // The 'internal link' of the md link
+                                const isMDUrl = props.has('url');
+                                const isMDFormatting = props.has('formatting-link');
+
+                                if (isMDLink && !isMDFormatting) {
+                                    // Link: The 'alias'
+                                    // URL: The internal link
+                                    mdAliasFrom = from;
+                                    mdAliasTo = to;
+                                }
+
                                 if (!isPipe && !isAlias) {
                                     if (iconDecoAfter) {
                                         builder.add(iconDecoAfterWhere, iconDecoAfterWhere, iconDecoAfter);
@@ -86,7 +103,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                         iconDecoAfterWhere = null;
                                     }
                                 }
-                                if (isLink && !isAlias && !isPipe) {
+                                if (isLink && !isAlias && !isPipe || isMDUrl) {
                                     let linkText = view.state.doc.sliceString(from, to);
                                     linkText = linkText.split("#")[0];
                                     let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
@@ -106,7 +123,27 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                         iconDecoAfter = Decoration.widget({
                                             widget: new HeaderWidget(attributes, true),
                                         });
-                                        builder.add(from, from, iconDecoBefore);
+
+                                        if (isMDUrl) {
+                                            // Apply retroactively to the alias found before
+                                            let deco = Decoration.mark({
+                                                attributes: attributes,
+                                                class: "data-link-text"
+                                            });
+                                            builder.add(mdAliasFrom, mdAliasFrom, iconDecoBefore);
+                                            builder.add(mdAliasFrom, mdAliasTo, deco);
+                                            if (iconDecoAfter) {
+                                                builder.add(mdAliasTo, mdAliasTo, iconDecoAfter);
+                                                iconDecoAfter = null;
+                                                iconDecoAfterWhere = null;
+                                                mdAliasFrom = null;
+                                                mdAliasTo = null;
+                                            }
+                                        }
+                                        else {
+                                            builder.add(from, from, iconDecoBefore);
+                                        }
+
                                         builder.add(from, to, deco);
                                         lastAttributes = attributes;
                                         iconDecoAfterWhere = to;
