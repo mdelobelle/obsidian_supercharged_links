@@ -1,4 +1,4 @@
-import {App, editorViewField, MarkdownView} from "obsidian";
+import {App, editorViewField, MarkdownView, TFile} from "obsidian";
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
 import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
 import {RangeSetBuilder} from "@codemirror/rangeset";
@@ -107,6 +107,12 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                     let linkText = view.state.doc.sliceString(from, to);
                                     linkText = linkText.split("#")[0];
                                     let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
+                                    if (isMDUrl && !file) {
+                                        try {
+                                            file = app.vault.getAbstractFileByPath(decodeURIComponent(linkText)) as TFile;
+                                        }
+                                        catch(e) {}
+                                    }
                                     if (file) {
                                         let _attributes = fetchTargetAttributesSync(app, settings, file, true);
                                         let attributes: Record<string, string> = {};
