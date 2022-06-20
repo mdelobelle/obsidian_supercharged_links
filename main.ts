@@ -1,10 +1,11 @@
-import {Plugin, MarkdownView, Notice, debounce} from 'obsidian';
+import {Plugin, MarkdownView, Notice, debounce, TFile, TAbstractFile} from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {
 	updateElLinks,
 	updateVisibleLinks,
 	clearExtraAttributes,
 	updateDivExtraAttributes,
+	fetchTargetAttributesSync,
 } from "src/linkAttributes/linkAttributes"
 import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
 import Field from 'src/Field';
@@ -13,6 +14,9 @@ import NoteFieldsCommandsModal from "src/options/NoteFieldsCommandsModal"
 import FileClassAttributeSelectModal from 'src/fileClass/FileClassAttributeSelectModal';
 import { Prec } from "@codemirror/state";
 import {buildCMViewPlugin} from "./src/linkAttributes/livePreview";
+import {CSSLink} from "./src/cssBuilder/cssLink";
+
+type GraphColor = {a: number, rgb: number};
 
 export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
@@ -121,6 +125,7 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content');
+		plugin.registerGraphViewType(plugin);
 		// If backlinks in editor is on
 		// @ts-ignore
 		if (plugin.app?.internalPlugins?.plugins?.backlink?.instance?.options?.backlinkInDocument) {
@@ -157,6 +162,55 @@ export default class SuperchargedLinks extends Plugin {
 			});
 		});
 		this.modalObserver.observe(document.body, config);
+	}
+
+	registerGraphViewType(plugin: SuperchargedLinks) {
+		if (!plugin.settings.enableGraph) return;
+		this.app.workspace.getLeavesOfType('graph')
+			.map(leave => leave.view as any)
+			.forEach(view => {
+				// FIXME this lambda is invoked two times consequently, find out why and fix.
+				//console.log(`Registering render callbacks for graph view ${view.contentEl.id}:`);
+				//console.dir(view);
+
+				const renderer = view.renderer;
+
+				const app = plugin.app;
+				const vault = app.vault;
+
+				// Save current callback to call it during our redefined one.
+				// FIXME this setup can chain our callback multiple times if called multiple times itself.
+				// Maybe add some callback uniqueness check?
+				const oldCallback = renderer.renderCallback;
+				renderer.renderCallback = function() {
+					// TODO this gets called way to often, we should minimize the amount of work done here.
+					// Caching colors and/or matched rules for nodes should do the trick.
+					// TBD: where to do this, where to store this and when to flush the cache.
+					console.log('renderCallback...');
+					// TODO add relevant typing for Graph View types
+					// @ts-ignore
+					renderer.nodes.forEach(node => {
+						const file = vault.getAbstractFileByPath(node.id);
+						if (node.color != null) {
+							logGraphColor(node.color, `${node.id} original color: `);
+						}
+						plugin.settings.selectors.forEach(selector => {
+							if (fileMatchesSelector(plugin, file, selector)) {
+								// Get color set up by Style Settings.
+								// Original colors are set at :root, but Style Settings
+								// redefines them by styling `body.css-settings-manager`
+								// FIXME CSS variable name is copy-pasted from cssBuilder,
+								// maybe these properties should be abstracted away.
+								const colorStr = getComputedStyle(document.body)
+									.getPropertyValue(`--${selector.uid}-color`)
+								logCssColor(colorStr, `${node.id} match, new color: `)
+								node.color = colorCssToGraph(colorStr);
+							}
+						})
+					})
+					oldCallback(...arguments);
+				}
+			});
 	}
 
 	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false ){
@@ -258,4 +312,29 @@ export default class SuperchargedLinks extends Plugin {
 		this.settings.presetFields = this.initialProperties
 		await this.saveData(this.settings);
 	}
+}
+
+// TODO move out this function elsewhere
+function fileMatchesSelector(plugin: SuperchargedLinks, file: TAbstractFile, link: CSSLink): boolean {
+	if (file instanceof TFile) {
+		const attrs = fetchTargetAttributesSync(plugin.app, plugin.settings, file, true);
+		return link.type == "path" && attrs["path"] == link.value ||
+			link.type == "tag" && attrs["tags"].indexOf(link.value) != -1 ||
+			link.type == "attribute" && false; // TODO handle attributes
+	} else {
+		return false;
+	}
+}
+
+// TODO move out these two functions elsewhere
+function colorGraphToCss(graphColor: GraphColor): string { return "#" + graphColor.rgb.toString(16); }
+function colorCssToGraph(cssColor: string): GraphColor {
+	return {a: 1, rgb: parseInt(cssColor.trim().substring(1), 16)};
+}
+
+// TODO remove these logging functions
+function logCssColor(cssColor: string, prefix: string = '') { logColors(cssColor, this.colorCssToGraph(cssColor), prefix) }
+function logGraphColor(graphColor: GraphColor, prefix: string = '') { logColors(this.colorGraphToCss(graphColor), graphColor, prefix) }
+function logColors(cssColor: string, graphColor: GraphColor, prefix: string = '') {
+	console.log("%s%ccss: %s, graph: %s", prefix, `color:${cssColor}`, cssColor, JSON.stringify(graphColor));
 }

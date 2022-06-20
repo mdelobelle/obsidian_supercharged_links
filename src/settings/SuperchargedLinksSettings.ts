@@ -15,6 +15,7 @@ export interface SuperchargedLinksSettings {
 	enableBacklinks: boolean;
 	enableQuickSwitcher: boolean;
 	enableSuggestor: boolean;
+	enableGraph: boolean;
 	selectors: CSSLink[];
 }
 
@@ -32,5 +33,6 @@ export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	enableBacklinks: true,
 	enableQuickSwitcher: true,
 	enableSuggestor: true,
+	enableGraph: true,
 	selectors: []
 }

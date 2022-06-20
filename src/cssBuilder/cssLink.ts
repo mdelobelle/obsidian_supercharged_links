@@ -66,9 +66,9 @@ class CSSLink {
         //return id of format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
         this.uid = s4() + "-" + s4();
         this.selectText = true;
+        this.selectBackground = true;
         this.selectAppend = true;
         this.selectPrepend = true;
-        this.selectBackground = true;
     }
 }
 
