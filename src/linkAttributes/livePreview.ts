@@ -1,9 +1,9 @@
 import {App, editorViewField, MarkdownView, TFile} from "obsidian";
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
 import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
-import {RangeSetBuilder} from "@codemirror/rangeset";
+import {RangeSetBuilder} from "@codemirror/state";
 import {syntaxTree} from "@codemirror/language";
-import {tokenClassNodeProp} from "@codemirror/stream-parser";
+import {tokenClassNodeProp} from "@codemirror/language";
 import {fetchTargetAttributesSync} from "./linkAttributes";
 
 export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings)
@@ -73,10 +73,10 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                     syntaxTree(view.state).iterate({
                         from,
                         to,
-                        enter: (type, from, to) => {
+                        enter: (node) => {
 
 
-                            const tokenProps = type.prop(tokenClassNodeProp);
+                            const tokenProps = node.type.prop(tokenClassNodeProp);
                             if (tokenProps) {
                                 const props = new Set(tokenProps.split(" "));
                                 const isLink = props.has("hmd-internal-link");
@@ -92,8 +92,8 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                 if (isMDLink && !isMDFormatting) {
                                     // Link: The 'alias'
                                     // URL: The internal link
-                                    mdAliasFrom = from;
-                                    mdAliasTo = to;
+                                    mdAliasFrom = node.from;
+                                    mdAliasTo = node.to;
                                 }
 
                                 if (!isPipe && !isAlias) {
@@ -104,7 +104,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                     }
                                 }
                                 if (isLink && !isAlias && !isPipe || isMDUrl) {
-                                    let linkText = view.state.doc.sliceString(from, to);
+                                    let linkText = view.state.doc.sliceString(node.from, node.to);
                                     linkText = linkText.split("#")[0];
                                     let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
                                     if (isMDUrl && !file) {
@@ -147,21 +147,21 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                             }
                                         }
                                         else {
-                                            builder.add(from, from, iconDecoBefore);
+                                            builder.add(node.from, node.from, iconDecoBefore);
                                         }
 
-                                        builder.add(from, to, deco);
+                                        builder.add(node.from, node.to, deco);
                                         lastAttributes = attributes;
-                                        iconDecoAfterWhere = to;
+                                        iconDecoAfterWhere = node.to;
                                     }
                                 } else if (isLink && isAlias) {
                                     let deco = Decoration.mark({
                                         attributes: lastAttributes,
                                         class: "data-link-text"
                                     });
-                                    builder.add(from, to, deco);
+                                    builder.add(node.from, node.to, deco);
                                     if (iconDecoAfter) {
-                                        builder.add(to, to, iconDecoAfter);
+                                        builder.add(node.to, node.to, iconDecoAfter);
                                         iconDecoAfter = null;
                                         iconDecoAfterWhere = null;
                                     }
