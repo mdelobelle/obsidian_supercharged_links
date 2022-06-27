@@ -174,6 +174,7 @@ Community plugins:
 - Quicker Switcher++
 - Another Quick Switcher
 - Dataview (inline fields)
+- Omnisearch
 
 Want support for another plugin? Create an issue here in the repo!
 
