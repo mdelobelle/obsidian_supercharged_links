@@ -19,7 +19,7 @@ export default class SuperchargedLinks extends Plugin {
 	initialProperties: Array<Field> = []
 	settingTab: SuperchargedLinksSettingTab
 	private observers: [MutationObserver, string, string][];
-	private modalObserver: MutationObserver;
+	private modalObservers: MutationObserver[] = [];
 
 	async onload(): Promise<void> {
 		console.log('Supercharged links loaded');
@@ -57,8 +57,9 @@ export default class SuperchargedLinks extends Plugin {
 
 		this.app.workspace.onLayoutReady(() => {
 			this.initViewObservers(this);
-			this.initModalObservers(this);
+			this.initModalObservers(this, document);
 		});
+		this.registerEvent(this.app.workspace.on("window-open", (window, win) => this.initModalObservers(this, window.getContainer().doc)));
 		this.registerEvent(this.app.workspace.on("layout-change", () => this.initViewObservers(this)));
 
 		this.addCommand({
@@ -128,14 +129,14 @@ export default class SuperchargedLinks extends Plugin {
 		}
 	}
 
-	initModalObservers(plugin: SuperchargedLinks) {
+	initModalObservers(plugin: SuperchargedLinks, doc: Document) {
 		const config = {
 			subtree: false,
 			childList: true,
 			attributes: false
 		};
 
-		this.modalObserver = new MutationObserver(records => {
+		this.modalObservers.push(new MutationObserver(records => {
 			records.forEach((mutation) => {
 				if (mutation.type === 'childList') {
 					mutation.addedNodes.forEach(n => {
@@ -155,8 +156,8 @@ export default class SuperchargedLinks extends Plugin {
 					});
 				}
 			});
-		});
-		this.modalObserver.observe(document.body, config);
+		}));
+		this.modalObservers.last().observe(doc.body, config);
 	}
 
 	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false ){
@@ -246,7 +247,9 @@ export default class SuperchargedLinks extends Plugin {
 				this.removeFromContainer(leaf.view.containerEl, own_class);
 			})
 		});
-		this.modalObserver.disconnect();
+		for (const observer of this.modalObservers) {
+			observer.disconnect();
+		}
 		console.log('Supercharged links unloaded');
 	}
 
