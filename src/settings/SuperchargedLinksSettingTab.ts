@@ -104,6 +104,16 @@ Styling can be done using the Style Settings plugin.
 					this.plugin.saveSettings()
 				});
 			});
+		new Setting(containerEl)
+			.setName('Enable in Graph View')
+			.setDesc('If true, this will also supercharge graph views.')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.enableGraph)
+				toggle.onChange(value => {
+					this.plugin.settings.enableGraph = value
+					this.plugin.saveSettings()
+				});
+			});
 
 		containerEl.createEl('h4', {text: 'Advanced'});
 		// Managing choice wether you want to parse tags both from normal tags and in the frontmatter
