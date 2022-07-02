@@ -181,4 +181,4 @@ Want support for another plugin? Create an issue here in the repo!
 ## Link context menu extra options
 This plugin also adds context menu items to modifiy target note's frontmatter properties and "inline fields" (dataview syntax) by right-clicking on the link.
 
-**This functionality is deprecated and will be removed in a future version of the plugin. We recommend using the [MetaEdit plugin](https://github.com/chhoumann/MetaEdit) instead.**
+**This functionality is deprecated and has been migrated to metadata-menu plugin, available with brat https://github.com/mdelobelle/metadatamenu .**

@@ -2,9 +2,44 @@
   "targetAttributes": [
     "tags",
     "category",
-    "blob"
+    "blob",
+    "Status"
   ],
   "targetTags": true,
+  "classFilesPath": "🗃/",
+  "getFromInlineField": true,
+  "activateSnippet": true,
+  "enableEditor": true,
+  "enableFileList": true,
+  "enableBacklinks": true,
+  "enableQuickSwitcher": true,
+  "enableSuggestor": true,
+  "selectors": [
+    {
+      "type": "tag",
+      "name": "tags",
+      "value": "People",
+      "matchCaseSensitive": false,
+      "match": "exact",
+      "uid": "3dbb-f3d0",
+      "selectText": false,
+      "selectAppend": false,
+      "selectPrepend": true,
+      "selectBackground": false
+    },
+    {
+      "type": "attribute",
+      "name": "Status",
+      "value": "#T/Completed",
+      "matchCaseSensitive": false,
+      "match": "exact",
+      "uid": "c955-67db",
+      "selectText": false,
+      "selectAppend": false,
+      "selectPrepend": true,
+      "selectBackground": false
+    }
+  ],
   "presetFields": [
     {
       "name": "category",
@@ -40,10 +75,5 @@
   "globallyIgnoredFields": [
     ""
   ],
-  "classFilesPath": "🗃/",
-  "getFromInlineField": true,
-  "enableEditor": true,
-  "enableFileList": false,
-  "enableBacklinks": false,
   "getFromFrontmatter": true
 }
