@@ -1,4 +1,4 @@
-import {Plugin, MarkdownView, Notice, debounce} from 'obsidian';
+import { Plugin, debounce } from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {
 	updateElLinks,
@@ -7,16 +7,11 @@ import {
 	updateDivExtraAttributes,
 } from "src/linkAttributes/linkAttributes"
 import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
-import Field from 'src/Field';
-import linkContextMenu from "src/options/linkContextMenu"
-import NoteFieldsCommandsModal from "src/options/NoteFieldsCommandsModal"
-import FileClassAttributeSelectModal from 'src/fileClass/FileClassAttributeSelectModal';
 import { Prec } from "@codemirror/state";
-import {buildCMViewPlugin} from "./src/linkAttributes/livePreview";
+import { buildCMViewPlugin } from "./src/linkAttributes/livePreview";
 
 export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
-	initialProperties: Array<Field> = []
 	settingTab: SuperchargedLinksSettingTab
 	private observers: [MutationObserver, string, string][];
 	private modalObservers: MutationObserver[] = [];
@@ -25,12 +20,6 @@ export default class SuperchargedLinks extends Plugin {
 		console.log('Supercharged links loaded');
 		await this.loadSettings();
 
-
-		this.settings.presetFields.forEach(prop => {
-			const property = new Field()
-			Object.assign(property, prop)
-			this.initialProperties.push(property)
-		})
 		this.addSettingTab(new SuperchargedLinksSettingTab(this.app, this));
 		this.registerMarkdownPostProcessor((el, ctx) => {
 			updateElLinks(this.app, this, el, ctx)
@@ -39,7 +28,7 @@ export default class SuperchargedLinks extends Plugin {
 		// Plugins watching
 		this.registerEvent(this.app.metadataCache.on('changed', debounce((_file) => {
 			updateVisibleLinks(this.app, this);
-			this.observers.forEach(([observer, type, own_class ]) => {
+			this.observers.forEach(([observer, type, own_class]) => {
 				const leaves = this.app.workspace.getLeavesOfType(type);
 				leaves.forEach(leaf => {
 					this.updateContainer(leaf.view.containerEl, this, own_class);
@@ -62,51 +51,11 @@ export default class SuperchargedLinks extends Plugin {
 		this.registerEvent(this.app.workspace.on("window-open", (window, win) => this.initModalObservers(this, window.getContainer().doc)));
 		this.registerEvent(this.app.workspace.on("layout-change", () => this.initViewObservers(this)));
 
-		this.addCommand({
-			id: "field_options",
-			name: "field options",
-			hotkeys: [
-				{
-					modifiers: ["Alt"],
-					key: 'O',
-				},
-			],
-			callback: () => {
-				const leaf = this.app.workspace.activeLeaf
-				if (leaf.view instanceof MarkdownView && leaf.view.file) {
-					const fieldsOptionsModal = new NoteFieldsCommandsModal(this.app, this, leaf.view.file)
-					fieldsOptionsModal.open()
-				}
-			},
-		});
-
-		/* TODO : add a context menu for fileClass files to show the same options as in FileClassAttributeSelectModal*/
-		this.addCommand({
-			id: "fileClassAttr_options",
-			name: "fileClass attributes options",
-			hotkeys: [
-				{
-					modifiers: ["Alt"],
-					key: 'P',
-				},
-			],
-			callback: () => {
-				const leaf = this.app.workspace.activeLeaf
-				if (leaf.view instanceof MarkdownView && leaf.view.file && `${leaf.view.file.parent.path}/` == this.settings.classFilesPath) {
-					const modal = new FileClassAttributeSelectModal(this, leaf.view.file)
-					modal.open()
-				} else {
-					const notice = new Notice("This is not a fileClass", 2500)
-				}
-			},
-		});
-
-		new linkContextMenu(this)
 	}
 
 	initViewObservers(plugin: SuperchargedLinks) {
 		// Reset observers
-		plugin.observers.forEach(([observer, type ]) => {
+		plugin.observers.forEach(([observer, type]) => {
 			observer.disconnect();
 		});
 		plugin.observers = [];
@@ -160,10 +109,10 @@ export default class SuperchargedLinks extends Plugin {
 		this.modalObservers.last().observe(doc.body, config);
 	}
 
-	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false ){
+	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false) {
 		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
 		if (leaves.length > 1) {
-			for (let i=0; i < leaves.length; i++) {
+			for (let i = 0; i < leaves.length; i++) {
 				const container = leaves[i].view.containerEl;
 				if (updateDynamic) {
 					plugin._watchContainerDynamic(viewTypeName + i, container, plugin, selector)
@@ -189,7 +138,7 @@ export default class SuperchargedLinks extends Plugin {
 	updateContainer(container: HTMLElement, plugin: SuperchargedLinks, selector: string) {
 		if (!plugin.settings.enableBacklinks) return;
 		const nodes = container.findAll(selector);
-		for (let i = 0; i < nodes.length; ++i)  {
+		for (let i = 0; i < nodes.length; ++i) {
 			const el = nodes[i] as HTMLElement;
 			updateDivExtraAttributes(plugin.app, plugin.settings, el, "");
 		}
@@ -197,15 +146,15 @@ export default class SuperchargedLinks extends Plugin {
 
 	removeFromContainer(container: HTMLElement, selector: string) {
 		const nodes = container.findAll(selector);
-		for (let i = 0; i < nodes.length; ++i)  {
-		    const el = nodes[i] as HTMLElement;
+		for (let i = 0; i < nodes.length; ++i) {
+			const el = nodes[i] as HTMLElement;
 			clearExtraAttributes(el);
 		}
 	}
 
 	_watchContainer(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string) {
 		let observer = new MutationObserver((records, _) => {
-			 plugin.updateContainer(container, plugin, selector);
+			plugin.updateContainer(container, plugin, selector);
 		});
 		observer.observe(container, { subtree: true, childList: true, attributes: false });
 		if (viewType) {
@@ -213,7 +162,7 @@ export default class SuperchargedLinks extends Plugin {
 		}
 	}
 
-	_watchContainerDynamic(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, own_class='tree-item-inner', parent_class='tree-item') {
+	_watchContainerDynamic(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, own_class = 'tree-item-inner', parent_class = 'tree-item') {
 		// Used for efficient updating of the backlinks panel
 		// Only loops through newly added DOM nodes instead of changing all of them
 		let observer = new MutationObserver((records, _) => {
@@ -240,7 +189,7 @@ export default class SuperchargedLinks extends Plugin {
 
 
 	onunload() {
-		this.observers.forEach(([observer, type, own_class ]) => {
+		this.observers.forEach(([observer, type, own_class]) => {
 			observer.disconnect();
 			const leaves = this.app.workspace.getLeavesOfType(type);
 			leaves.forEach(leaf => {
@@ -258,7 +207,6 @@ export default class SuperchargedLinks extends Plugin {
 	}
 
 	async saveSettings() {
-		this.settings.presetFields = this.initialProperties
 		await this.saveData(this.settings);
 	}
 }

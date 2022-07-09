@@ -1,10 +1,7 @@
-import {App, PluginSettingTab, Setting, ButtonComponent, ToggleComponent, Notice, debounce} from "obsidian"
+import { App, PluginSettingTab, Setting, debounce } from "obsidian"
 import SuperchargedLinks from "main"
-import FieldSettingsModal from "src/settings/FieldSettingsModal"
-import Field from "src/Field"
-import FieldSetting from "src/settings/FieldSetting"
-import {CSSBuilderModal, updateDisplay} from "../cssBuilder/cssBuilderModal";
-import {buildCSS} from "../cssBuilder/cssBuilder";
+import { CSSBuilderModal, updateDisplay } from "../cssBuilder/cssBuilderModal";
+import { buildCSS } from "../cssBuilder/cssBuilder";
 
 export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 	plugin: SuperchargedLinks;
@@ -17,29 +14,30 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
-		let {containerEl} = this;
+		let { containerEl } = this;
 
 		containerEl.empty();
 
-        /* Managing extra attirbutes for a.internal-link */
+		/* Managing extra attirbutes for a.internal-link */
 		new Setting(containerEl)
 			.setName('Target Attributes for styling')
 			.setDesc('Frontmatter attributes to target, comma separated')
-			.addTextArea((text) => {text
-				.setPlaceholder('Enter attributes as string, comma separated')
-				.setValue(this.plugin.settings.targetAttributes.join(', '))
-				.onChange(async (value) => {
-					this.plugin.settings.targetAttributes = value.replace(/\s/g,'').split(',');
-					if (this.plugin.settings.targetAttributes.length === 1 && !this.plugin.settings.targetAttributes[0]) {
-						this.plugin.settings.targetAttributes = [];
-					}
-					await this.plugin.saveSettings();
-				})
+			.addTextArea((text) => {
+				text
+					.setPlaceholder('Enter attributes as string, comma separated')
+					.setValue(this.plugin.settings.targetAttributes.join(', '))
+					.onChange(async (value) => {
+						this.plugin.settings.targetAttributes = value.replace(/\s/g, '').split(',');
+						if (this.plugin.settings.targetAttributes.length === 1 && !this.plugin.settings.targetAttributes[0]) {
+							this.plugin.settings.targetAttributes = [];
+						}
+						await this.plugin.saveSettings();
+					})
 				text.inputEl.rows = 6;
 				text.inputEl.cols = 25;
 			});
 
-		containerEl.createEl('h4', {text: 'Styling'});
+		containerEl.createEl('h4', { text: 'Styling' });
 		const styleSettingDescription = containerEl.createDiv();
 		styleSettingDescription.innerHTML = `
 Styling can be done using the Style Settings plugin. 
@@ -51,7 +49,7 @@ Styling can be done using the Style Settings plugin.
 		this.drawSelectors(selectorDiv);
 
 
-		containerEl.createEl('h4', {text: 'Settings'});
+		containerEl.createEl('h4', { text: 'Settings' });
 		new Setting(containerEl)
 			.setName('Enable in Editor')
 			.setDesc('If true, this will also supercharge internal links in the editor view of a note.')
@@ -105,7 +103,7 @@ Styling can be done using the Style Settings plugin.
 				});
 			});
 
-		containerEl.createEl('h4', {text: 'Advanced'});
+		containerEl.createEl('h4', { text: 'Advanced' });
 		// Managing choice wether you want to parse tags both from normal tags and in the frontmatter
 		new Setting(containerEl)
 			.setName('Parse all tags in the file')
@@ -120,17 +118,17 @@ Styling can be done using the Style Settings plugin.
 
 		// Managing choice wether you get attributes from inline fields and frontmatter or only frontmater
 		new Setting(containerEl)
-		.setName('Search for attribute in Inline fields like <field::>')
-		.setDesc('Sets the `data-link-<field>`-attribute to the value of inline fields')
-		.addToggle(toggle => {
-			toggle.setValue(this.plugin.settings.getFromInlineField)
+			.setName('Search for attribute in Inline fields like <field::>')
+			.setDesc('Sets the `data-link-<field>`-attribute to the value of inline fields')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.getFromInlineField)
 				toggle.onChange(async value => {
 					this.plugin.settings.getFromInlineField = value
 					await this.plugin.saveSettings()
 				});
-		});
+			});
 
-		// Managing choice wether you get attributes from inline fields and frontmatter or only frontmater
+		// Automatically activate snippet
 		new Setting(containerEl)
 			.setName('Automatically activate snippet')
 			.setDesc('If true, this will automatically activate the generated CSS snippet "supercharged-links-gen.css". ' +
@@ -143,66 +141,11 @@ Styling can be done using the Style Settings plugin.
 				});
 			});
 
-        /* Managing predefined values for properties */
+		/* Managing predefined values for properties */
 		/* Manage menu options display*/
 		new Setting(containerEl)
 			.setName("Display field options in context menu")
-			.setDesc("Choose to show or hide fields options in the context menu of a link or a file")
-			.addToggle((toggle: ToggleComponent) => {
-				toggle.setValue(this.plugin.settings.displayFieldsInContextMenu)
-				toggle.onChange(async value => {
-					this.plugin.settings.displayFieldsInContextMenu = value
-					await this.plugin.saveSettings()
-				})
-			})
-		/* Exclude Fields from context menu*/
-		new Setting(containerEl)
-			.setName('Ignored fields')
-			.setDesc('Fields to be ignored by the plugin when adding options to the context menu')
-			.addTextArea((text) => {text
-				.setPlaceholder('Enter fields as string, comma separated')
-				.setValue(this.plugin.settings.globallyIgnoredFields.join(', '))
-				.onChange(async (value) => {
-					this.plugin.settings.globallyIgnoredFields = value.replace(/\s/g,'').split(',');
-					await this.plugin.saveSettings();
-				})
-				text.inputEl.rows = 6;
-				text.inputEl.cols = 25;
-			});
-
-		/* Set classFiles Path*/
-		new Setting(containerEl)
-		.setName('class Files path')
-		.setDesc('Path to the files containing the authorized fields for a type of note')
-		.addText((text) => {text
-			.setPlaceholder('Path/')
-			.setValue(this.plugin.settings.classFilesPath)
-			.onChange(async (value) => {
-				this.plugin.settings.classFilesPath = value
-				await this.plugin.saveSettings();
-			})
-		});
-
-        /* Add new property for which we want to preset values*/
-		new Setting(containerEl)
-			.setName("Add New Property Manager")
-			.setDesc("Add a new Frontmatter property for which you want preset values.")
-			.addButton((button: ButtonComponent): ButtonComponent => {
-				return button
-					.setTooltip("Add New Property Manager")
-					.setButtonText("+")
-					.onClick(async () => {
-						let modal = new FieldSettingsModal(this.app, this.plugin, containerEl);
-						modal.open();
-					});
-			});
-
-        /* Managed properties that currently have preset values */
-		this.plugin.initialProperties.forEach(prop => {
-            const property = new Field()
-            Object.assign(property, prop)
-			new FieldSetting(containerEl, property, this.app, this.plugin)
-		})
+			.setDesc("This feature has been migrated to metadata-menu plugin https://github.com/mdelobelle/metadatamenu")
 	}
 
 	generateSnippet() {
@@ -222,8 +165,8 @@ Styling can be done using the Style Settings plugin.
 			const s = new Setting(div)
 				.addButton(button => {
 					button.onClick(() => {
-						const oldSelector = selectors[i+1];
-						selectors[i+1] = selector;
+						const oldSelector = selectors[i + 1];
+						selectors[i + 1] = selector;
 						selectors[i] = oldSelector;
 						this.drawSelectors(div);
 
@@ -236,8 +179,8 @@ Styling can be done using the Style Settings plugin.
 				})
 				.addButton(button => {
 					button.onClick(() => {
-						const oldSelector = selectors[i-1];
-						selectors[i-1] = selector;
+						const oldSelector = selectors[i - 1];
+						selectors[i - 1] = selector;
 						selectors[i] = oldSelector;
 						this.drawSelectors(div);
 
@@ -249,7 +192,7 @@ Styling can be done using the Style Settings plugin.
 					}
 				})
 				.addButton(button => {
-					button.onClick(() =>{
+					button.onClick(() => {
 						const formModal = new CSSBuilderModal(this.plugin, (newSelector) => {
 							this.plugin.settings.selectors[i] = newSelector;
 							this.plugin.saveSettings();
