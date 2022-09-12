@@ -1,4 +1,4 @@
-import { Plugin, debounce } from 'obsidian';
+import {Plugin, debounce, TFile} from 'obsidian';
 import SuperchargedLinksSettingTab from "src/settings/SuperchargedLinksSettingTab"
 import {
 	updateElLinks,
@@ -25,18 +25,23 @@ export default class SuperchargedLinks extends Plugin {
 			updateElLinks(this.app, this, el, ctx)
 		});
 
-		// Plugins watching
-		this.registerEvent(this.app.metadataCache.on('changed', debounce((_file) => {
-			updateVisibleLinks(this.app, this);
-			this.observers.forEach(([observer, type, own_class]) => {
-				const leaves = this.app.workspace.getLeavesOfType(type);
+		const plugin = this;
+		const updateLinks = function(_file: TFile) {
+			updateVisibleLinks(plugin.app, plugin);
+			plugin.observers.forEach(([observer, type, own_class]) => {
+				const leaves = plugin.app.workspace.getLeavesOfType(type);
 				leaves.forEach(leaf => {
-					this.updateContainer(leaf.view.containerEl, this, own_class);
+					plugin.updateContainer(leaf.view.containerEl, this, own_class);
 				})
 			});
-			// Debounced to prevent lag when writing
-		}, 4500, true)));
+		}
 
+		// Plugins watching
+		// Debounced to prevent lag when writing
+		this.registerEvent(this.app.metadataCache.on('changed', debounce(updateLinks, 4500, true)));
+
+		// Needed for eg tab headers
+		this.registerEvent(this.app.workspace.on("file-open", updateLinks));
 
 		// Live preview
 		const ext = Prec.lowest(buildCMViewPlugin(this.app, this.settings));
