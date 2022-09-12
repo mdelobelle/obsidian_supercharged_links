@@ -133,10 +133,15 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
             const file: TFile = leaf.view.file;
             const cachedFile = app.metadataCache.getFileCache(file);
 
-            // Supercharge tab headers
             //@ts-ignore
             const tabHeader: HTMLElement = leaf.tabHeaderInnerTitleEl;
-            updateDivExtraAttributes(app, settings, tabHeader, "");
+            if (settings.enableTabHeader) {
+                // Supercharge tab headers
+                updateDivExtraAttributes(app, settings, tabHeader, "");
+            }
+            else {
+                clearExtraAttributes(tabHeader);
+            }
 
             if (cachedFile.links) {
                 cachedFile.links.forEach((link: LinkCache) => {

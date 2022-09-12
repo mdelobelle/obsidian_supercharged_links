@@ -2,6 +2,7 @@ import { App, PluginSettingTab, Setting, debounce } from "obsidian"
 import SuperchargedLinks from "main"
 import { CSSBuilderModal, updateDisplay } from "../cssBuilder/cssBuilderModal";
 import { buildCSS } from "../cssBuilder/cssBuilder";
+import {updateVisibleLinks} from "../linkAttributes/linkAttributes";
 
 export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 	plugin: SuperchargedLinks;
@@ -58,6 +59,7 @@ Styling can be done using the Style Settings plugin.
 				toggle.onChange(value => {
 					this.plugin.settings.enableEditor = value
 					this.plugin.saveSettings()
+					updateVisibleLinks(app, this.plugin);
 				})
 			})
 
@@ -69,6 +71,7 @@ Styling can be done using the Style Settings plugin.
 				toggle.onChange(value => {
 					this.plugin.settings.enableTabHeader = value
 					this.plugin.saveSettings()
+					updateVisibleLinks(app, this.plugin);
 				})
 			})
 
