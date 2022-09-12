@@ -6,6 +6,7 @@ export interface SuperchargedLinksSettings {
 	getFromInlineField: boolean;
 	activateSnippet: boolean;
 	enableEditor: boolean;
+	enableTabHeaders: boolean;
 	enableFileList: boolean;
 	enableBacklinks: boolean;
 	enableQuickSwitcher: boolean;
@@ -17,6 +18,7 @@ export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	targetAttributes: [],
 	targetTags: true,
 	getFromInlineField: true,
+	enableTabHeaders: true,
 	activateSnippet: true,
 	enableEditor: true,
 	enableFileList: true,

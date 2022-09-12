@@ -47,6 +47,7 @@ export default class SuperchargedLinks extends Plugin {
 		this.app.workspace.onLayoutReady(() => {
 			this.initViewObservers(this);
 			this.initModalObservers(this, document);
+			updateVisibleLinks(this.app, this);
 		});
 		this.registerEvent(this.app.workspace.on("window-open", (window, win) => this.initModalObservers(this, window.getContainer().doc)));
 		this.registerEvent(this.app.workspace.on("layout-change", () => this.initViewObservers(this)));

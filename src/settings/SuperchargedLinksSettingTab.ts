@@ -62,6 +62,17 @@ Styling can be done using the Style Settings plugin.
 			})
 
 		new Setting(containerEl)
+			.setName('Enable in tab headers')
+			.setDesc('If true, this will also supercharge the headers of a tab.')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.enableTabHeader)
+				toggle.onChange(value => {
+					this.plugin.settings.enableTabHeader = value
+					this.plugin.saveSettings()
+				})
+			})
+
+		new Setting(containerEl)
 			.setName('Enable in File Browser')
 			.setDesc('If true, this will also supercharge the file browser.')
 			.addToggle(toggle => {

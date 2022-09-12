@@ -131,7 +131,13 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
     app.workspace.iterateRootLeaves((leaf) => {
         if (leaf.view instanceof MarkdownView && leaf.view.file) {
             const file: TFile = leaf.view.file;
-            const cachedFile = app.metadataCache.getFileCache(file)
+            const cachedFile = app.metadataCache.getFileCache(file);
+
+            // Supercharge tab headers
+            //@ts-ignore
+            const tabHeader: HTMLElement = leaf.tabHeaderInnerTitleEl;
+            updateDivExtraAttributes(app, settings, tabHeader, "");
+
             if (cachedFile.links) {
                 cachedFile.links.forEach((link: LinkCache) => {
                     const fileName = file.path.replace(/(.*).md/, "$1")
