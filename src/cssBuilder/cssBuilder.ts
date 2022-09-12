@@ -241,8 +241,9 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
     if (plugin.settings.activateSnippet) {
         // @ts-ignore
         const customCss = plugin.app.customCss;
-        customCss.readCssFolders();
-        customCss.setCssEnabledStatus('supercharged-links-gen', true);
+        console.log(customCss);
+        customCss.enabledSnippets.add('supercharged-links-gen');
+        customCss.requestLoadSnippets();
     }
 
     // Ensure Style Settings reads changes
