@@ -31,17 +31,10 @@ export default class SuperchargedLinks extends Plugin {
 			plugin.observers.forEach(([observer, type, own_class]) => {
 				const leaves = plugin.app.workspace.getLeavesOfType(type);
 				leaves.forEach(leaf => {
-					plugin.updateContainer(leaf.view.containerEl, this, own_class);
+					plugin.updateContainer(leaf.view.containerEl, plugin, own_class);
 				})
 			});
 		}
-
-		// Plugins watching
-		// Debounced to prevent lag when writing
-		this.registerEvent(this.app.metadataCache.on('changed', debounce(updateLinks, 4500, true)));
-
-		// Needed for eg tab headers
-		this.registerEvent(this.app.workspace.on("file-open", updateLinks));
 
 		// Live preview
 		const ext = Prec.lowest(buildCMViewPlugin(this.app, this.settings));
@@ -54,9 +47,16 @@ export default class SuperchargedLinks extends Plugin {
 			this.initModalObservers(this, document);
 			updateVisibleLinks(this.app, this);
 		});
-		this.registerEvent(this.app.workspace.on("window-open", (window, win) => this.initModalObservers(this, window.getContainer().doc)));
-		this.registerEvent(this.app.workspace.on("layout-change", () => this.initViewObservers(this)));
 
+		// Initialization
+		this.registerEvent(this.app.workspace.on("window-open", (window, win) => this.initModalObservers(this, window.getContainer().doc)));
+
+		// Update when layout changes
+		// @ts-ignore
+		this.registerEvent(this.app.workspace.on("layout-change", debounce(updateLinks, 10, true)));
+		// Update plugin views when layout changes
+		// TODO: This is an expensive operation that seems like it is called fairly frequently. Maybe we can do this more efficiently?
+		this.registerEvent(this.app.workspace.on("layout-change", () => this.initViewObservers(this)));
 	}
 
 	initViewObservers(plugin: SuperchargedLinks) {
