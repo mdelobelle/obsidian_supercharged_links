@@ -51,6 +51,10 @@ export default class SuperchargedLinks extends Plugin {
 		// Initialization
 		this.registerEvent(this.app.workspace.on("window-open", (window, win) => this.initModalObservers(this, window.getContainer().doc)));
 
+		// Update when
+		// Debounced to prevent lag when writing
+		this.registerEvent(this.app.metadataCache.on('changed', debounce(updateLinks, 500, true)));
+
 		// Update when layout changes
 		// @ts-ignore
 		this.registerEvent(this.app.workspace.on("layout-change", debounce(updateLinks, 10, true)));
