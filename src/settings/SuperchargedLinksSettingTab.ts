@@ -12,7 +12,8 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 		super(app, plugin);
 		this.plugin = plugin;
 		this.debouncedGenerate = debounce(this._generateSnippet, 1000, true);
-		this.generateSnippet();
+    // Generate CSS immediately rather than 1 second - feels laggy
+		this._generateSnippet();
 	}
 
 	display(): void {
