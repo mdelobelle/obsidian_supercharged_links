@@ -12,7 +12,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 		super(app, plugin);
 		this.plugin = plugin;
 		this.debouncedGenerate = debounce(this._generateSnippet, 1000, true);
-    this.generateSnippet();
+		this.generateSnippet();
 	}
 
 	display(): void {
