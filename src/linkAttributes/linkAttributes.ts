@@ -143,7 +143,7 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
                 clearExtraAttributes(tabHeader);
             }
 
-            if (cachedFile.links) {
+            if (cachedFile?.links) {
                 cachedFile.links.forEach((link: LinkCache) => {
                     const fileName = file.path.replace(/(.*).md/, "$1")
                     const dest = app.metadataCache.getFirstLinkpathDest(link.link, fileName)
