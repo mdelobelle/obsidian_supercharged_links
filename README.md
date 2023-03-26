@@ -1,17 +1,24 @@
 ## Supercharged Links
 
-This plugin allows you to style the links in your Obsidian vault based on your notes metadata!
-You can, for example, automatically add colors and emojis to the links:
+Supercharged Links is an Obsidian plugin that helps you style the links in your vault based on your notes metadata, such as tags or YAML frontmatter properties. You can automatically add colors, emojis, or other styles to the links, making them more visually appealing and easier to navigate.
 
 <img src=https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/overview-screenshot.png alt="drawing" style="width:700px;"/>
 
-Why is this useful?
-For example, when your notes represent something, like a paper, a location, a person or a day in the week. Then you can use Supercharged links to have those notes stand out. Another use case might be to give notes with the `#todo` tag a loud color.
+When your notes represent something, like a paper, a location, a person or a day in the week, Supercharged links ensures those notes stand out. Another use case might be to give notes with the `#todo` tag a loud color.
 This visual feedback helps you find the right note back quickly!
 
-Setting Supercharged Links up is easier than ever now with the [Style Settings Plugin](https://github.com/mgmeyers/obsidian-style-settings)! See down below for a tutorial to get started. 
+## Installing the plugins
+1. Install and enable the Supercharged Links plugin in Obsidian.
+2. Install and enable the [Style Settings Plugin](https://github.com/mgmeyers/obsidian-style-settings) in Obsidian. 
 
 ## Getting started
+This is the overall workflow for Supercharged Links:
+1. In the Supercharged Links settings, create a new selector for the attribute you want to style
+2. Choose the type of selector (Tag, Attribute, or Path) and enter the value you want to match.
+3. In the Style Settings Plugin settings, set up the style for the selected attribute, such as changing the text color, background color, or by adding emojis.
+
+
+## Example workflow
 Let's say I have a note about Jim called `Jim.md` with the tag `#person` and some [YAML frontmatter](https://help.obsidian.md/Advanced+topics/YAML+front+matter). 
 
 ```md
@@ -62,8 +69,15 @@ And voila!
 <img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/result-call-jim.png" alt="drawing" style="width:700px;"/>
 
 
-## Advanced use
-While the Style Settings integration provides a huge amount of customizability options, if you are comfortable with CSS and HTML, you can go even further with styling your links. For that, let's explain what this plugin does in the background.
+## Advanced Styling with CSS
+If you are comfortable with CSS and HTML, you can create even more customized styles for your links using CSS snippets.
+
+1. Create a CSS snippet in Obsidian by going to Settings > Appearance > CSS Snippets.
+2. Write your custom CSS code to style the links based on their data attributes, such as data-link-tags or data-link-status.
+3. Save the CSS file and enable the snippet in Obsidian.
+
+### Example styling with CSS
+To explain how this works, let's explain what this plugin does in the background.
 
 Let's say I have some link to `[[Jim]]` somewhere.
 Without the plugin activated, the HTML link element would normally look like this: 
