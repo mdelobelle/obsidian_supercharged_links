@@ -81,6 +81,7 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content');
+		plugin.registerViewType('markdown', plugin, '.inline-title');
 		// If backlinks in editor is on
 		// @ts-ignore
 		if (plugin.app?.internalPlugins?.plugins?.backlink?.instance?.options?.backlinkInDocument) {
