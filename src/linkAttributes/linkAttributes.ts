@@ -108,6 +108,13 @@ export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSe
     if (!linkName) {
         linkName = link.textContent;
     }
+    if (!!link.parentElement.getAttribute('data-path')) {
+        // File Browser
+        linkName = link.parentElement.getAttribute('data-path');
+    } else if (link.parentElement.getAttribute("class") == "suggestion-content" && !!link.nextElementSibling) {
+        // Auto complete
+        linkName = link.nextElementSibling.textContent + linkName;
+    }
     const dest = app.metadataCache.getFirstLinkpathDest(getLinkpath(linkName), destName)
 
     if (dest) {
@@ -137,7 +144,7 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
             const tabHeader: HTMLElement = leaf.tabHeaderInnerTitleEl;
             if (settings.enableTabHeader) {
                 // Supercharge tab headers
-                updateDivExtraAttributes(app, settings, tabHeader, "");
+                updateDivExtraAttributes(app, settings, tabHeader, "", file.path);
             }
             else {
                 clearExtraAttributes(tabHeader);
