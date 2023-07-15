@@ -140,6 +140,16 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
             const file: TFile = leaf.view.file;
             const cachedFile = app.metadataCache.getFileCache(file);
 
+            // @ts-ignore
+            const metadata = leaf.view?.metadataEditor.contentEl;
+            if (!!metadata) {//
+                const nodes = metadata.querySelectorAll("div.internal-link > .multi-select-pill-content");
+                for (let i = 0; i < nodes.length; ++i) {
+                    const el = nodes[i] as HTMLElement;
+                    updateDivExtraAttributes(plugin.app, plugin.settings, el, "");
+                }
+            }
+
             //@ts-ignore
             const tabHeader: HTMLElement = leaf.tabHeaderInnerTitleEl;
             if (settings.enableTabHeader) {

@@ -81,6 +81,7 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content');
+		plugin.registerViewType('file-properties', plugin, 'div.internal-link > .multi-select-pill-content');
 		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner');
 		// If backlinks in editor is on
 		// @ts-ignore
