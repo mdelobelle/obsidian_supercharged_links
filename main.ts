@@ -4,7 +4,7 @@ import {
 	updateElLinks,
 	updateVisibleLinks,
 	clearExtraAttributes,
-	updateDivExtraAttributes,
+	updateDivExtraAttributes, updatePropertiesPane,
 } from "src/linkAttributes/linkAttributes"
 import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
 import { Prec } from "@codemirror/state";
@@ -81,13 +81,23 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content');
-		plugin.registerViewType('file-properties', plugin, 'div.internal-link > .multi-select-pill-content');
 		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner');
 		// If backlinks in editor is on
 		// @ts-ignore
 		if (plugin.app?.internalPlugins?.plugins?.backlink?.instance?.options?.backlinkInDocument) {
 			plugin.registerViewType('markdown', plugin, '.tree-item-inner', true);
 		}
+		const propertyLeaves = this.app.workspace.getLeavesOfType("file-properties");
+		 for (let i = 0; i < propertyLeaves.length; i++) {
+			 const container = propertyLeaves[i].view.containerEl;
+			 let observer = new MutationObserver((records, _) =>{
+				 updatePropertiesPane(container, app.workspace.getActiveFile(), app, plugin);
+			 });
+			 observer.observe(container, {subtree: true, childList: true, attributes: false});
+			 plugin.observers.push([observer, "file-properties" + i, ""]);
+			 // TODO: No proper unloading!
+		 }
+		plugin.registerViewType('file-properties', plugin, 'div.internal-link > .multi-select-pill-content');
 	}
 
 	initModalObservers(plugin: SuperchargedLinks, doc: Document) {
@@ -123,28 +133,28 @@ export default class SuperchargedLinks extends Plugin {
 
 	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false) {
 		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
-		if (leaves.length > 1) {
-			for (let i = 0; i < leaves.length; i++) {
-				const container = leaves[i].view.containerEl;
-				if (updateDynamic) {
-					plugin._watchContainerDynamic(viewTypeName + i, container, plugin, selector)
-				}
-				else {
-					plugin._watchContainer(viewTypeName + i, container, plugin, selector);
-				}
-			}
-		}
-		else if (leaves.length < 1) return;
-		else {
-			const container = leaves[0].view.containerEl;
-			this.updateContainer(container, plugin, selector);
-			if (updateDynamic) {
-				plugin._watchContainerDynamic(viewTypeName, container, plugin, selector)
-			}
-			else {
-				plugin._watchContainer(viewTypeName, container, plugin, selector);
-			}
-		}
+		// if (leaves.length > 1) {
+		 for (let i = 0; i < leaves.length; i++) {
+			 const container = leaves[i].view.containerEl;
+			 if (updateDynamic) {
+				 plugin._watchContainerDynamic(viewTypeName + i, container, plugin, selector)
+			 }
+			 else {
+				 plugin._watchContainer(viewTypeName + i, container, plugin, selector);
+			 }
+		 }
+		// }
+		// else if (leaves.length < 1) return;
+		// else {
+		// 	const container = leaves[0].view.containerEl;
+		// 	this.updateContainer(container, plugin, selector);
+		// 	if (updateDynamic) {
+		// 		plugin._watchContainerDynamic(viewTypeName, container, plugin, selector)
+		// 	}
+		// 	else {
+		// 		plugin._watchContainer(viewTypeName, container, plugin, selector);
+		// 	}
+		// }
 	}
 
 	updateContainer(container: HTMLElement, plugin: SuperchargedLinks, selector: string) {
