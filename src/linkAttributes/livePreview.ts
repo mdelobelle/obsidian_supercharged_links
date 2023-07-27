@@ -113,7 +113,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                 }
                                 if (isLink && !isAlias && !isPipe || isMDUrl) {
                                     let linkText = view.state.doc.sliceString(node.from, node.to);
-                                    linkText = decodeURI(linkText.split("#")[0]);
+                                    linkText = linkText.split("#")[0];
                                     let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
                                     if (isMDUrl && !file) {
                                         try {

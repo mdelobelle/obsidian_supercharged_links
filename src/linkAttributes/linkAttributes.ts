@@ -113,6 +113,13 @@ export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSe
     if (!linkName) {
         linkName = link.textContent;
     }
+    if (!!link.parentElement.getAttribute('data-path')) {
+        // File Browser
+        linkName = link.parentElement.getAttribute('data-path');
+    } else if (link.parentElement.getAttribute("class") == "suggestion-content" && !!link.nextElementSibling) {
+        // Auto complete
+        linkName = link.nextElementSibling.textContent + linkName;
+    }
     const dest = app.metadataCache.getFirstLinkpathDest(getLinkpath(linkName), destName)
 
     if (dest) {
@@ -131,6 +138,62 @@ export function updateElLinks(app: App, plugin: SuperchargedLinks, el: HTMLEleme
     });
 }
 
+
+export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app: App, plugin: SuperchargedLinks) {
+    const frontmatter = app.metadataCache.getCache(file.path)?.frontmatter;
+    if(!!frontmatter) {
+        const nodes = propertiesEl.querySelectorAll("div.internal-link > .multi-select-pill-content");
+        for (let i = 0; i < nodes.length; ++i) {
+            const el = nodes[i] as HTMLElement;
+            const linkText = el.textContent;
+            const keyEl = el.parentElement.parentElement.parentElement.parentElement.children[0].children[1];
+            // @ts-ignore
+            const key = keyEl.value;
+            const listOfLinks: [string] = frontmatter[key];
+            let foundS = null;
+            for (const s of listOfLinks) {
+                if (s.length > 4 && s.startsWith("[[") && s.endsWith("]]")) {
+                    const slicedS = s.slice(2, -2);
+                    const split = slicedS.split("|");
+                    if (split.length == 1 && split[0] == linkText) {
+                        foundS = split[0];
+                        break;
+                    } else if (split.length == 2 && split[1] == linkText) {
+                        foundS = split[0];
+                        break;
+                    }
+                }
+            }
+            if (!!foundS) {
+                updateDivExtraAttributes(plugin.app, plugin.settings, el, "", foundS);
+            }
+        }
+        const singleNodes = propertiesEl.querySelectorAll("div.metadata-link-inner");
+        for (let i = 0; i < singleNodes.length; ++i) {
+            const el = singleNodes[i] as HTMLElement;
+            const linkText = el.textContent;
+            const keyEl = el.parentElement.parentElement.parentElement.children[0].children[1];
+            // @ts-ignore
+            const key = keyEl.value;
+            const link: string = frontmatter[key];
+            let foundS: string = null;
+            if (link.length > 4 && link.startsWith("[[") && link.endsWith("]]")) {
+                const slicedS = link.slice(2, -2);
+                const split = slicedS.split("|");
+                if (split.length == 1 && split[0] == linkText) {
+                    foundS = split[0];
+                } else if (split.length == 2 && split[1] == linkText) {
+                    foundS = split[0];
+                }
+            }
+            if (!!foundS) {
+                updateDivExtraAttributes(plugin.app, plugin.settings, el, "", foundS);
+            }
+        }
+    }
+}
+
+
 export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
     const settings = plugin.settings;
     app.workspace.iterateRootLeaves((leaf) => {
@@ -138,11 +201,17 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
             const file: TFile = leaf.view.file;
             const cachedFile = app.metadataCache.getFileCache(file);
 
+            // @ts-ignore
+            const metadata = leaf.view?.metadataEditor.contentEl;
+            if (!!metadata) {//
+                updatePropertiesPane(metadata, file, app, plugin);
+            }
+
             //@ts-ignore
             const tabHeader: HTMLElement = leaf.tabHeaderInnerTitleEl;
             if (settings.enableTabHeader) {
                 // Supercharge tab headers
-                updateDivExtraAttributes(app, settings, tabHeader, "");
+                updateDivExtraAttributes(app, settings, tabHeader, "", file.path);
             }
             else {
                 clearExtraAttributes(tabHeader);
