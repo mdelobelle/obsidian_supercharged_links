@@ -156,6 +156,70 @@ a.internal-link[data-link-tags *="hide"],
 
 ```
 
+### CSS custom properties (CSS variables)
+
+In addition to adding HTML attributes, Supercharged Links will also add [CSS custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/--*) to your links. This can make it easier to use these values directly in CSS.
+
+All such properties are prefixed with `--data-link-` -- so a property called "priority" would be expressed as `--data-link-priority`.
+
+Any property whose value begins with `http` will be treated as a URL in CSS -- so if you have `avatar:: https://avatars.githubusercontent.com/u/124363?v=4` in your document, it will be added as `--data-link-avatar: url(https://avatars.githubusercontent.com/u/124363?v=4)`.
+
+#### Example: using colours
+
+Let's say you add a property `colour` to a note (for example, with `colour:: #8bc34a` or `colour:: rebeccapurple`). You can then use CSS to apply that colour to your link:
+
+```css
+[data-link-colour] {
+    color: var(--colour);
+}
+```
+
+#### Example: avatars
+
+Set up your notes so that each "person" note includes a `photo` attribute. Note that this will need to be an HTTP link. For example:
+
+barryvan.md
+```md
+    photo:: https://avatars.githubusercontent.com/u/124363?v=4
+    website:: https://barryvan.com.au/
+
+    ...my notes about barryvan
+```
+
+Then in your CSS:
+
+```css
+/* Used in the editor */
+.data-link-icon[data-link-photo^="https" i]:empty {
+	width: 1.5em;
+	height: 1.5em;
+	display: inline-block;
+	vertical-align: middle;
+	background-image: var(--data-link-photo);
+	background-size: cover;
+	box-shadow: 0 1px 4px #0008;
+	border-radius: 100%;
+	margin: -0.5em 0.2em -0.5em 0;
+}
+
+/* Used outside the editor -- for example, in search results, tabs, etc. */
+.data-link-icon[data-link-photo^="https" i]:not(:empty)::before {
+	content: '';
+	width: 1.5em;
+	height: 1.5em;
+	display: inline-block;
+	vertical-align: middle;
+	background-image: var(--data-link-photo);
+	background-size: cover;
+	box-shadow: 0 1px 4px #0008;
+	border-radius: 100%;
+	margin: -0.5em 0.2em -0.5em 0;
+}
+```
+
+...to produce something like this:
+
+<img src="https://raw.githubusercontent.com/mdelobelle/obsidian_supercharged_links/master/images/avatars-basic.png">
 
 ### Demos 
 NOTE: These demos are somewhat outdated.
