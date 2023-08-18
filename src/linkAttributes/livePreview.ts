@@ -86,7 +86,6 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                 // The 'alias' of the md link
                                 const isMDLink = props.has('link');
                                 // The 'internal link' of the md link
-                                const isMDUrl = props.has('url');
                                 const isMDFormatting = props.has('formatting-link');
 
                                 if (isMDLink && !isMDFormatting) {
@@ -103,11 +102,11 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                         iconDecoAfterWhere = null;
                                     }
                                 }
-                                if (isLink && !isAlias && !isPipe || isMDUrl) {
+                                if (isLink && !isAlias && !isPipe) {
                                     let linkText = view.state.doc.sliceString(node.from, node.to);
                                     linkText = linkText.split("#")[0];
                                     let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
-                                    if (isMDUrl && !file) {
+                                    if (!file) {
                                         try {
                                             file = app.vault.getAbstractFileByPath(decodeURIComponent(linkText)) as TFile;
                                         }
@@ -130,26 +129,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                             widget: new HeaderWidget(attributes, true),
                                         });
 
-                                        if (isMDUrl) {
-                                            // Apply retroactively to the alias found before
-                                            let deco = Decoration.mark({
-                                                attributes: attributes,
-                                                class: "data-link-text"
-                                            });
-                                            builder.add(mdAliasFrom, mdAliasFrom, iconDecoBefore);
-                                            builder.add(mdAliasFrom, mdAliasTo, deco);
-                                            if (iconDecoAfter) {
-                                                builder.add(mdAliasTo, mdAliasTo, iconDecoAfter);
-                                                iconDecoAfter = null;
-                                                iconDecoAfterWhere = null;
-                                                mdAliasFrom = null;
-                                                mdAliasTo = null;
-                                            }
-                                        }
-                                        else {
-                                            builder.add(node.from, node.from, iconDecoBefore);
-                                        }
-
+                                        builder.add(node.from, node.from, iconDecoBefore);
                                         builder.add(node.from, node.to, deco);
                                         lastAttributes = attributes;
                                         iconDecoAfterWhere = node.to;
