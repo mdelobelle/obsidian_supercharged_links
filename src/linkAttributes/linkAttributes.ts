@@ -197,8 +197,8 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
             const cachedFile = app.metadataCache.getFileCache(file);
 
             // @ts-ignore
-            const metadata = leaf.view?.metadataEditor.contentEl;
-            if (!!metadata) {//
+            const metadata = leaf.view?.metadataEditor?.contentEl;
+            if (!!metadata) {
                 updatePropertiesPane(metadata, file, app, plugin);
             }
 
