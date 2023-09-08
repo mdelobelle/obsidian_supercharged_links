@@ -168,9 +168,10 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
                 "    - ",
                 `        id: ${selector.uid}-color`,
                 `        title: Link color`,
-                "        type: variable-color",
+                "        type: variable-themed-color",
                 "        format: hex",
-                `        default: '${colors[hash(selector.uid) % 36]}'`,
+                `        default-light: '${colors[hash(selector.uid) % 36]}'`,
+                `        default-dark: '${colors[hash(selector.uid) % 36]}'`,
                 "    - ",
                 `        id: ${selector.uid}-weight`,
                 `        title: Font weight`,
@@ -220,9 +221,10 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
                 "    - ",
                 `        id: ${selector.uid}-background-color`,
                 `        title: Background color`,
-                "        type: variable-color",
+                "        type: variable-themed-color",
                 "        format: hex",
-                `        default: '#ffffff'`])
+                `        default-light: '#000000'`,
+                `        default-dark: '#ffffff'`])
         }
     });
     instructions.push("*/");
