@@ -26,7 +26,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
             headerEl.setAttrs(this.attributes);
             for (let key in this.attributes) {
                 // CSS doesn't allow interpolation of variables for URLs, so do it beforehand to be nice.
-                if (this.attributes[key].startsWith && this.attributes[key].startsWith('http')) {
+                if (this.attributes[key]?.startsWith && this.attributes[key].startsWith('http')) {
                     headerEl.style.setProperty(`--${key}`, `url(${this.attributes[key]})`);
                 } else {
                     headerEl.style.setProperty(`--${key}`, this.attributes[key]);
