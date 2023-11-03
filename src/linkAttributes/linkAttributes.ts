@@ -81,6 +81,11 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
         // Only update if value is different
         if (!newValue || curValue != newValue) {
             link.setAttribute("data-link-" + key, new_props[key])
+            if (new_props[key].startsWith && new_props[key].startsWith('http')) {
+                link.style.setProperty(`--data-link-${key}`, `url(${new_props[key]})`);
+            } else {
+                link.style.setProperty(`--data-link-${key}`, new_props[key]);
+            }
         }
     });
     if (!link.hasClass("data-link-icon")) {
