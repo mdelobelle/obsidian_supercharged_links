@@ -9,3 +9,7 @@ div.supercharged-modal {
 div.supercharged-modal h4 {
     margin: 0;
 }
+
+span.data-link-text > a.cm-underline {
+    color: inherit;
+}
