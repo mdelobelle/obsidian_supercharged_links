@@ -110,6 +110,7 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
 }
 
 export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string, linkName?: string) {
+    if (link.parentElement.getAttribute("class").contains('mod-collapsible')) return; // Bookmarks Folder
     if (!linkName) {
         linkName = link.textContent;
     }
@@ -208,8 +209,8 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
             const cachedFile = app.metadataCache.getFileCache(file);
 
             // @ts-ignore
-            const metadata = leaf.view?.metadataEditor.contentEl;
-            if (!!metadata) {//
+            const metadata = leaf.view?.metadataEditor?.contentEl;
+            if (!!metadata) {
                 updatePropertiesPane(metadata, file, app, plugin);
             }
 

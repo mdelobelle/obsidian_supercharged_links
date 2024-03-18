@@ -103,19 +103,24 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                             const tokenProps = node.type.prop(tokenClassNodeProp);
                             if (tokenProps) {
                                 const props = new Set(tokenProps.split(" "));
-                                const isLink = props.has("hmd-internal-link");
-                                const isAlias = props.has("link-alias");
-                                const isPipe = props.has("link-alias-pipe");
 
-                                // The 'alias' of the md link
-                                const isMDLink = props.has('link');
-                                // The 'internal link' of the md link
-                                const isMDUrl = props.has('url');
-                                const isMDFormatting = props.has('formatting-link');
+                                // Square Brackets of links both internal (`[[`, `]]`) and md link (`[`, `]`)
+                                const isMDFormatting = props.has('formatting-link') || props.has('formatting-link-string');
+                                if (isMDFormatting) return;
 
-                                if (isMDLink && !isMDFormatting) {
-                                    // Link: The 'alias'
-                                    // URL: The internal link
+                                // Parts of internal links
+                                const isLink = props.has("hmd-internal-link"); // [[`Note` or `|` or `Alias`]]
+                                const isAlias = props.has("link-alias"); // [[Note| `Alias`]]
+                                const isPipe = props.has("link-alias-pipe"); // [[Note `|` Alias]]
+
+                                // The 'alias' of the md link (or its brackets)
+                                const isMDLink = props.has('link'); // `[` or `Alias` or `]`(URL)
+                                // The 'internal link' of the md link (or its brackets)
+                                const isMDUrl = props.has('url'); // [Alias]`(` or `URL` or `)`
+
+                                if (isMDLink) {
+                                    // This catches the alias of md links i.e. [ `Alias` ](URL)
+                                    // We'll apply the styling in the next iteration when we analyze the `URL`
                                     mdAliasFrom = node.from;
                                     mdAliasTo = node.to;
                                 }
@@ -160,6 +165,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                                 attributes: attributes,
                                                 class: "data-link-text"
                                             });
+
                                             builder.add(mdAliasFrom, mdAliasFrom, iconDecoBefore);
                                             builder.add(mdAliasFrom, mdAliasTo, deco);
                                             if (iconDecoAfter) {
@@ -169,8 +175,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                                 mdAliasFrom = null;
                                                 mdAliasTo = null;
                                             }
-                                        }
-                                        else {
+                                        } else {
                                             builder.add(node.from, node.from, iconDecoBefore);
                                         }
 
