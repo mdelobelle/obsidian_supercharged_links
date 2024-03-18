@@ -91,7 +91,10 @@ export default class SuperchargedLinks extends Plugin {
 		 for (let i = 0; i < propertyLeaves.length; i++) {
 			 const container = propertyLeaves[i].view.containerEl;
 			 let observer = new MutationObserver((records, _) =>{
-				 updatePropertiesPane(container, app.workspace.getActiveFile(), app, plugin);
+				 const file = app.workspace.getActiveFile();
+				 if (!!file) {
+					 updatePropertiesPane(container, app.workspace.getActiveFile(), app, plugin);
+				 }
 			 });
 			 observer.observe(container, {subtree: true, childList: true, attributes: false});
 			 plugin.observers.push([observer, "file-properties" + i, ""]);

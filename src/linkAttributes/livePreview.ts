@@ -1,10 +1,11 @@
-import {App, editorViewField, MarkdownView, TFile} from "obsidian";
+import {App, debounce, Debouncer, editorViewField, MarkdownView, TFile} from "obsidian";
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
 import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
-import {RangeSetBuilder} from "@codemirror/state";
+import {RangeSet, RangeSetBuilder} from "@codemirror/state";
 import {syntaxTree} from "@codemirror/language";
 import {tokenClassNodeProp} from "@codemirror/language";
 import {fetchTargetAttributesSync} from "./linkAttributes";
+import {DefaultFunctions} from "obsidian-dataview/lib/expression/functions";
 
 export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings)
 {
@@ -24,6 +25,14 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
         toDOM() {
             let headerEl = document.createElement("span");
             headerEl.setAttrs(this.attributes);
+            for (let key in this.attributes) {
+                // CSS doesn't allow interpolation of variables for URLs, so do it beforehand to be nice.
+                if (this.attributes[key]?.startsWith && (this.attributes[key].startsWith('http') || this.attributes[key].startsWith('data:'))) {
+                    headerEl.style.setProperty(`--${key}`, `url(${this.attributes[key]})`);
+                } else {
+                    headerEl.style.setProperty(`--${key}`, this.attributes[key]);
+                }
+            }
             if (this.after) {
                 headerEl.addClass('data-link-icon-after');
             }
@@ -49,15 +58,29 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
             }
 
             update(update: ViewUpdate) {
-                if (update.docChanged || update.viewportChanged) {
-                    this.decorations = this.buildDecorations(update.view);
+                if (update.viewportChanged || update.docChanged) {
+                    this.decorations = this.decorations.map(update.changes);
+
+                    update.changes.iterChanges((fromA, toA, fromB, toB, t) => {
+                        // Update all 'line blocks' between the range changed. Prevents weird graphical bugs
+                        const minFrom = update.view.lineBlockAt(fromB).from;
+                        const maxTo = update.view.lineBlockAt(toB).to;
+                        // remove things within bounds
+                        this.decorations = this.decorations.update({
+                            filter: (from, to) => to < minFrom || from > maxTo});
+
+                        // Update decorations within bounds
+                        this.decorations = RangeSet.join([this.decorations,
+                            this.buildDecorations(update.view, minFrom, maxTo)]);
+
+                    });
                 }
             }
 
             destroy() {
             }
 
-            buildDecorations(view: EditorView) {
+            buildDecorations(view: EditorView, updateFrom: number = -1, updateTo: number=-1) {
                 let builder = new RangeSetBuilder<Decoration>();
                 if (!settings.enableEditor) {
                     return builder.finish();
@@ -70,12 +93,13 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                 let mdAliasFrom: number = null;
                 let mdAliasTo: number = null;
                 for (let {from, to} of view.visibleRanges) {
+                    // When updating, only changes the range given.
+                    if (updateFrom !== -1 && (to < updateFrom || from > updateTo)) continue;
                     syntaxTree(view.state).iterate({
                         from,
                         to,
                         enter: (node) => {
-
-
+                            if (updateFrom !== -1 && (node.to < updateFrom || node.from > updateTo)) return;
                             const tokenProps = node.type.prop(tokenClassNodeProp);
                             if (tokenProps) {
                                 const props = new Set(tokenProps.split(" "));

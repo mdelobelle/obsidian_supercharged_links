@@ -81,6 +81,11 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
         // Only update if value is different
         if (!newValue || curValue != newValue) {
             link.setAttribute("data-link-" + key, new_props[key])
+            if (new_props[key]?.startsWith && (new_props[key].startsWith('http') || new_props[key].startsWith('data:'))) {
+                link.style.setProperty(`--data-link-${key}`, `url(${new_props[key]})`);
+            } else {
+                link.style.setProperty(`--data-link-${key}`, new_props[key]);
+            }
         }
     });
     if (!link.hasClass("data-link-icon")) {
@@ -147,6 +152,9 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
             const key = keyEl.value;
             const listOfLinks: [string] = frontmatter[key];
             let foundS = null;
+            if (!listOfLinks) {
+                continue;
+            }
             for (const s of listOfLinks) {
                 if (s.length > 4 && s.startsWith("[[") && s.endsWith("]]")) {
                     const slicedS = s.slice(2, -2);
@@ -172,8 +180,11 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
             // @ts-ignore
             const key = keyEl.value;
             const link: string = frontmatter[key];
+            if (!link) {
+                continue;
+            }
             let foundS: string = null;
-            if (link.length > 4 && link.startsWith("[[") && link.endsWith("]]")) {
+            if (link?.length > 4 && link.startsWith("[[") && link.endsWith("]]")) {
                 const slicedS = link.slice(2, -2);
                 const split = slicedS.split("|");
                 if (split.length == 1 && split[0] == linkText) {
