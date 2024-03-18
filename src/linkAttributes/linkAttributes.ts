@@ -183,7 +183,7 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
                 continue;
             }
             let foundS: string = null;
-            if (link.length > 4 && link.startsWith("[[") && link.endsWith("]]")) {
+            if (link?.length > 4 && link.startsWith("[[") && link.endsWith("]]")) {
                 const slicedS = link.slice(2, -2);
                 const split = slicedS.split("|");
                 if (split.length == 1 && split[0] == linkText) {
