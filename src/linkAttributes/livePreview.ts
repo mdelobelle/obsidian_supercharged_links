@@ -58,7 +58,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
             }
 
             update(update: ViewUpdate) {
-                if (update.viewportChanged || update.docChanged) {
+                if (update.docChanged) {
                     this.decorations = this.decorations.map(update.changes);
 
                     update.changes.iterChanges((fromA, toA, fromB, toB, t) => {
@@ -72,8 +72,10 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                         // Update decorations within bounds
                         this.decorations = RangeSet.join([this.decorations,
                             this.buildDecorations(update.view, minFrom, maxTo)]);
-
                     });
+                }
+                else if (update.viewportChanged) {
+                    this.decorations = this.buildDecorations(update.view);
                 }
             }
 
