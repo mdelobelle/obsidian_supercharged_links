@@ -74,9 +74,9 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('backlink', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('outgoing-link', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('search', plugin, ".tree-item-inner");
-		plugin.registerViewType('BC-matrix', plugin, '.BC-Link');
+		plugin.registerViewType('bc-matrix-view', plugin, 'span.internal-link');
 		plugin.registerViewType('BC-ducks', plugin, '.internal-link');
-		plugin.registerViewType('BC-tree', plugin, 'a.internal-link');
+		plugin.registerViewType('bc-tree-view', plugin, 'span.internal-link');
 		plugin.registerViewType('graph-analysis', plugin, '.internal-link');
 		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
