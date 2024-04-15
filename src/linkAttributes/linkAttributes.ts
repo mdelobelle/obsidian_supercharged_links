@@ -100,12 +100,13 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
 }
 
 function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
-    const linkHref = link.getAttribute('href').split('#')[0];
-    const dest = app.metadataCache.getFirstLinkpathDest(linkHref, destName);
-
-    if (dest) {
-        const new_props = fetchTargetAttributesSync(app, settings, dest, false);
-        setLinkNewProps(link, new_props);
+    const linkHref = link.getAttribute('href')?.split('#')?.[0];
+    if (linkHref) {
+        const dest = app.metadataCache.getFirstLinkpathDest(linkHref, destName);
+        if (dest) {
+            const new_props = fetchTargetAttributesSync(app, settings, dest, false);
+            setLinkNewProps(link, new_props);
+        }
     }
 }
 
