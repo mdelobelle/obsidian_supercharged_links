@@ -71,6 +71,8 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.observers = [];
 
 		// Register new observers
+		plugin.registerViewType('hierarchical-backlinks', plugin, ".tree-item-inner", true);
+		plugin.registerViewType('hierarchical-outgoing-links', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('backlink', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('outgoing-link', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('search', plugin, ".tree-item-inner");
