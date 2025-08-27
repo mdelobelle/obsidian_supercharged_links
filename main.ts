@@ -61,6 +61,11 @@ export default class SuperchargedLinks extends Plugin {
 		// Update plugin views when layout changes
 		// TODO: This is an expensive operation that seems like it is called fairly frequently. Maybe we can do this more efficiently?
 		this.registerEvent(this.app.workspace.on("layout-change", () => this.initViewObservers(this)));
+
+		// DEBUG: When adding a new view, to get the proper id of that view, uncomment this and reload the plugin
+		this.app.workspace.iterateAllLeaves(leaf => {
+			console.log(leaf.view.getViewType());
+		});
 	}
 
 	initViewObservers(plugin: SuperchargedLinks) {
@@ -82,6 +87,7 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content');
 		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner');
+		plugin.registerViewType('bases', plugin, '.internal-link');
 		// If backlinks in editor is on
 		// @ts-ignore
 		if (plugin.app?.internalPlugins?.plugins?.backlink?.instance?.options?.backlinkInDocument) {
@@ -91,9 +97,9 @@ export default class SuperchargedLinks extends Plugin {
 		 for (let i = 0; i < propertyLeaves.length; i++) {
 			 const container = propertyLeaves[i].view.containerEl;
 			 let observer = new MutationObserver((records, _) =>{
-				 const file = app.workspace.getActiveFile();
+				 const file = this.app.workspace.getActiveFile();
 				 if (!!file) {
-					 updatePropertiesPane(container, app.workspace.getActiveFile(), app, plugin);
+					 updatePropertiesPane(container, this.app.workspace.getActiveFile(), this.app, plugin);
 				 }
 			 });
 			 observer.observe(container, {subtree: true, childList: true, attributes: false});
@@ -138,13 +144,13 @@ export default class SuperchargedLinks extends Plugin {
 		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
 		// if (leaves.length > 1) {
 		 for (let i = 0; i < leaves.length; i++) {
-			 const container = leaves[i].view.containerEl;
-			 if (updateDynamic) {
-				 plugin._watchContainerDynamic(viewTypeName + i, container, plugin, selector)
-			 }
+			const container = leaves[i].view.containerEl;
+			if (updateDynamic) {
+				plugin._watchContainerDynamic(viewTypeName + i, container, plugin, selector)
+			}
 			 else {
-				 plugin._watchContainer(viewTypeName + i, container, plugin, selector);
-			 }
+				plugin._watchContainer(viewTypeName + i, container, plugin, selector);
+			}
 		 }
 		// }
 		// else if (leaves.length < 1) return;
