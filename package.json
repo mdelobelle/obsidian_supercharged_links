@@ -15,19 +15,22 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@codemirror/state": "^6.0.0",
     "@codemirror/language": "https://github.com/lishid/cm-language",
+    "@codemirror/state": "^6.0.0",
     "@codemirror/view": "^6.0.0",
     "@rollup/plugin-commonjs": "^18.0.0",
     "@rollup/plugin-node-resolve": "^11.2.1",
     "@rollup/plugin-typescript": "^8.2.1",
-    "@types/node": "^14.14.37",
-    "obsidian": "^0.15.0",
+    "@types/luxon": "^3.7.1",
+    "@types/node": "^18.19.123",
+    "obsidian": "^1.8.7",
     "obsidian-dataview": "^0.4.21",
     "rollup": "^2.32.1",
     "standard-version": "^9.3.2",
     "tslib": "^2.2.0",
-    "typescript": "^4.2.4"
+    "typescript": "^5.9.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "compare-versions": "^6.1.1"
+  }
 }

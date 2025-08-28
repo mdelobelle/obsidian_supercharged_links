@@ -1,5 +1,5 @@
 import "obsidian";
-import { DataviewApi } from "obsidian-dataview";
+import { DataviewAPI } from "obsidian-dataview";
 
 declare module "obsidian" {
     interface App {
@@ -8,7 +8,7 @@ declare module "obsidian" {
             plugins: {
                 [id: string]: any;
                 dataview?: {
-                    api?: DataviewApi;
+                    api?: DataviewAPI;
                 };
             };
         };
@@ -16,7 +16,7 @@ declare module "obsidian" {
     interface MetadataCache {
         on(
             name: "dataview:api-ready",
-            callback: (api: DataviewPlugin["api"]) => any,
+            callback: (api: DataviewAPI) => any,
             ctx?: any
         ): EventRef;
         on(

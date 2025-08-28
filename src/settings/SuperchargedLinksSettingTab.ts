@@ -61,7 +61,7 @@ Styling can be done using the Style Settings plugin.
 				toggle.onChange(value => {
 					this.plugin.settings.enableEditor = value
 					this.plugin.saveSettings()
-					updateVisibleLinks(app, this.plugin);
+					updateVisibleLinks(this.app, this.plugin);
 				})
 			})
 
@@ -73,7 +73,7 @@ Styling can be done using the Style Settings plugin.
 				toggle.onChange(value => {
 					this.plugin.settings.enableTabHeader = value
 					this.plugin.saveSettings()
-					updateVisibleLinks(app, this.plugin);
+					updateVisibleLinks(this.app, this.plugin);
 				})
 			})
 
