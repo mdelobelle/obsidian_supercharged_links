@@ -63,9 +63,9 @@ export default class SuperchargedLinks extends Plugin {
 		this.registerEvent(this.app.workspace.on("layout-change", () => this.initViewObservers(this)));
 
 		// DEBUG: When adding a new view, to get the proper id of that view, uncomment this and reload the plugin
-		this.app.workspace.iterateAllLeaves(leaf => {
-			console.log(leaf.view.getViewType());
-		});
+		// this.app.workspace.iterateAllLeaves(leaf => {
+		// 	console.log(leaf.view.getViewType());
+		// });
 	}
 
 	initViewObservers(plugin: SuperchargedLinks) {
@@ -75,23 +75,36 @@ export default class SuperchargedLinks extends Plugin {
 		});
 		plugin.observers = [];
 
-		// Register new observers
+		// Register new observers for particular file panes
 		plugin.registerViewType('backlink', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('outgoing-link', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('search', plugin, ".tree-item-inner");
-		plugin.registerViewType('bc-matrix-view', plugin, 'span.internal-link');
-		plugin.registerViewType('BC-ducks', plugin, '.internal-link');
-		plugin.registerViewType('bc-tree-view', plugin, 'span.internal-link');
+		if (plugin.app?.plugins?.plugins?.breadcrumbs) {
+			// console.log('Supercharged links: Enabling breadcrumbs support');
+			plugin.registerViewType('bc-matrix-view', plugin, 'span.internal-link');
+			plugin.registerViewType('BC-ducks', plugin, '.internal-link');
+			plugin.registerViewType('bc-tree-view', plugin, 'span.internal-link');
+			// Breadcrumbs codeblock support as suggested by https://github.com/mdelobelle/obsidian_supercharged_links/issues/248#issuecomment-3231706063
+			plugin.registerViewType('markdown', plugin, '.BC-page-views span.internal-link, .BC-codeblock-tree span.internal-link, .nodes a.internal-link');
+		}
 		plugin.registerViewType('graph-analysis', plugin, '.internal-link');
 		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content');
 		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner');
-		plugin.registerViewType('bases', plugin, '.internal-link');
+		// @ts-ignore
+		if (plugin.app?.internalPlugins?.plugins?.bases?.enabled) {
+			// console.log('Supercharged links: Enabling bases support');
+			plugin.registerViewType('bases', plugin, '.internal-link');
+			// For embedded bases
+			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell  .internal-link');
+		}
+
 		// If backlinks in editor is on
 		// @ts-ignore
-		if (plugin.app?.internalPlugins?.plugins?.backlink?.instance?.options?.backlinkInDocument) {
-			plugin.registerViewType('markdown', plugin, '.tree-item-inner', true);
+		if (plugin.app?.internalPlugins?.plugins?.backlink?.enabled && plugin.app?.internalPlugins?.plugins?.backlink?.instance?.options?.backlinkInDocument) {
+			// console.log("Supercharged links: Enabling backlinks in document support");
+			plugin.registerViewType('markdown', plugin, '.embedded-backlinks .tree-item-inner', true);
 		}
 		const propertyLeaves = this.app.workspace.getLeavesOfType("file-properties");
 		 for (let i = 0; i < propertyLeaves.length; i++) {
@@ -194,7 +207,7 @@ export default class SuperchargedLinks extends Plugin {
 		}
 	}
 
-	_watchContainerDynamic(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, own_class = 'tree-item-inner', parent_class = 'tree-item') {
+	_watchContainerDynamic(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, parent_class = 'tree-item') {
 		// Used for efficient updating of the backlinks panel
 		// Only loops through newly added DOM nodes instead of changing all of them
 		if (!plugin.settings.enableBacklinks) return;
@@ -205,7 +218,7 @@ export default class SuperchargedLinks extends Plugin {
 						if ('className' in n) {
 							// @ts-ignore
 							if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes(parent_class)) {
-								const fileDivs = (n as HTMLElement).getElementsByClassName(own_class);
+								const fileDivs = (n as HTMLElement).findAll(selector);
 								for (let i = 0; i < fileDivs.length; ++i) {
 									const link = fileDivs[i] as HTMLElement;
 									updateDivExtraAttributes(plugin.app, plugin.settings, link, "");
