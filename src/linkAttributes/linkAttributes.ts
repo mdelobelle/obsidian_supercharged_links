@@ -110,8 +110,8 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
     }
 }
 
-export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string, linkName?: string) {
-    if (link.parentElement.getAttribute("class").contains('mod-collapsible')) return; // Bookmarks Folder
+export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string, linkName?: string, filter_collapsible: boolean = false) {
+    if (filter_collapsible && link.parentElement.getAttribute("class").contains('mod-collapsible')) return; // Bookmarks Folder
     if (!linkName) {
         linkName = link.textContent;
     }

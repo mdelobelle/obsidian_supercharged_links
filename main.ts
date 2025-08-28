@@ -90,8 +90,14 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('graph-analysis', plugin, '.internal-link');
 		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
+
+		if (plugin.app?.plugins?.plugins?.['folder-notes']) {
+			console.log('Supercharged links: Enabling folder notes support');
+			plugin.registerViewType('file-explorer', plugin, '.has-folder-note .tree-item-inner');
+		}
+
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content');
-		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner');
+		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner', false, true);
 		// @ts-ignore
 		if (plugin.app?.internalPlugins?.plugins?.bases?.enabled) {
 			// console.log('Supercharged links: Enabling bases support');
@@ -99,7 +105,6 @@ export default class SuperchargedLinks extends Plugin {
 			// For embedded bases
 			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell  .internal-link');
 		}
-
 		if (plugin.app?.plugins?.plugins?.['similar-notes']) {
 			plugin.registerViewType('markdown', plugin, '.similar-notes-pane .tree-item-inner', true)
 		}
@@ -156,7 +161,7 @@ export default class SuperchargedLinks extends Plugin {
 		this.modalObservers.last().observe(doc.body, config);
 	}
 
-	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false) {
+	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false, filter_collapsible: boolean = false) {
 		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
 		// if (leaves.length > 1) {
 		 for (let i = 0; i < leaves.length; i++) {
@@ -165,7 +170,7 @@ export default class SuperchargedLinks extends Plugin {
 				plugin._watchContainerDynamic(viewTypeName + i, container, plugin, selector)
 			}
 			 else {
-				plugin._watchContainer(viewTypeName + i, container, plugin, selector);
+				plugin._watchContainer(viewTypeName + i, container, plugin, selector, filter_collapsible);
 			}
 		 }
 		// }
@@ -182,13 +187,16 @@ export default class SuperchargedLinks extends Plugin {
 		// }
 	}
 
-	updateContainer(container: HTMLElement, plugin: SuperchargedLinks, selector: string) {
+	updateContainer(container: HTMLElement, plugin: SuperchargedLinks, selector: string, filter_collapsible: boolean = false) {
 		if (!plugin.settings.enableBacklinks && container.getAttribute("data-type") !== "file-explorer") return;
 		if (!plugin.settings.enableFileList && container.getAttribute("data-type") === "file-explorer") return;
 		const nodes = container.findAll(selector);
 		for (let i = 0; i < nodes.length; ++i) {
 			const el = nodes[i] as HTMLElement;
-			updateDivExtraAttributes(plugin.app, plugin.settings, el, "");
+			if (selector.includes('has-folder-note')) {
+				console.log(el);
+			}
+			updateDivExtraAttributes(plugin.app, plugin.settings, el, "", undefined, filter_collapsible);
 		}
 	}
 
@@ -200,9 +208,9 @@ export default class SuperchargedLinks extends Plugin {
 		}
 	}
 
-	_watchContainer(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string) {
+	_watchContainer(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, filter_collapsible: boolean = false) {
 		let observer = new MutationObserver((records, _) => {
-			plugin.updateContainer(container, plugin, selector);
+			plugin.updateContainer(container, plugin, selector, filter_collapsible);
 		});
 		observer.observe(container, { subtree: true, childList: true, attributes: false });
 		if (viewType) {
