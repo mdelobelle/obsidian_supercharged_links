@@ -138,7 +138,7 @@ export default class SuperchargedLinks extends Plugin {
 							(n.className.includes('modal-container') && plugin.settings.enableQuickSwitcher
 								// @ts-ignore
 								|| n.className.includes('suggestion-container') && plugin.settings.enableSuggestor)) {
-							let selector = ".suggestion-title, .suggestion-note, .another-quick-switcher__item__title, .omnisearch-result__title";
+							let selector = ".suggestion-title, .suggestion-note, .another-quick-switcher__item__title, .omnisearch-result__title > span";
 							// @ts-ignore
 							if (n.className.includes('suggestion-container')) {
 								selector = ".suggestion-title, .suggestion-note";
