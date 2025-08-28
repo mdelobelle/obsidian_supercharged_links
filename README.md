@@ -37,6 +37,8 @@ Community plugins:
 - Quick Switcher++
 - Another Quick Switcher
 - Dataview (inline fields)
+- Folder notes
+- Similar notes
 - Omnisearch
 
 Want support for another plugin? Create an issue or a pull request here in the repo!
