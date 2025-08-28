@@ -101,7 +101,7 @@ export default class SuperchargedLinks extends Plugin {
 		}
 
 		if (plugin.app?.plugins?.plugins?.['similar-notes']) {
-			plugin.registerViewType('markdown', plugin, '.similar-notes-pane .tree-item-inner')
+			plugin.registerViewType('markdown', plugin, '.similar-notes-pane .tree-item-inner', true)
 		}
 		// If backlinks in editor is on
 		// @ts-ignore
@@ -259,3 +259,4 @@ export default class SuperchargedLinks extends Plugin {
 		await this.saveData(this.settings);
 	}
 }
+
