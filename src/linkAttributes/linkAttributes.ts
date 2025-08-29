@@ -62,6 +62,13 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
                 )
             );
     }
+    // Replace spaces with hyphens in the keys of new_props
+    const hyphenated_props: Record<string, string> = {};
+    for (const key in new_props) {
+        const hyphenatedKey = key.replace(/ /g, '-');
+        hyphenated_props[hyphenatedKey] = new_props[key];
+    }
+    new_props = hyphenated_props;
 
     return new_props
 }
