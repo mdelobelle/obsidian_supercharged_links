@@ -92,7 +92,7 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
 
 		if (plugin.app?.plugins?.plugins?.['folder-notes']) {
-			console.log('Supercharged links: Enabling folder notes support');
+			// console.log('Supercharged links: Enabling folder notes support');
 			plugin.registerViewType('file-explorer', plugin, '.has-folder-note .tree-item-inner');
 		}
 
@@ -193,9 +193,6 @@ export default class SuperchargedLinks extends Plugin {
 		const nodes = container.findAll(selector);
 		for (let i = 0; i < nodes.length; ++i) {
 			const el = nodes[i] as HTMLElement;
-			if (selector.includes('has-folder-note')) {
-				console.log(el);
-			}
 			updateDivExtraAttributes(plugin.app, plugin.settings, el, "", undefined, filter_collapsible);
 		}
 	}

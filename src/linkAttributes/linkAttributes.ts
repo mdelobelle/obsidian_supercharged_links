@@ -74,17 +74,19 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
         }
     }
     Object.keys(new_props).forEach(key => {
-        const name = "data-link-" + key;
+        // Replace spaces with hyphens (v0.13.4+)
+        const dom_key = key.replace(/ /g, '-');
+        const name = "data-link-" + dom_key;
         const newValue = new_props[key];
         const curValue = link.getAttribute(name);
 
         // Only update if value is different
         if (!newValue || curValue != newValue) {
-            link.setAttribute("data-link-" + key, new_props[key])
-            if (new_props[key]?.startsWith && (new_props[key].startsWith('http') || new_props[key].startsWith('data:'))) {
-                link.style.setProperty(`--data-link-${key}`, `url(${new_props[key]})`);
+            link.setAttribute(name, newValue)
+            if (newValue?.startsWith && (newValue.startsWith('http') || newValue.startsWith('data:'))) {
+                link.style.setProperty(`--data-link-${dom_key}`, `url(${newValue})`);
             } else {
-                link.style.setProperty(`--data-link-${key}`, new_props[key]);
+                link.style.setProperty(`--data-link-${dom_key}`, newValue);
             }
         }
     });
