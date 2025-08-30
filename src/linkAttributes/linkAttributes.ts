@@ -100,6 +100,13 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
                 )
             );
     }
+    // Replace spaces with hyphens in the keys of new_props
+    const hyphenated_props: Record<string, string> = {};
+    for (const key in new_props) {
+        const hyphenatedKey = key.replace(/ /g, '-');
+        hyphenated_props[hyphenatedKey] = new_props[key];
+    }
+    new_props = hyphenated_props;
 
     return new_props
 }
@@ -112,17 +119,19 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>, s
         }
     }
     Object.keys(new_props).forEach(key => {
-        const name = "data-link-" + key;
+        // Replace spaces with hyphens (v0.13.4+)
+        const dom_key = key.replace(/ /g, '-');
+        const name = "data-link-" + dom_key;
         const newValue = new_props[key];
         const curValue = link.getAttribute(name);
 
         // Only update if value is different
         if (!newValue || curValue != newValue) {
-            link.setAttribute("data-link-" + key, new_props[key])
-            if (new_props[key]?.startsWith && (new_props[key].startsWith('http') || new_props[key].startsWith('data:'))) {
-                link.style.setProperty(`--data-link-${key}`, `url(${new_props[key]})`);
+            link.setAttribute(name, newValue)
+            if (newValue?.startsWith && (newValue.startsWith('http') || newValue.startsWith('data:'))) {
+                link.style.setProperty(`--data-link-${dom_key}`, `url(${newValue})`);
             } else {
-                link.style.setProperty(`--data-link-${key}`, new_props[key]);
+                link.style.setProperty(`--data-link-${dom_key}`, newValue);
             }
         }
     });
@@ -156,8 +165,8 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
     }
 }
 
-export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string, linkName?: string) {
-    if (link.parentElement.getAttribute("class").contains('mod-collapsible')) return; // Bookmarks Folder
+export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string, linkName?: string, filter_collapsible: boolean = false) {
+    if (filter_collapsible && link.parentElement.getAttribute("class").contains('mod-collapsible')) return; // Bookmarks Folder
     if (!linkName) {
         linkName = link.textContent;
     }

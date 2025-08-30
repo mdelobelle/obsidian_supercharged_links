@@ -17,6 +17,32 @@ This is the overall workflow for Supercharged Links:
 2. Choose the type of selector (Tag, Attribute, or Path) and enter the value you want to match.
 3. In the Style Settings Plugin settings, set up the style for the selected attribute, such as changing the text color, background color, or by adding emojis.
 
+## Supported plugins
+Live preview, source view, reading mode and the file browser are fully supported in core Obsidian. Other plugins are also supported, as listed below:
+
+Core plugins:
+- Backlinks (including Backlinks in edit mode)
+- Outgoing links
+- Bases
+- Search
+- Starred files
+- Recent files
+- Quick Switcher
+- Bookmarks
+
+Community plugins:
+- Breadcrumbs (V4+)
+- Graph Analysis
+- Recent files
+- Quick Switcher++
+- Another Quick Switcher
+- Dataview (inline fields)
+- Folder notes
+- Similar notes
+- Omnisearch
+
+Want support for another plugin? Create an issue or a pull request here in the repo!
+
 
 ## Example workflow
 Let's say I have a note about Jim called `Jim.md` with the tag `#person` and some [YAML frontmatter](https://help.obsidian.md/Advanced+topics/YAML+front+matter). 
@@ -235,26 +261,7 @@ https://youtu.be/Ofm6gIRP-7o
 #### Multiple values for a property
 https://youtu.be/aaSZnkEuH4w
 
-### Supported plugins
-Live preview, source view, reading mode and the file browser are fully supported in core Obsidian. Other plugins are also supported, as listed below:
 
-Core plugins:
-- Backlinks (including Backlinks in edit mode)
-- Outgoing links
-- Search
-- Starred files
-- Quick Switcher
-
-Community plugins:
-- Breadcrumbs
-- Graph Analysis
-- Recent files
-- Quicker Switcher++
-- Another Quick Switcher
-- Dataview (inline fields)
-- Omnisearch
-
-Want support for another plugin? Create an issue here in the repo!
 
 ## Link context menu extra options
 This plugin also adds context menu items to modifiy target note's frontmatter properties and "inline fields" (dataview syntax) by right-clicking on the link.

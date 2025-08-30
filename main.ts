@@ -61,6 +61,11 @@ export default class SuperchargedLinks extends Plugin {
 		// Update plugin views when layout changes
 		// TODO: This is an expensive operation that seems like it is called fairly frequently. Maybe we can do this more efficiently?
 		this.registerEvent(this.app.workspace.on("layout-change", () => this.initViewObservers(this)));
+
+		// DEBUG: When adding a new view, to get the proper id of that view, uncomment this and reload the plugin
+		// this.app.workspace.iterateAllLeaves(leaf => {
+		// 	console.log(leaf.view.getViewType());
+		// });
 	}
 
 	initViewObservers(plugin: SuperchargedLinks) {
@@ -70,30 +75,52 @@ export default class SuperchargedLinks extends Plugin {
 		});
 		plugin.observers = [];
 
-		// Register new observers
+		// Register new observers for particular file panes
 		plugin.registerViewType('backlink', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('outgoing-link', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('search', plugin, ".tree-item-inner");
-		plugin.registerViewType('bc-matrix-view', plugin, 'span.internal-link');
-		plugin.registerViewType('BC-ducks', plugin, '.internal-link');
-		plugin.registerViewType('bc-tree-view', plugin, 'span.internal-link');
+		if (plugin.app?.plugins?.plugins?.breadcrumbs) {
+			// console.log('Supercharged links: Enabling breadcrumbs support');
+			plugin.registerViewType('bc-matrix-view', plugin, 'span.internal-link');
+			plugin.registerViewType('BC-ducks', plugin, '.internal-link');
+			plugin.registerViewType('bc-tree-view', plugin, 'span.internal-link');
+			// Breadcrumbs codeblock support as suggested by https://github.com/mdelobelle/obsidian_supercharged_links/issues/248#issuecomment-3231706063
+			plugin.registerViewType('markdown', plugin, '.BC-page-views span.internal-link, .BC-codeblock-tree span.internal-link, .nodes a.internal-link');
+		}
 		plugin.registerViewType('graph-analysis', plugin, '.internal-link');
 		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
+
+		if (plugin.app?.plugins?.plugins?.['folder-notes']) {
+			// console.log('Supercharged links: Enabling folder notes support');
+			plugin.registerViewType('file-explorer', plugin, '.has-folder-note .tree-item-inner');
+		}
+
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content');
-		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner');
+		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner', false, true);
+		// @ts-ignore
+		if (plugin.app?.internalPlugins?.plugins?.bases?.enabled) {
+			// console.log('Supercharged links: Enabling bases support');
+			plugin.registerViewType('bases', plugin, '.internal-link');
+			// For embedded bases
+			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell  .internal-link');
+		}
+		if (plugin.app?.plugins?.plugins?.['similar-notes']) {
+			plugin.registerViewType('markdown', plugin, '.similar-notes-pane .tree-item-inner', true)
+		}
 		// If backlinks in editor is on
 		// @ts-ignore
-		if (plugin.app?.internalPlugins?.plugins?.backlink?.instance?.options?.backlinkInDocument) {
-			plugin.registerViewType('markdown', plugin, '.tree-item-inner', true);
+		if (plugin.app?.internalPlugins?.plugins?.backlink?.enabled && plugin.app?.internalPlugins?.plugins?.backlink?.instance?.options?.backlinkInDocument) {
+			// console.log("Supercharged links: Enabling backlinks in document support");
+			plugin.registerViewType('markdown', plugin, '.embedded-backlinks .tree-item-inner', true);
 		}
 		const propertyLeaves = this.app.workspace.getLeavesOfType("file-properties");
 		 for (let i = 0; i < propertyLeaves.length; i++) {
 			 const container = propertyLeaves[i].view.containerEl;
 			 let observer = new MutationObserver((records, _) =>{
-				 const file = app.workspace.getActiveFile();
+				 const file = this.app.workspace.getActiveFile();
 				 if (!!file) {
-					 updatePropertiesPane(container, app.workspace.getActiveFile(), app, plugin);
+					 updatePropertiesPane(container, this.app.workspace.getActiveFile(), this.app, plugin);
 				 }
 			 });
 			 observer.observe(container, {subtree: true, childList: true, attributes: false});
@@ -119,7 +146,7 @@ export default class SuperchargedLinks extends Plugin {
 							(n.className.includes('modal-container') && plugin.settings.enableQuickSwitcher
 								// @ts-ignore
 								|| n.className.includes('suggestion-container') && plugin.settings.enableSuggestor)) {
-							let selector = ".suggestion-title, .suggestion-note, .another-quick-switcher__item__title, .omnisearch-result__title";
+							let selector = ".suggestion-title, .suggestion-note, .another-quick-switcher__item__title, .omnisearch-result__title > span";
 							// @ts-ignore
 							if (n.className.includes('suggestion-container')) {
 								selector = ".suggestion-title, .suggestion-note";
@@ -134,17 +161,17 @@ export default class SuperchargedLinks extends Plugin {
 		this.modalObservers.last().observe(doc.body, config);
 	}
 
-	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false) {
+	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false, filter_collapsible: boolean = false) {
 		const leaves = this.app.workspace.getLeavesOfType(viewTypeName);
 		// if (leaves.length > 1) {
 		 for (let i = 0; i < leaves.length; i++) {
-			 const container = leaves[i].view.containerEl;
-			 if (updateDynamic) {
-				 plugin._watchContainerDynamic(viewTypeName + i, container, plugin, selector)
-			 }
+			const container = leaves[i].view.containerEl;
+			if (updateDynamic) {
+				plugin._watchContainerDynamic(viewTypeName + i, container, plugin, selector)
+			}
 			 else {
-				 plugin._watchContainer(viewTypeName + i, container, plugin, selector);
-			 }
+				plugin._watchContainer(viewTypeName + i, container, plugin, selector, filter_collapsible);
+			}
 		 }
 		// }
 		// else if (leaves.length < 1) return;
@@ -160,13 +187,13 @@ export default class SuperchargedLinks extends Plugin {
 		// }
 	}
 
-	updateContainer(container: HTMLElement, plugin: SuperchargedLinks, selector: string) {
+	updateContainer(container: HTMLElement, plugin: SuperchargedLinks, selector: string, filter_collapsible: boolean = false) {
 		if (!plugin.settings.enableBacklinks && container.getAttribute("data-type") !== "file-explorer") return;
 		if (!plugin.settings.enableFileList && container.getAttribute("data-type") === "file-explorer") return;
 		const nodes = container.findAll(selector);
 		for (let i = 0; i < nodes.length; ++i) {
 			const el = nodes[i] as HTMLElement;
-			updateDivExtraAttributes(plugin.app, plugin.settings, el, "");
+			updateDivExtraAttributes(plugin.app, plugin.settings, el, "", undefined, filter_collapsible);
 		}
 	}
 
@@ -178,9 +205,9 @@ export default class SuperchargedLinks extends Plugin {
 		}
 	}
 
-	_watchContainer(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string) {
+	_watchContainer(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, filter_collapsible: boolean = false) {
 		let observer = new MutationObserver((records, _) => {
-			plugin.updateContainer(container, plugin, selector);
+			plugin.updateContainer(container, plugin, selector, filter_collapsible);
 		});
 		observer.observe(container, { subtree: true, childList: true, attributes: false });
 		if (viewType) {
@@ -188,7 +215,7 @@ export default class SuperchargedLinks extends Plugin {
 		}
 	}
 
-	_watchContainerDynamic(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, own_class = 'tree-item-inner', parent_class = 'tree-item') {
+	_watchContainerDynamic(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, parent_class = 'tree-item') {
 		// Used for efficient updating of the backlinks panel
 		// Only loops through newly added DOM nodes instead of changing all of them
 		if (!plugin.settings.enableBacklinks) return;
@@ -199,7 +226,7 @@ export default class SuperchargedLinks extends Plugin {
 						if ('className' in n) {
 							// @ts-ignore
 							if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes(parent_class)) {
-								const fileDivs = (n as HTMLElement).getElementsByClassName(own_class);
+								const fileDivs = (n as HTMLElement).findAll(selector);
 								for (let i = 0; i < fileDivs.length; ++i) {
 									const link = fileDivs[i] as HTMLElement;
 									updateDivExtraAttributes(plugin.app, plugin.settings, link, "");
@@ -237,3 +264,4 @@ export default class SuperchargedLinks extends Plugin {
 		await this.saveData(this.settings);
 	}
 }
+

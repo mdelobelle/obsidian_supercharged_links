@@ -30,7 +30,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 					.setPlaceholder('Enter attributes as string, comma separated')
 					.setValue(this.plugin.settings.targetAttributes.join(', '))
 					.onChange(async (value) => {
-						this.plugin.settings.targetAttributes = value.replace(/\s/g, '').split(',');
+						this.plugin.settings.targetAttributes = value.split(',').map(attr => attr.trim());
 						if (this.plugin.settings.targetAttributes.length === 1 && !this.plugin.settings.targetAttributes[0]) {
 							this.plugin.settings.targetAttributes = [];
 						}
@@ -61,7 +61,7 @@ Styling can be done using the Style Settings plugin.
 				toggle.onChange(value => {
 					this.plugin.settings.enableEditor = value
 					this.plugin.saveSettings()
-					updateVisibleLinks(app, this.plugin);
+					updateVisibleLinks(this.app, this.plugin);
 				})
 			})
 
@@ -73,7 +73,7 @@ Styling can be done using the Style Settings plugin.
 				toggle.onChange(value => {
 					this.plugin.settings.enableTabHeader = value
 					this.plugin.saveSettings()
-					updateVisibleLinks(app, this.plugin);
+					updateVisibleLinks(this.app, this.plugin);
 				})
 			})
 

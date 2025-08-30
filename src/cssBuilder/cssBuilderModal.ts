@@ -23,7 +23,7 @@ export function displayText(link: CSSLink, settings: SuperchargedLinksSettings):
         if (!link.value){
             return "<b>Please choose an attribute value.</b>"
         }
-        return `<span class="data-link-icon data-link-text data-link-icon-after" data-link-${link.name}="${link.value}">Note</span> has attribute <b>${link.name}</b> ${matchPreview[link.match]} <b>${link.value}</b>.`;
+        return `<span class="data-link-icon data-link-text data-link-icon-after" data-link-${link.name}="${link.value}">Note</span> has attribute <b>${link.name.replace(/-/g, ' ')}</b> ${matchPreview[link.match]} <b>${link.value}</b>.`;
     }
     if (!link.value) {
         return "<b>Please choose a path.</b>"
@@ -117,9 +117,10 @@ class CSSBuilderModal extends Modal {
             .setDesc("What attribute to target? Make sure to first add target attributes to the settings at the top!")
             .addDropdown(dc => {
                 plugin.settings.targetAttributes.forEach((attribute: string) => {
-                    dc.addOption(attribute, attribute);
-                    if (attribute === cssLink.name) {
-                        dc.setValue(attribute);
+                    const dom_attribute = attribute.replace(/ /g, '-');
+                    dc.addOption(dom_attribute, attribute);
+                    if (dom_attribute === cssLink.name) {
+                        dc.setValue(dom_attribute);
                     }
                 });
                 dc.onChange(name => {
