@@ -19,6 +19,12 @@ export function formatTargetNoteName(format: string, originalName: string, prope
     // Replace {} with the original name
     result = result.replace(/\{\}/g, originalName);
 
+    for (const key of targetProps) {
+        if (properties[key] === undefined) {
+            return originalName; // Missing property, return original name
+        }
+    }
+
     // Replace {property} with property values
     result = result.replace(/\{([^}]+)\}/g, (match, property) => {
         const value = properties[property];
@@ -146,7 +152,7 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>, s
     }
 
     if (settings.enableDynamicViewNameFormatting && settings.dynamicViewNameFormat && !link.getAttribute('data-link-original-name')) {
-        const formattedName = formatTargetNoteName(settings.dynamicViewNameFormat, link.textContent, new_props);
+        const formattedName = formatTargetNoteName(settings.dynamicViewNameFormat, link.textContent, new_props, settings.dynamicViewNameFormatProperties);
         // Store the original name as a data attribute for reference
         link.setAttribute('data-link-original-name', link.textContent);
         // Update the displayed text
