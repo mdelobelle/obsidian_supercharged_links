@@ -107,7 +107,7 @@ describe('Cumulative Integration Tests', () => {
                         type: 'attribute' as any,
                         name: null as any,
                         value: 'test',
-                        match: 'exact',
+                        match: 'exact' as any,
                         matchCaseSensitive: false,
                         selectText: true,
                         selectBackground: false,
@@ -115,7 +115,7 @@ describe('Cumulative Integration Tests', () => {
                         selectAppend: false
                     }
                 ]
-            };
+            } as any;
 
             // Act & Assert
             expect(() => initializeCumulativeLinkService(malformedSettings)).not.toThrow();

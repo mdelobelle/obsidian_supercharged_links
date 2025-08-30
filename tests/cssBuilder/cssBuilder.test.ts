@@ -203,7 +203,7 @@ describe('CSS Builder - Style Settings Integration', () => {
 
     // Should contain combined ::before selector with concatenated content
     expect(generatedCSS).toContain('::before {');
-    expect(generatedCSS).toContain('content: var(--tag-project-before) var(--tag-bug-before);');
+    expect(generatedCSS).toContain('content: var(--tag-project-before) var(--tag-bug-before) !important;');
   });
 
   it('should handle 3+ selector combinations', async () => {

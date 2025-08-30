@@ -1,5 +1,5 @@
-import { CumulativeCSSService } from '../../src/cssBuilder/CumulativeCSSService';
 import { CSSLink } from '../../src/cssBuilder/cssLink';
+import { CumulativeCSSService } from '../../src/cssBuilder/CumulativeCSSService';
 
 describe('CumulativeCSSService', () => {
   let service: CumulativeCSSService;
@@ -67,7 +67,7 @@ describe('CumulativeCSSService', () => {
 
       // Assert
       expect(result).toContain('/* Cumulative Rules - Multiple attributes can combine */');
-      expect(result).toContain('[data-link-status="completed"  i][data-link-priority="high"  i] {');
+      expect(result.join('\n')).toMatch(/\[data-link-status="completed"\s+i\]\[data-link-priority="high"\s+i\], \.scl-cumulative-[a-f0-9]+/);
       expect(result).toContain('    color: var(--text-selector-color) !important;');
       expect(result).toContain('    background-color: var(--bg-selector-background-color) !important;');
     });
@@ -105,7 +105,7 @@ describe('CumulativeCSSService', () => {
       const result = service.generateCumulativeRules(selectors);
 
       // Assert
-      expect(result).toContain('[data-link-tags*="project" i][data-link-path^="Projects/" i] {');
+      expect(result.join('\n')).toMatch(/\[data-link-tags\*="project" i\]\[data-link-path\^="Projects\/" i\], \.scl-cumulative-[a-f0-9]+/);
       expect(result).toContain('    color: var(--tag-selector-color) !important;');
       expect(result).toContain('    background-color: var(--path-selector-background-color) !important;');
     });
@@ -193,8 +193,8 @@ describe('CumulativeCSSService', () => {
 
       // Assert
       // Should contain 3-way combination
-      expect(result).toContain('[data-link-tags*="project" i][data-link-tags*="bug" i][data-link-tags*="urgent" i]');
-      expect(result).toContain('content: var(--prepend1-before) var(--prepend2-before) var(--prepend3-before) !important;');
+      expect(result.join('\n')).toContain('[data-link-tags*="project" i][data-link-tags*="bug" i][data-link-tags*="urgent" i]');
+      expect(result).toContain('    content: var(--prepend1-before) var(--prepend2-before) var(--prepend3-before) !important;');
     });
 
     it('should respect maxCombinations limit', () => {
@@ -214,7 +214,7 @@ describe('CumulativeCSSService', () => {
       // Should not contain 3+ way combinations
       expect(result.join('\n')).not.toContain('[data-link-a="1" i][data-link-b="2" i][data-link-c="3" i]');
       // Should contain 2-way combinations
-      expect(result.join('\n')).toContain('[data-link-a="1" i][data-link-b="2" i]');
+      expect(result.join('\n')).toContain('[data-link-a="1"  i][data-link-b="2"  i], .scl-cumulative-');
     });
   });
 
@@ -296,7 +296,7 @@ describe('CumulativeCSSService', () => {
       const result = service.generateCumulativeRules(selectors);
 
       // Assert
-      expect(result).toContain('[data-link-status="Done" ][data-link-priority="HIGH"  i]');
+      expect(result.join('\n')).toMatch(/\[data-link-status="Done" \]\[data-link-priority="HIGH"\s+i\], \.scl-cumulative-[a-f0-9]+/);
     });
 
     it('should handle different match types', () => {
@@ -332,7 +332,7 @@ describe('CumulativeCSSService', () => {
       const result = service.generateCumulativeRules(selectors);
 
       // Assert
-      expect(result).toContain('[data-link-path^="Projects/"  i][data-link-title*="important"  i]');
+      expect(result.join('\n')).toMatch(/\[data-link-path\^="Projects\/"\s+i\]\[data-link-title\*="important"\s+i\], \.scl-cumulative-[a-f0-9]+/);
     });
   });
 });
