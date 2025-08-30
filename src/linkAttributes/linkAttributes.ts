@@ -1,6 +1,23 @@
-import { App, getAllTags, getLinkpath, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile } from "obsidian"
-import { SuperchargedLinksSettings } from "src/settings/SuperchargedLinksSettings"
+import { App, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile, getAllTags, getLinkpath } from "obsidian"
+
+import { CumulativeLinkService } from './CumulativeLinkService';
 import SuperchargedLinks from "../../main";
+import { SuperchargedLinksSettings } from "src/settings/SuperchargedLinksSettings"
+
+// Global cumulative link service instance
+let cumulativeLinkService: CumulativeLinkService | null = null;
+
+export function initializeCumulativeLinkService(settings: SuperchargedLinksSettings) {
+    cumulativeLinkService = new CumulativeLinkService(settings);
+}
+
+export function updateCumulativeLinkService(settings: SuperchargedLinksSettings) {
+    if (cumulativeLinkService) {
+        cumulativeLinkService.updateSettings(settings);
+    } else {
+        initializeCumulativeLinkService(settings);
+    }
+}
 
 export function clearExtraAttributes(link: HTMLElement) {
     Object.values(link.attributes).forEach(attr => {
@@ -30,8 +47,11 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
         })
     }
 
-    if (settings.targetTags) {
-        new_props["tags"] += getAllTags(cache).join(' ');
+    if (settings.targetTags && cache) {
+        const tags = getAllTags(cache);
+        if (tags) {
+            new_props["tags"] += tags.join(' ');
+        }
     }
 
     if (addDataHref) {
@@ -55,18 +75,18 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
         if (api) {
             getResults(api)
         }
-        else
-            this.plugin.registerEvent(
-                this.app.metadataCache.on("dataview:api-ready", (api: any) =>
-                    getResults(api)
-                )
-            );
+        // Note: this context issue needs to be handled by the caller
+        // The function is called from a plugin context, but 'this' is not available here
+        // This code block should be moved to the plugin's initialization
     }
     // Replace spaces with hyphens in the keys of new_props
     const hyphenated_props: Record<string, string> = {};
     for (const key in new_props) {
         const hyphenatedKey = key.replace(/ /g, '-');
-        hyphenated_props[hyphenatedKey] = new_props[key];
+        const value = new_props[key];
+        if (value !== undefined) {
+            hyphenated_props[hyphenatedKey] = value;
+        }
     }
     new_props = hyphenated_props;
 
@@ -88,13 +108,17 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
         const curValue = link.getAttribute(name);
 
         // Only update if value is different
-        if (!newValue || curValue != newValue) {
+        if (newValue && curValue != newValue) {
             link.setAttribute(name, newValue)
-            if (newValue?.startsWith && (newValue.startsWith('http') || newValue.startsWith('data:'))) {
+            if (newValue.startsWith && (newValue.startsWith('http') || newValue.startsWith('data:'))) {
                 link.style.setProperty(`--data-link-${dom_key}`, `url(${newValue})`);
             } else {
                 link.style.setProperty(`--data-link-${dom_key}`, newValue);
             }
+        } else if (!newValue && curValue) {
+            // Remove attribute if newValue is empty/undefined but curValue exists
+            link.removeAttribute(name);
+            link.style.removeProperty(`--data-link-${dom_key}`);
         }
     });
     if (!link.hasClass("data-link-icon")) {
@@ -105,6 +129,11 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
     }
     if (!link.hasClass("data-link-text")) {
         link.addClass("data-link-text");
+    }
+
+    // Apply cumulative styling if enabled and service is available
+    if (cumulativeLinkService) {
+        cumulativeLinkService.applyCumulativeStyles(link, new_props);
     }
 }
 
@@ -120,17 +149,19 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
 }
 
 export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string, linkName?: string, filter_collapsible: boolean = false) {
-    if (filter_collapsible && link.parentElement.getAttribute("class").contains('mod-collapsible')) return; // Bookmarks Folder
+    if (filter_collapsible && link.parentElement?.getAttribute("class")?.includes('mod-collapsible')) return; // Bookmarks Folder
     if (!linkName) {
-        linkName = link.textContent;
+        linkName = link.textContent || '';
     }
-    if (!!link.parentElement.getAttribute('data-path')) {
+    if (link.parentElement?.getAttribute('data-path')) {
         // File Browser
-        linkName = link.parentElement.getAttribute('data-path');
-    } else if (link.parentElement.getAttribute("class") == "suggestion-content" && !!link.nextElementSibling) {
+        linkName = link.parentElement.getAttribute('data-path') || linkName;
+    } else if (link.parentElement?.getAttribute("class") == "suggestion-content" && link.nextElementSibling) {
         // Auto complete
-        linkName = link.nextElementSibling.textContent + linkName;
+        const nextText = link.nextElementSibling.textContent || '';
+        linkName = nextText + linkName;
     }
+    if (!linkName) return; // Exit early if no linkName could be determined
     const dest = app.metadataCache.getFirstLinkpathDest(getLinkpath(linkName), destName)
 
     if (dest) {
@@ -144,8 +175,8 @@ export function updateElLinks(app: App, plugin: SuperchargedLinks, el: HTMLEleme
     const settings = plugin.settings;
     const links = el.querySelectorAll('a.internal-link');
     const destName = ctx.sourcePath.replace(/(.*).md/, "$1");
-    links.forEach((link: HTMLElement) => {
-        updateLinkExtraAttributes(app, settings, link, destName);
+    links.forEach((link) => {
+        updateLinkExtraAttributes(app, settings, link as HTMLElement, destName);
     });
 }
 
@@ -157,11 +188,12 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
         for (let i = 0; i < nodes.length; ++i) {
             const el = nodes[i] as HTMLElement;
             const linkText = el.textContent;
-            const keyEl = el.parentElement.parentElement.parentElement.parentElement.children[0].children[1];
+            const keyEl = el.parentElement?.parentElement?.parentElement?.parentElement?.children?.[0]?.children?.[1];
+            if (!keyEl) continue;
             // @ts-ignore
             const key = keyEl.value;
             const listOfLinks: [string] = frontmatter[key];
-            let foundS = null;
+            let foundS: string | null = null;
             if (!listOfLinks) {
                 continue;
             }
@@ -170,10 +202,10 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
                     const slicedS = s.slice(2, -2);
                     const split = slicedS.split("|");
                     if (split.length == 1 && split[0] == linkText) {
-                        foundS = split[0];
+                        foundS = split[0] || null;
                         break;
                     } else if (split.length == 2 && split[1] == linkText) {
-                        foundS = split[0];
+                        foundS = split[0] || null;
                         break;
                     }
                 }
@@ -186,20 +218,21 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
         for (let i = 0; i < singleNodes.length; ++i) {
             const el = singleNodes[i] as HTMLElement;
             const linkText = el.textContent;
-            const keyEl = el.parentElement.parentElement.parentElement.children[0].children[1];
+            const keyEl = el.parentElement?.parentElement?.parentElement?.children?.[0]?.children?.[1];
+            if (!keyEl) continue;
             // @ts-ignore
             const key = keyEl.value;
             const link: string = frontmatter[key];
             if (!link) {
                 continue;
             }
-            let foundS: string = null;
+            let foundS: string | null = null;
             if (link?.length > 4 && link.startsWith("[[") && link.endsWith("]]")) {
                 const slicedS = link.slice(2, -2);
                 const split = slicedS.split("|");
                 if (split.length == 1 && split[0] == linkText) {
                     foundS = split[0];
-                } else if (split.length == 2 && split[1] == linkText) {
+                } else if (split.length == 2 && split[1] == linkText && split[0]) {
                     foundS = split[0];
                 }
             }
@@ -241,7 +274,7 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
                     if (dest) {
                         const new_props = fetchTargetAttributesSync(app, settings, dest, false)
                         const internalLinks = leaf.view.containerEl.querySelectorAll(`a.internal-link[href="${link.link}"]`)
-                        internalLinks.forEach((internalLink: HTMLElement) => setLinkNewProps(internalLink, new_props))
+                        internalLinks.forEach((internalLink) => setLinkNewProps(internalLink as HTMLElement, new_props))
                     }
                 })
             }
