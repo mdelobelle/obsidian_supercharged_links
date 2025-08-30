@@ -2,7 +2,7 @@ import { App, PluginSettingTab, Setting, debounce } from "obsidian"
 import SuperchargedLinks from "main"
 import { CSSBuilderModal, updateDisplay } from "../cssBuilder/cssBuilderModal";
 import { buildCSS } from "../cssBuilder/cssBuilder";
-import {updateVisibleLinks} from "../linkAttributes/linkAttributes";
+import { updateVisibleLinks } from "../linkAttributes/linkAttributes";
 
 export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 	plugin: SuperchargedLinks;
@@ -157,11 +157,50 @@ Styling can be done using the Style Settings plugin.
 				});
 			});
 
+		// Dynamic view name formatting
+		new Setting(containerEl)
+			.setName('Enable dynamic view name formatting')
+			.setDesc('If true, allows you to customize how target note names are displayed in dynamic views (backlinks, file browser, etc.)')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.enableDynamicViewNameFormatting)
+				toggle.onChange(async value => {
+					this.plugin.settings.enableDynamicViewNameFormatting = value
+					await this.plugin.saveSettings();
+					updateVisibleLinks(app, this.plugin);
+				});
+			});
+
+		new Setting(containerEl)
+			.setName('Dynamic view name format')
+			.setDesc('Format string for target note names. Use {name} for the original name, {property} for property values.')
+			.addTextArea((text) => {
+				text
+					.setPlaceholder('e.g., {name} ({status:Unknown})')
+					.setValue(this.plugin.settings.dynamicViewNameFormat)
+					.onChange(async (value) => {
+						this.plugin.settings.dynamicViewNameFormat = value;
+						this.plugin.settings.dynamicViewNameFormatProperties = this.dumpPropertiesFromFormatString(value);
+						await this.plugin.saveSettings();
+						updateVisibleLinks(app, this.plugin);
+					})
+				text.inputEl.rows = 3;
+				text.inputEl.cols = 40;
+			})
+			.setDisabled(!this.plugin.settings.enableDynamicViewNameFormatting);
+
 		/* Managing predefined values for properties */
 		/* Manage menu options display*/
 		new Setting(containerEl)
 			.setName("Display field options in context menu")
 			.setDesc("This feature has been migrated to metadata-menu plugin https://github.com/mdelobelle/metadatamenu")
+	}
+
+	dumpPropertiesFromFormatString(formatString: string) {
+		const properties = formatString.match(/\{([^}]+)\}/g);
+		if (properties) {
+			return properties.map(property => property.replace('{', '').replace('}', ''));
+		}
+		return [];
 	}
 
 	generateSnippet() {

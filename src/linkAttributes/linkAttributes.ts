@@ -2,7 +2,43 @@ import { App, getAllTags, getLinkpath, LinkCache, MarkdownPostProcessorContext, 
 import { SuperchargedLinksSettings } from "src/settings/SuperchargedLinksSettings"
 import SuperchargedLinks from "../../main";
 
+/**
+ * Formats a target note name using the specified format string with property expansion
+ * @param format The format string (e.g., "{name} ({status:Unknown})")
+ * @param originalName The original note name
+ * @param properties The properties/attributes of the target note
+ * @returns The formatted name string
+ */
+export function formatTargetNoteName(format: string, originalName: string, properties: Record<string, string>): string {
+    if (!format || format === "{name}") {
+        return originalName;
+    }
+
+    let result = format;
+
+    // Replace {name} with the original name
+    result = result.replace(/\{name\}/g, originalName);
+
+    // Replace {property} with property values
+    result = result.replace(/\{([^}]+)\}/g, (match, property) => {
+        const value = properties[property];
+        if (value && value.trim()) {
+            return value.trim();
+        }
+        return '';
+    });
+
+    return result;
+}
+
 export function clearExtraAttributes(link: HTMLElement) {
+    // Restore original name if it was stored
+    const originalName = link.getAttribute('data-link-original-name');
+    if (originalName) {
+        link.textContent = originalName;
+        link.removeAttribute('data-link-original-name');
+    }
+
     Object.values(link.attributes).forEach(attr => {
         if (attr.name.includes("data-link")) {
             link.removeAttribute(attr.name)
@@ -19,15 +55,17 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
     const frontmatter = cache.frontmatter
 
     if (frontmatter) {
-        settings.targetAttributes.forEach(attribute => {
-            if (Object.keys(frontmatter).includes(attribute)) {
-                if (attribute === 'tag' || attribute === 'tags') {
-                    new_props['tags'] += frontmatter[attribute];
-                } else {
-                    new_props[attribute] = frontmatter[attribute]
+        settings.targetAttributes
+            .concat(settings.dynamicViewNameFormatProperties)
+            .forEach(attribute => {
+                if (Object.keys(frontmatter).includes(attribute)) {
+                    if (attribute === 'tag' || attribute === 'tags') {
+                        new_props['tags'] += frontmatter[attribute];
+                    } else {
+                        new_props[attribute] = frontmatter[attribute]
+                    }
                 }
-            }
-        })
+            })
     }
 
     if (settings.targetTags) {
@@ -66,10 +104,10 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
     return new_props
 }
 
-function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
+function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>, settings: SuperchargedLinksSettings) {
     // @ts-ignore
     for (const a of link.attributes) {
-        if (a.name.includes("data-link") && !(a.name in new_props)) {
+        if (a.name.includes("data-link") && !(a.name in new_props) && a.name !== "data-link-original-name") {
             link.removeAttribute(a.name);
         }
     }
@@ -97,6 +135,14 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
     if (!link.hasClass("data-link-text")) {
         link.addClass("data-link-text");
     }
+
+    if (settings.enableDynamicViewNameFormatting && settings.dynamicViewNameFormat && !link.getAttribute('data-link-original-name')) {
+        const formattedName = formatTargetNoteName(settings.dynamicViewNameFormat, link.textContent, new_props);
+        // Store the original name as a data attribute for reference
+        link.setAttribute('data-link-original-name', link.textContent);
+        // Update the displayed text
+        link.textContent = formattedName;
+    }
 }
 
 function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
@@ -105,7 +151,7 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
         const dest = app.metadataCache.getFirstLinkpathDest(linkHref, destName);
         if (dest) {
             const new_props = fetchTargetAttributesSync(app, settings, dest, false);
-            setLinkNewProps(link, new_props);
+            setLinkNewProps(link, new_props, settings);
         }
     }
 }
@@ -126,7 +172,7 @@ export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSe
 
     if (dest) {
         const new_props = fetchTargetAttributesSync(app, settings, dest, true);
-        setLinkNewProps(link, new_props);
+        setLinkNewProps(link, new_props, settings);
     }
 }
 
@@ -143,7 +189,7 @@ export function updateElLinks(app: App, plugin: SuperchargedLinks, el: HTMLEleme
 
 export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app: App, plugin: SuperchargedLinks) {
     const frontmatter = app.metadataCache.getCache(file.path)?.frontmatter;
-    if(!!frontmatter) {
+    if (!!frontmatter) {
         const nodes = propertiesEl.querySelectorAll("div.internal-link > .multi-select-pill-content");
         for (let i = 0; i < nodes.length; ++i) {
             const el = nodes[i] as HTMLElement;
@@ -232,7 +278,7 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
                     if (dest) {
                         const new_props = fetchTargetAttributesSync(app, settings, dest, false)
                         const internalLinks = leaf.view.containerEl.querySelectorAll(`a.internal-link[href="${link.link}"]`)
-                        internalLinks.forEach((internalLink: HTMLElement) => setLinkNewProps(internalLink, new_props))
+                        internalLinks.forEach((internalLink: HTMLElement) => setLinkNewProps(internalLink, new_props, settings))
                     }
                 })
             }

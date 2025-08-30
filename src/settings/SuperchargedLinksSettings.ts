@@ -12,6 +12,9 @@ export interface SuperchargedLinksSettings {
 	enableQuickSwitcher: boolean;
 	enableSuggestor: boolean;
 	selectors: CSSLink[];
+	enableDynamicViewNameFormatting: boolean;
+	dynamicViewNameFormat: string;
+	dynamicViewNameFormatProperties: Array<string>;
 }
 
 export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
@@ -25,5 +28,8 @@ export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	enableBacklinks: true,
 	enableQuickSwitcher: true,
 	enableSuggestor: true,
-	selectors: []
+	selectors: [],
+	enableDynamicViewNameFormatting: false,
+	dynamicViewNameFormat: "{name}",
+	dynamicViewNameFormatProperties: []
 }
