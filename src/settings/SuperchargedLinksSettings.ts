@@ -30,6 +30,6 @@ export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	enableSuggestor: true,
 	selectors: [],
 	enableDynamicViewNameFormatting: false,
-	dynamicViewNameFormat: "{name}",
+	dynamicViewNameFormat: "{}",
 	dynamicViewNameFormatProperties: []
 }

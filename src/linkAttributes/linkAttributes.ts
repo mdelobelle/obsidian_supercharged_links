@@ -4,20 +4,20 @@ import SuperchargedLinks from "../../main";
 
 /**
  * Formats a target note name using the specified format string with property expansion
- * @param format The format string (e.g., "{name} ({status:Unknown})")
+ * @param format The format string (e.g., "{} ({status:Unknown})")
  * @param originalName The original note name
  * @param properties The properties/attributes of the target note
  * @returns The formatted name string
  */
-export function formatTargetNoteName(format: string, originalName: string, properties: Record<string, string>): string {
-    if (!format || format === "{name}") {
+export function formatTargetNoteName(format: string, originalName: string, properties: Record<string, string>, targetProps: string[]): string {
+    if (!format || format === "{}") {
         return originalName;
     }
 
     let result = format;
 
-    // Replace {name} with the original name
-    result = result.replace(/\{name\}/g, originalName);
+    // Replace {} with the original name
+    result = result.replace(/\{\}/g, originalName);
 
     // Replace {property} with property values
     result = result.replace(/\{([^}]+)\}/g, (match, property) => {

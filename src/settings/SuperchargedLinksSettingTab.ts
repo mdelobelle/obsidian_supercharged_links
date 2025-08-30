@@ -172,10 +172,10 @@ Styling can be done using the Style Settings plugin.
 
 		new Setting(containerEl)
 			.setName('Dynamic view name format')
-			.setDesc('Format string for target note names. Use {name} for the original name, {property} for property values.')
+			.setDesc('Format string for target note names. Use {} for the original name, {property} for property values.')
 			.addTextArea((text) => {
 				text
-					.setPlaceholder('e.g., {name} ({status:Unknown})')
+					.setPlaceholder('e.g., {} ({status})')
 					.setValue(this.plugin.settings.dynamicViewNameFormat)
 					.onChange(async (value) => {
 						this.plugin.settings.dynamicViewNameFormat = value;
