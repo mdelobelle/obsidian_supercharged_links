@@ -1,6 +1,22 @@
 import { App, getAllTags, getLinkpath, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile } from "obsidian"
 import { SuperchargedLinksSettings } from "src/settings/SuperchargedLinksSettings"
 import SuperchargedLinks from "../../main";
+import { CumulativeLinkService } from './CumulativeLinkService';
+
+// Global cumulative link service instance
+let cumulativeLinkService: CumulativeLinkService | null = null;
+
+export function initializeCumulativeLinkService(settings: SuperchargedLinksSettings) {
+    cumulativeLinkService = new CumulativeLinkService(settings);
+}
+
+export function updateCumulativeLinkService(settings: SuperchargedLinksSettings) {
+    if (cumulativeLinkService) {
+        cumulativeLinkService.updateSettings(settings);
+    } else {
+        initializeCumulativeLinkService(settings);
+    }
+}
 
 export function clearExtraAttributes(link: HTMLElement) {
     Object.values(link.attributes).forEach(attr => {
@@ -105,6 +121,11 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
     }
     if (!link.hasClass("data-link-text")) {
         link.addClass("data-link-text");
+    }
+
+    // Apply cumulative styling if enabled and service is available
+    if (cumulativeLinkService) {
+        cumulativeLinkService.applyCumulativeStyles(link, new_props);
     }
 }
 
