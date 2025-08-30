@@ -49,7 +49,10 @@ const colorSet = [[
 const colors: string[] = [];
 for (const i of Array(6).keys()) {
     for (const j of Array(6).keys()) {
-        colors.push(colorSet[j][i]);
+        const color = colorSet[j]?.[i];
+        if (color !== undefined) {
+            colors.push(color);
+        }
     }
 }
 

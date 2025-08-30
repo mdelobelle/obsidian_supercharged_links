@@ -50,7 +50,7 @@ export class CumulativeCSSService {
      */
     private generateAllCombinations(selectors: CSSLink[]): CSSLink[][] {
         const combinations: CSSLink[][] = [];
-        const maxSelectors = Math.min(selectors.length, this.maxCombinations + 1); // +1 because maxCombinations was for pairs
+        const maxSelectors = Math.min(selectors.length, this.maxCombinations);
 
         // Generate combinations of size 2 to maxSelectors
         for (let size = 2; size <= maxSelectors; size++) {
@@ -75,10 +75,12 @@ export class CumulativeCSSService {
 
         for (let i = 0; i <= arr.length - size; i++) {
             const head = arr[i];
-            const tailCombinations = this.getCombinations(arr.slice(i + 1), size - 1);
-            tailCombinations.forEach(tail => {
-                combinations.push([head, ...tail]);
-            });
+            if (head !== undefined) {
+                const tailCombinations = this.getCombinations(arr.slice(i + 1), size - 1);
+                tailCombinations.forEach(tail => {
+                    combinations.push([head, ...tail]);
+                });
+            }
         }
 
         return combinations;
@@ -259,12 +261,14 @@ export class CumulativeCSSService {
         const textSelectors = selectors.filter(s => s.selectText);
         if (textSelectors.length > 0) {
             const firstTextSelector = textSelectors[0];
-            styles.push(`    color: var(--${firstTextSelector.uid}-color) !important;`);
+            if (firstTextSelector) {
+                styles.push(`    color: var(--${firstTextSelector.uid}-color) !important;`);
 
-            if (textSelectors.length > 1) {
-                styles.push(`    font-weight: bold;`);
-            } else {
-                styles.push(`    font-weight: var(--${firstTextSelector.uid}-weight);`);
+                if (textSelectors.length > 1) {
+                    styles.push(`    font-weight: bold;`);
+                } else {
+                    styles.push(`    font-weight: var(--${firstTextSelector.uid}-weight);`);
+                }
             }
         }
 
@@ -272,11 +276,13 @@ export class CumulativeCSSService {
         const backgroundSelectors = selectors.filter(s => s.selectBackground);
         if (backgroundSelectors.length > 0) {
             const firstBgSelector = backgroundSelectors[0];
-            styles.push(`    background-color: var(--${firstBgSelector.uid}-background-color) !important;`);
-            styles.push(`    border-radius: 5px;`);
-            styles.push(`    padding-left: 2px;`);
-            styles.push(`    padding-right: 2px;`);
-            styles.push(`    text-decoration: var(--${firstBgSelector.uid}-decoration) !important;`);
+            if (firstBgSelector) {
+                styles.push(`    background-color: var(--${firstBgSelector.uid}-background-color) !important;`);
+                styles.push(`    border-radius: 5px;`);
+                styles.push(`    padding-left: 2px;`);
+                styles.push(`    padding-right: 2px;`);
+                styles.push(`    text-decoration: var(--${firstBgSelector.uid}-decoration) !important;`);
+            }
         }
 
         return styles;
