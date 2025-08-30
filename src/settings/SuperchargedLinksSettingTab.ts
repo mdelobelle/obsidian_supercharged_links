@@ -144,6 +144,19 @@ Styling can be done using the Style Settings plugin.
 				});
 			});
 
+		// Apply Cumulative Styles setting
+		new Setting(containerEl)
+			.setName('Apply Cumulative Styles')
+			.setDesc('When enabled, links that match multiple rules will combine all matching styles instead of only applying the last matching rule. For example, a link with both "status: completed" and "priority: high" will get both text color and background styling.')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.enableCumulative)
+				toggle.onChange(async value => {
+					this.plugin.settings.enableCumulative = value
+					await this.plugin.saveSettings()
+					this.generateSnippet(); // Regenerate CSS with new setting
+				});
+			});
+
 		// Automatically activate snippet
 		new Setting(containerEl)
 			.setName('Automatically activate snippet')

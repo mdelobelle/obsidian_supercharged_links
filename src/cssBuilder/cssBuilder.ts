@@ -1,5 +1,6 @@
 import {CSSLink, matchSign} from "./cssLink";
 import SuperchargedLinks from "../../main";
+import { CumulativeCSSService } from "./CumulativeCSSService";
 
 
 const colorSet = [[
@@ -48,7 +49,10 @@ const colorSet = [[
 const colors: string[] = [];
 for (const i of Array(6).keys()) {
     for (const j of Array(6).keys()) {
-        colors.push(colorSet[j][i]);
+        const color = colorSet[j]?.[i];
+        if (color !== undefined) {
+            colors.push(color);
+        }
     }
 }
 
@@ -227,6 +231,18 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
     });
     instructions.push("*/");
 
+    // Generate cumulative CSS rules if enabled
+    if (plugin.settings.enableCumulative) {
+        try {
+            const cumulativeService = new CumulativeCSSService();
+            const cumulativeRules = cumulativeService.generateCumulativeRules(selectors);
+            instructions.push(...cumulativeRules);
+        } catch (error) {
+            console.error('Failed to generate cumulative CSS rules:', error);
+            // Continue without cumulative rules rather than failing completely
+        }
+    }
+
     const vault = plugin.app.vault;
     const configDir = vault.configDir ?? ".obsidian";
     const pathDir = configDir + "/snippets";
@@ -237,14 +253,32 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
     }
     await plugin.app.vault.create(path, instructions.join('\n'));
 
-    // Activate snippet
+    // Robust snippet activation across Obsidian versions
     if (plugin.settings.activateSnippet) {
-        // @ts-ignore
-        const customCss = plugin.app.customCss;
-        customCss.enabledSnippets.add('supercharged-links-gen');
-        customCss.requestLoadSnippets();
+        try {
+            // @ts-ignore
+            const customCss = plugin.app.customCss;
+            if (customCss) {
+                customCss.enabledSnippets.add('supercharged-links-gen');
+
+                // Try multiple methods to ensure snippet loads
+                if (typeof customCss.requestLoadSnippets === 'function') {
+                    customCss.requestLoadSnippets();
+                }
+
+                // Fallback: trigger CSS change event
+                plugin.app.workspace.trigger('css-change');
+            }
+        } catch (error) {
+            console.error('Failed to activate CSS snippet:', error);
+            // Continue without activation - user can manually enable
+        }
     }
 
     // Ensure Style Settings reads changes
-    plugin.app.workspace.trigger("parse-style-settings");
+    try {
+        plugin.app.workspace.trigger("parse-style-settings");
+    } catch (error) {
+        console.error('Failed to trigger parse-style-settings:', error);
+    }
 }

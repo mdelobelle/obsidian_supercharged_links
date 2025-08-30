@@ -5,6 +5,7 @@ import {
 	updateVisibleLinks,
 	clearExtraAttributes,
 	updateDivExtraAttributes, updatePropertiesPane,
+	initializeCumulativeLinkService, updateCumulativeLinkService
 } from "src/linkAttributes/linkAttributes"
 import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
 import { Prec } from "@codemirror/state";
@@ -258,10 +259,14 @@ export default class SuperchargedLinks extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		// Initialize cumulative link service with current settings
+		initializeCumulativeLinkService(this.settings);
 	}
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+		// Update cumulative link service when settings change
+		updateCumulativeLinkService(this.settings);
 	}
 }
 
