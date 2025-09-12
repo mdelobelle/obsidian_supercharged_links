@@ -12,13 +12,14 @@ export interface SuperchargedLinksSettings {
 	enableQuickSwitcher: boolean;
 	enableSuggestor: boolean;
 	enableCumulative: boolean;
+	enableBases: boolean;
 	selectors: CSSLink[];
 }
 
 export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	targetAttributes: [],
 	targetTags: true,
-	getFromInlineField: true,
+	getFromInlineField: false,
 	enableTabHeader: true,
 	activateSnippet: true,
 	enableEditor: true,
@@ -27,5 +28,6 @@ export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	enableQuickSwitcher: true,
 	enableSuggestor: true,
 	enableCumulative: false, // Default to false for backward compatibility
+	enableBases: true,
 	selectors: []
 }

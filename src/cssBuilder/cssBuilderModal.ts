@@ -5,6 +5,7 @@ import {
 } from "obsidian"
 import {matchTypes, matchPreview, CSSLink, matchPreviewPath, selectorType, SelectorTypes, MatchTypes} from './cssLink'
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
+import { processKey } from "src/linkAttributes/linkAttributes";
 
 export function displayText(link: CSSLink, settings: SuperchargedLinksSettings): string {
     if (link.type === 'tag') {
@@ -117,7 +118,7 @@ class CSSBuilderModal extends Modal {
             .setDesc("What attribute to target? Make sure to first add target attributes to the settings at the top!")
             .addDropdown(dc => {
                 plugin.settings.targetAttributes.forEach((attribute: string) => {
-                    const dom_attribute = attribute.replace(/ /g, '-');
+                    const dom_attribute = processKey(attribute);
                     dc.addOption(dom_attribute, attribute);
                     if (dom_attribute === cssLink.name) {
                         dc.setValue(dom_attribute);

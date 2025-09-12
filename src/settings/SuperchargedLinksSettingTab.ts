@@ -86,7 +86,18 @@ Styling can be done using the Style Settings plugin.
 					this.plugin.settings.enableFileList = value
 					this.plugin.saveSettings()
 				})
-			})
+			});
+
+		new Setting(containerEl)
+			.setName('Enable in Bases')
+			.setDesc('If true, this will also supercharge Obsidian Bases.')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.enableBases)
+				toggle.onChange(value => {
+					this.plugin.settings.enableBases = value
+					this.plugin.saveSettings()
+				});
+			});
 
 		new Setting(containerEl)
 			.setName('Enable in Plugins')
