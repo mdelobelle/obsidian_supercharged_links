@@ -55,12 +55,13 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
         if (api) {
             getResults(api)
         }
-        else
-            this.plugin.registerEvent(
-                this.app.metadataCache.on("dataview:api-ready", (api: any) =>
-                    getResults(api)
-                )
-            );
+        // This is crashing for some people. I think ignoring it will be ok. 
+        // else
+        //     this.plugin.registerEvent(
+        //         app.metadataCache.on("dataview:api-ready", (api: any) =>
+        //             getResults(api)
+        //         )
+        //     );
     }
     // Replace spaces with hyphens in the keys of new_props
     const hyphenated_props: Record<string, string> = {};
@@ -73,6 +74,19 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
     return new_props
 }
 
+export function processKey(key: string) {
+    // Replace spaces with hyphens (v0.13.4+)
+    return key.replace(/ /g, '-');
+}
+
+export function processValue(key: string, value: string) {
+    // TODO: This is a hack specifically for Emile's setup. Should be commented in releases.
+    if (key.contains("publishedIn") && value?.length && value.length === 1 && value[0].startsWith && value[0].startsWith("[[") && value[0].endsWith("]]")) {
+        return value[0].slice(2, -2);
+    }
+    return value;
+}
+
 function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
     // @ts-ignore
     for (const a of link.attributes) {
@@ -81,11 +95,10 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
         }
     }
     Object.keys(new_props).forEach(key => {
-        // Replace spaces with hyphens (v0.13.4+)
-        const dom_key = key.replace(/ /g, '-');
+        const dom_key = processKey(key);
         const name = "data-link-" + dom_key;
-        const newValue = new_props[key];
         const curValue = link.getAttribute(name);
+        const newValue = processValue(key, new_props[key]);
 
         // Only update if value is different
         if (!newValue || curValue != newValue) {

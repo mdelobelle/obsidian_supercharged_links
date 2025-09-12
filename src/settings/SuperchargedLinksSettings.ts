@@ -17,7 +17,7 @@ export interface SuperchargedLinksSettings {
 export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	targetAttributes: [],
 	targetTags: true,
-	getFromInlineField: true,
+	getFromInlineField: false,
 	enableTabHeader: true,
 	activateSnippet: true,
 	enableEditor: true,
