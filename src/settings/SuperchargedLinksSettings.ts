@@ -12,6 +12,7 @@ export interface SuperchargedLinksSettings {
 	enableQuickSwitcher: boolean;
 	enableSuggestor: boolean;
 	enableBases: boolean;
+	enableCumulative: boolean;
 	selectors: CSSLink[];
 }
 
@@ -27,5 +28,6 @@ export const DEFAULT_SETTINGS: SuperchargedLinksSettings = {
 	enableQuickSwitcher: true,
 	enableSuggestor: true,
 	enableBases: true,
+	enableCumulative: false,
 	selectors: []
 }
