@@ -100,9 +100,13 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner', false, true);
 		// @ts-ignore
 		if (plugin.app?.internalPlugins?.plugins?.bases?.enabled && plugin.settings.enableBases) {
-			plugin.registerViewType('bases', plugin, '.internal-link');
+			// console.log('Supercharged links: Enabling bases support');
+			plugin.registerViewType('bases', plugin, 'a.internal-link');
+			plugin.registerViewType('bases', plugin, '.internal-link > .multi-select-pill-content');
+
 			// For embedded bases
-			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell  .internal-link');
+			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell a.internal-link');
+			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell .internal-link > .multi-select-pill-content');
 		}
 		if (plugin.app?.plugins?.plugins?.['similar-notes']) {
 			plugin.registerViewType('markdown', plugin, '.similar-notes-pane .tree-item-inner', true)
