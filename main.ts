@@ -103,6 +103,7 @@ export default class SuperchargedLinks extends Plugin {
 			// console.log('Supercharged links: Enabling bases support');
 			plugin.registerViewType('bases', plugin, 'a.internal-link');
 			plugin.registerViewType('bases', plugin, '.internal-link > .multi-select-pill-content');
+
 			// For embedded bases
 			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell a.internal-link');
 			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell .internal-link > .multi-select-pill-content');
