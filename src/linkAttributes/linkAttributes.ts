@@ -137,12 +137,19 @@ export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSe
     if (!linkName) {
         linkName = link.textContent;
     }
+    // Sometimes textContent refers to the alias, missing the base name/path. Then we need to explicitly get the base name/path from attributes.
     if (!!link.parentElement.getAttribute('data-path')) {
         // File Browser
         linkName = link.parentElement.getAttribute('data-path');
     } else if (link.parentElement.getAttribute("class") == "suggestion-content" && !!link.nextElementSibling) {
         // Auto complete
         linkName = link.nextElementSibling.textContent + linkName;
+    } else if (link.getAttribute("data-href")) {
+        // Bases (v1.10+)
+        linkName = link.getAttribute("data-href");
+    } else if (link.getAttribute("href")) {
+        // Bases
+        linkName = link.getAttribute("href");
     }
     const dest = app.metadataCache.getFirstLinkpathDest(getLinkpath(linkName), destName)
 

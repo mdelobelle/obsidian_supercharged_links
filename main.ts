@@ -100,7 +100,6 @@ export default class SuperchargedLinks extends Plugin {
 		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner', false, true);
 		// @ts-ignore
 		if (plugin.app?.internalPlugins?.plugins?.bases?.enabled && plugin.settings.enableBases) {
-			// console.log('Supercharged links: Enabling bases support');
 			plugin.registerViewType('bases', plugin, '.internal-link');
 			// For embedded bases
 			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell  .internal-link');
