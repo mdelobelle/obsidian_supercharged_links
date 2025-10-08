@@ -43,7 +43,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 		containerEl.createEl('h4', { text: 'Styling' });
 		const styleSettingDescription = containerEl.createDiv();
 		styleSettingDescription.innerHTML = `
-Styling can be done using the Style Settings plugin. 
+Styling can be done using the Style Settings plugin.
  <ol>
  <li>Create selectors down below.</li>
  <li>Go to the Style Settings tab and style your links!</li>
@@ -154,6 +154,20 @@ Styling can be done using the Style Settings plugin.
 					await this.plugin.saveSettings()
 				});
 			});
+
+			// Apply Cumulative Styles setting
+			new Setting(containerEl)
+				.setName('Apply Cumulative Styles')
+				.setDesc('When enabled, links that match multiple rules will combine all matching styles instead of only applying the last matching rule. For example, a link with both "status: completed" and "priority: high" will get both text color and background styling.')
+				.addToggle(toggle => {
+					toggle.setValue(this.plugin.settings.enableCumulative)
+					toggle.onChange(async value => {
+						this.plugin.settings.enableCumulative = value
+						await this.plugin.saveSettings()
+						this.generateSnippet(); // Regenerate CSS with new setting
+					});
+				});
+
 
 		// Automatically activate snippet
 		new Setting(containerEl)

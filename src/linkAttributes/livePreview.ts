@@ -1,11 +1,17 @@
 import {App, debounce, Debouncer, editorViewField, MarkdownView, TFile} from "obsidian";
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
 import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
-import {RangeSet, RangeSetBuilder} from "@codemirror/state";
+import {RangeSet, RangeSetBuilder,Compartment, Facet} from "@codemirror/state";
 import {syntaxTree} from "@codemirror/language";
 import {tokenClassNodeProp} from "@codemirror/language";
 import {fetchTargetAttributesSync, processValue} from "./linkAttributes";
 import {DefaultFunctions} from "obsidian-dataview/lib/expression/functions";
+
+// A facet + compartment used to signal metadata-driven refreshes to the CM6 view plugin
+export const metadataRefreshFacet = Facet.define<number, number>({
+    combine: values => (values.length ? values[0] : 0)
+});
+export const metadataRefreshCompartment = new Compartment();
 
 export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings)
 {
@@ -59,21 +65,32 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
             }
 
             update(update: ViewUpdate) {
-                if (update.docChanged) {
-                    this.decorations = this.decorations.map(update.changes);
+                // If the metadata refresh facet changed, rebuild decorations for the visible viewport
+                const prevSignal = update.startState.facet(metadataRefreshFacet);
+                const nextSignal = update.state.facet(metadataRefreshFacet);
+                const metadataRefreshed = prevSignal !== nextSignal;
 
-                    update.changes.iterChanges((fromA, toA, fromB, toB, t) => {
-                        // Update all 'line blocks' between the range changed. Prevents weird graphical bugs
-                        const minFrom = update.view.lineBlockAt(fromB).from;
-                        const maxTo = update.view.lineBlockAt(toB).to;
-                        // remove things within bounds
-                        this.decorations = this.decorations.update({
-                            filter: (from, to) => to < minFrom || from > maxTo});
+                if (update.docChanged || metadataRefreshed) {
+                    if (update.docChanged) {
+                        this.decorations = this.decorations.map(update.changes);
 
-                        // Update decorations within bounds
-                        this.decorations = RangeSet.join([this.decorations,
-                            this.buildDecorations(update.view, minFrom, maxTo)]);
-                    });
+                        update.changes.iterChanges((fromA, toA, fromB, toB, t) => {
+                            // Update all 'line blocks' between the range changed. Prevents weird graphical bugs
+                            const minFrom = update.view.lineBlockAt(fromB).from;
+                            const maxTo = update.view.lineBlockAt(toB).to;
+                            // remove things within bounds
+                            this.decorations = this.decorations.update({
+                                filter: (from, to) => to < minFrom || from > maxTo});
+
+                            // Update decorations within bounds
+                            this.decorations = RangeSet.join([this.decorations,
+                                this.buildDecorations(update.view, minFrom, maxTo)]);
+                        });
+                    }
+                    if (metadataRefreshed) {
+                        // No text changed, but metadata has; recompute decorations for current viewport
+                        this.decorations = this.buildDecorations(update.view);
+                    }
                 }
                 else if (update.viewportChanged) {
                     this.decorations = this.buildDecorations(update.view);
