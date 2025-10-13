@@ -1,5 +1,6 @@
 import {CSSLink, matchSign} from "./cssLink";
 import SuperchargedLinks from "../../main";
+import { CumulativeCSSService } from "./CumulativeCSSService";
 
 
 const colorSet = [[
@@ -137,6 +138,15 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
                 "}"]);
         }
     });
+
+	    // Cumulative styles (optional)
+	    if (plugin.settings.enableCumulative) {
+	        const cumulative = new CumulativeCSSService();
+	        const cumulativeRules = cumulative.generateCumulativeRules(selectors);
+	        if (cumulativeRules.length > 0) {
+	            instructions.push(...cumulativeRules);
+	        }
+	    }
 
     instructions.push(...[
         "/* @settings",
