@@ -118,19 +118,23 @@ export default class SuperchargedLinks extends Plugin {
 			plugin.registerViewType('markdown', plugin, '.embedded-backlinks .tree-item-inner', true);
 		}
 		const propertyLeaves = this.app.workspace.getLeavesOfType("file-properties");
-		 for (let i = 0; i < propertyLeaves.length; i++) {
-			 const container = propertyLeaves[i].view.containerEl;
-			 let observer = new MutationObserver((records, _) =>{
-				 const file = this.app.workspace.getActiveFile();
-				 if (!!file) {
-					 updatePropertiesPane(container, this.app.workspace.getActiveFile(), this.app, plugin);
-				 }
-			 });
-			 observer.observe(container, {subtree: true, childList: true, attributes: false});
-			 plugin.observers.push([observer, "file-properties" + i, ""]);
-			 // TODO: No proper unloading!
-		 }
+		for (let i = 0; i < propertyLeaves.length; i++) {
+			const container = propertyLeaves[i].view.containerEl;
+			let observer = new MutationObserver((records, _) =>{
+				const file = this.app.workspace.getActiveFile();
+				if (!!file) {
+					updatePropertiesPane(container, this.app.workspace.getActiveFile(), this.app, plugin);
+				}
+			});
+			observer.observe(container, {subtree: true, childList: true, attributes: false});
+			plugin.observers.push([observer, "file-properties" + i, ""]);
+			// TODO: No proper unloading!
+		}
 		plugin.registerViewType('file-properties', plugin, 'div.internal-link > .multi-select-pill-content');
+		if (plugin.app?.plugins?.plugins?.['notebook-navigator']) {
+			plugin.registerViewType('notebook-navigator', plugin, 'span.nn-shortcut-label');
+			plugin.registerViewType('notebook-navigator', plugin, 'div.nn-file-name');
+		}
 	}
 
 	initModalObservers(plugin: SuperchargedLinks, doc: Document) {
