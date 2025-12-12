@@ -179,7 +179,7 @@ export function updateElLinks(app: App, plugin: SuperchargedLinks, el: HTMLEleme
 export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app: App, plugin: SuperchargedLinks) {
     const frontmatter = app.metadataCache.getCache(file.path)?.frontmatter;
     if(!!frontmatter) {
-        const nodes = propertiesEl.querySelectorAll("div.internal-link > .multi-select-pill-content");
+        const nodes = propertiesEl.querySelectorAll("div.multi-select-pill-content");
         for (let i = 0; i < nodes.length; ++i) {
             const el = nodes[i] as HTMLElement;
             const linkText = el.textContent;
