@@ -106,7 +106,7 @@ export default class SuperchargedLinks extends Plugin {
 
 			// For embedded bases
 			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell > span.internal-link');
-			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell .internal-link > .multi-select-pill-content');
+			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell div.multi-select-pill-content');
 			plugin.registerViewType('markdown', plugin, 'div.bases-cards-line');
 		}
 		if (plugin.app?.plugins?.plugins?.['similar-notes']) {
