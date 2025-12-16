@@ -88,6 +88,9 @@ export default class SuperchargedLinks extends Plugin {
 			plugin.registerViewType('markdown', plugin, '.BC-page-views span.internal-link, .BC-codeblock-tree span.internal-link, .nodes a.internal-link');
 		}
 		plugin.registerViewType('graph-analysis', plugin, '.internal-link');
+		
+		plugin.registerViewType('hierarchical-backlinks', plugin, ".tree-item-inner", true);
+		plugin.registerViewType('hierarchical-outgoing-links', plugin, ".tree-item-inner", true);
 		plugin.registerViewType('starred', plugin, '.nav-file-title-content');
 		plugin.registerViewType('file-explorer', plugin, '.nav-file-title-content');
 
