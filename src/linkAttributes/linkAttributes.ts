@@ -2,6 +2,18 @@ import { App, getAllTags, getLinkpath, LinkCache, MarkdownPostProcessorContext, 
 import { SuperchargedLinksSettings } from "src/settings/SuperchargedLinksSettings"
 import SuperchargedLinks from "../../main";
 
+import { CumulativeLinkService } from "./CumulativeLinkService";
+
+let cumulativeLinkService: CumulativeLinkService | null = null;
+
+export function initializeCumulativeLinkService(settings: SuperchargedLinksSettings) {
+    cumulativeLinkService = new CumulativeLinkService(settings);
+}
+
+export function updateCumulativeLinkService(settings: SuperchargedLinksSettings) {
+    if (cumulativeLinkService) cumulativeLinkService.updateSettings(settings);
+}
+
 export function clearExtraAttributes(link: HTMLElement) {
     Object.values(link.attributes).forEach(attr => {
         if (attr.name.includes("data-link")) {
@@ -55,7 +67,7 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
         if (api) {
             getResults(api)
         }
-        // This is crashing for some people. I think ignoring it will be ok. 
+        // This is crashing for some people. I think ignoring it will be ok.
         // else
         //     this.plugin.registerEvent(
         //         app.metadataCache.on("dataview:api-ready", (api: any) =>
@@ -119,6 +131,14 @@ function setLinkNewProps(link: HTMLElement, new_props: Record<string, string>) {
     if (!link.hasClass("data-link-text")) {
         link.addClass("data-link-text");
     }
+	// Apply cumulative classes when multiple rules match
+    if (cumulativeLinkService) {
+        try {
+            cumulativeLinkService.applyCumulativeStyles(link, new_props);
+        } catch (e) {
+            // Non-fatal: ignore
+        }
+    }
 }
 
 function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string) {
@@ -173,7 +193,14 @@ export function updateElLinks(app: App, plugin: SuperchargedLinks, el: HTMLEleme
     links.forEach((link: HTMLElement) => {
         updateLinkExtraAttributes(app, settings, link, destName);
     });
-}
+    // After DOM settles, re-apply to catch late updates so wikilinks refresh without typing
+    queueMicrotask(() => {
+        const links2 = el.querySelectorAll('a.internal-link');
+        links2.forEach((link2: HTMLElement) => {
+            updateLinkExtraAttributes(app, settings, link2, destName);
+        });
+    });
+    }
 
 
 export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app: App, plugin: SuperchargedLinks) {
@@ -260,17 +287,12 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
                 clearExtraAttributes(tabHeader);
             }
 
-            if (cachedFile?.links) {
-                cachedFile.links.forEach((link: LinkCache) => {
-                    const fileName = file.path.replace(/(.*).md/, "$1")
-                    const dest = app.metadataCache.getFirstLinkpathDest(link.link, fileName)
-                    if (dest) {
-                        const new_props = fetchTargetAttributesSync(app, settings, dest, false)
-                        const internalLinks = leaf.view.containerEl.querySelectorAll(`a.internal-link[href="${link.link}"]`)
-                        internalLinks.forEach((internalLink: HTMLElement) => setLinkNewProps(internalLink, new_props))
-                    }
-                })
-            }
+            // Update all internal links in the view to reflect current metadata
+            const fileName = file.path.replace(/(.*).md/, "$1");
+            const internalLinks = leaf.view.containerEl.querySelectorAll('a.internal-link');
+            internalLinks.forEach((internalLink: HTMLElement) => {
+                updateLinkExtraAttributes(app, settings, internalLink, fileName);
+            });
         }
     })
 }

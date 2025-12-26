@@ -5,10 +5,13 @@ import {
 	updateVisibleLinks,
 	clearExtraAttributes,
 	updateDivExtraAttributes, updatePropertiesPane,
+	initializeCumulativeLinkService,
+	updateCumulativeLinkService,
+	
 } from "src/linkAttributes/linkAttributes"
 import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
 import { Prec } from "@codemirror/state";
-import { buildCMViewPlugin } from "./src/linkAttributes/livePreview";
+import { buildCMViewPlugin, metadataRefreshCompartment, metadataRefreshFacet } from "./src/linkAttributes/livePreview";
 
 export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
@@ -21,6 +24,10 @@ export default class SuperchargedLinks extends Plugin {
 		await this.loadSettings();
 
 		this.addSettingTab(new SuperchargedLinksSettingTab(this.app, this));
+
+			// Initialize cumulative service after settings are loaded
+			initializeCumulativeLinkService(this.settings);
+
 		this.registerMarkdownPostProcessor((el, ctx) => {
 			updateElLinks(this.app, this, el, ctx)
 		});
@@ -29,16 +36,23 @@ export default class SuperchargedLinks extends Plugin {
 		const updateLinks = function(_file: TFile) {
 			updateVisibleLinks(plugin.app, plugin);
 			plugin.observers.forEach(([observer, type, own_class]) => {
-				const leaves = plugin.app.workspace.getLeavesOfType(type);
+				// Some observers are registered with an index suffix (e.g., 'file-explorer0').
+				// Strip trailing digits to get the actual view type.
+				const baseType = type.replace(/\d+$/,'');
+				const leaves = plugin.app.workspace.getLeavesOfType(baseType);
 				leaves.forEach(leaf => {
-					plugin.updateContainer(leaf.view.containerEl, plugin, own_class);
+					// Guard: skip when selector is empty to avoid querySelectorAll('') errors
+					if (own_class && own_class.trim().length > 0) {
+						plugin.updateContainer(leaf.view.containerEl, plugin, own_class);
+					}
 				})
 			});
 		}
 
 		// Live preview
 		const ext = Prec.lowest(buildCMViewPlugin(this.app, this.settings));
-		this.registerEditorExtension(ext);
+		// allows the plugin to trigger link decoration updates when metadata changes
+		this.registerEditorExtension([metadataRefreshCompartment.of(metadataRefreshFacet.of(0)), ext]);
 
 		this.observers = [];
 
@@ -53,7 +67,22 @@ export default class SuperchargedLinks extends Plugin {
 
 		// Update when 
 		// Debounced to prevent lag when writing
-		this.registerEvent(this.app.metadataCache.on('changed', debounce(updateLinks, 500, true)));
+		// Use trailing debounce so updates run after metadata cache settles (fixes stale tab/file-explorer styles)
+		this.registerEvent(this.app.metadataCache.on('changed', debounce((file) => {
+			// Signal CM6 to recompute link decorations (wikilinks) without typing
+			const markdownLeaves = this.app.workspace.getLeavesOfType('markdown');
+			for (const leaf of markdownLeaves) {
+				const view = leaf.view as any;
+				if (view?.editor?.cm?.state) {
+					const s = view.editor.cm.state;
+					const current = s.facet(metadataRefreshFacet);
+					view.editor.cm.dispatch({
+						effects: metadataRefreshCompartment.reconfigure(metadataRefreshFacet.of(current + 1))
+					});
+				}
+			}
+			updateLinks(file);
+		}, 500, false)));
 
 		// Update when layout changes
 		// @ts-ignore
@@ -266,10 +295,18 @@ export default class SuperchargedLinks extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+
+			// Ensure runtime service sees updated settings
+			updateCumulativeLinkService(this.settings);
+
 	}
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+
+			// Ensure runtime service sees updated settings after save
+			updateCumulativeLinkService(this.settings);
+
 	}
 }
 
