@@ -3,6 +3,7 @@ import SuperchargedLinks from "main"
 import { CSSBuilderModal, updateDisplay } from "../cssBuilder/cssBuilderModal";
 import { buildCSS } from "../cssBuilder/cssBuilder";
 import {updateVisibleLinks} from "../linkAttributes/linkAttributes";
+import { t } from "src/i18n";
 
 export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 	plugin: SuperchargedLinks;
@@ -23,8 +24,8 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 
 		/* Managing extra attirbutes for a.internal-link */
 		new Setting(containerEl)
-			.setName('Target Attributes for styling')
-			.setDesc('Frontmatter attributes to target, comma separated')
+			.setName(t('settings.targetAttributes.name', 'Target Attributes for styling'))
+			.setDesc(t('settings.targetAttributes.desc', 'Frontmatter attributes to target, comma separated'))
 			.addTextArea((text) => {
 				text
 					.setPlaceholder('Enter attributes as string, comma separated')
@@ -40,22 +41,21 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 				text.inputEl.cols = 25;
 			});
 
-		containerEl.createEl('h4', { text: 'Styling' });
+		containerEl.createEl('h4', { text: t('sections.styling', 'Styling') });
 		const styleSettingDescription = containerEl.createDiv();
-		styleSettingDescription.innerHTML = `
-Styling can be done using the Style Settings plugin. 
+		styleSettingDescription.innerHTML = t('styling.helper.html', `Styling can be done using the Style Settings plugin. 
  <ol>
  <li>Create selectors down below.</li>
  <li>Go to the Style Settings tab and style your links!</li>
-</ol>`
+</ol>`);
 		const selectorDiv = containerEl.createDiv();
 		this.drawSelectors(selectorDiv);
 
 
-		containerEl.createEl('h4', { text: 'Settings' });
+		containerEl.createEl('h4', { text: t('sections.settings', 'Settings') });
 		new Setting(containerEl)
-			.setName('Enable in Editor')
-			.setDesc('If true, this will also supercharge internal links in the editor view of a note.')
+			.setName(t('settings.enableEditor.name', 'Enable in Editor'))
+			.setDesc(t('settings.enableEditor.desc', 'If true, this will also supercharge internal links in the editor view of a note.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableEditor)
 				toggle.onChange(value => {
@@ -66,8 +66,8 @@ Styling can be done using the Style Settings plugin.
 			})
 
 		new Setting(containerEl)
-			.setName('Enable in tab headers')
-			.setDesc('If true, this will also supercharge the headers of a tab.')
+			.setName(t('settings.enableTabHeader.name', 'Enable in tab headers'))
+			.setDesc(t('settings.enableTabHeader.desc', 'If true, this will also supercharge the headers of a tab.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableTabHeader)
 				toggle.onChange(value => {
@@ -78,8 +78,8 @@ Styling can be done using the Style Settings plugin.
 			})
 
 		new Setting(containerEl)
-			.setName('Enable in File Browser')
-			.setDesc('If true, this will also supercharge the file browser.')
+			.setName(t('settings.enableFileList.name', 'Enable in File Browser'))
+			.setDesc(t('settings.enableFileList.desc', 'If true, this will also supercharge the file browser.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableFileList)
 				toggle.onChange(value => {
@@ -89,8 +89,8 @@ Styling can be done using the Style Settings plugin.
 			});
 
 		new Setting(containerEl)
-			.setName('Enable in Bases')
-			.setDesc('If true, this will also supercharge Obsidian Bases.')
+			.setName(t('settings.enableBases.name', 'Enable in Bases'))
+			.setDesc(t('settings.enableBases.desc', 'If true, this will also supercharge Obsidian Bases.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableBases)
 				toggle.onChange(value => {
@@ -100,8 +100,8 @@ Styling can be done using the Style Settings plugin.
 			});
 
 		new Setting(containerEl)
-			.setName('Enable in Plugins')
-			.setDesc('If true, this will also supercharge plugins like the backlinks and forward links panels.')
+			.setName(t('settings.enableBacklinks.name', 'Enable in Plugins'))
+			.setDesc(t('settings.enableBacklinks.desc', 'If true, this will also supercharge plugins like the backlinks and forward links panels.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableBacklinks)
 				toggle.onChange(value => {
@@ -110,8 +110,8 @@ Styling can be done using the Style Settings plugin.
 				});
 			});
 		new Setting(containerEl)
-			.setName('Enable in Quick Switcher')
-			.setDesc('If true, this will also supercharge the quick switcher.')
+			.setName(t('settings.enableQuickSwitcher.name', 'Enable in Quick Switcher'))
+			.setDesc(t('settings.enableQuickSwitcher.desc', 'If true, this will also supercharge the quick switcher.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableQuickSwitcher)
 				toggle.onChange(value => {
@@ -120,8 +120,8 @@ Styling can be done using the Style Settings plugin.
 				});
 			});
 		new Setting(containerEl)
-			.setName('Enable in Link Autocompleter')
-			.setDesc('If true, this will also supercharge the link autocompleter.')
+			.setName(t('settings.enableSuggestor.name', 'Enable in Link Autocompleter'))
+			.setDesc(t('settings.enableSuggestor.desc', 'If true, this will also supercharge the link autocompleter.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableSuggestor)
 				toggle.onChange(value => {
@@ -130,11 +130,11 @@ Styling can be done using the Style Settings plugin.
 				});
 			});
 
-		containerEl.createEl('h4', { text: 'Advanced' });
+		containerEl.createEl('h4', { text: t('sections.advanced', 'Advanced') });
 		// Managing choice wether you want to parse tags both from normal tags and in the frontmatter
 		new Setting(containerEl)
-			.setName('Parse all tags in the file')
-			.setDesc('Sets the `data-link-tags`-attribute to look for tags both in the frontmatter and in the file as #tag-name')
+			.setName(t('settings.targetTags.name', 'Parse all tags in the file'))
+			.setDesc(t('settings.targetTags.desc', 'Sets the `data-link-tags`-attribute to look for tags both in the frontmatter and in the file as #tag-name'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.targetTags)
 				toggle.onChange(async value => {
@@ -145,8 +145,8 @@ Styling can be done using the Style Settings plugin.
 
 		// Managing choice wether you get attributes from inline fields and frontmatter or only frontmater
 		new Setting(containerEl)
-			.setName('Search for attribute in Inline fields like <field::>')
-			.setDesc('Sets the `data-link-<field>`-attribute to the value of inline fields')
+			.setName(t('settings.getFromInlineField.name', 'Search for attribute in Inline fields like <field::>'))
+			.setDesc(t('settings.getFromInlineField.desc', 'Sets the `data-link-<field>`-attribute to the value of inline fields'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.getFromInlineField)
 				toggle.onChange(async value => {
@@ -157,9 +157,8 @@ Styling can be done using the Style Settings plugin.
 
 		// Automatically activate snippet
 		new Setting(containerEl)
-			.setName('Automatically activate snippet')
-			.setDesc('If true, this will automatically activate the generated CSS snippet "supercharged-links-gen.css". ' +
-				'Turn this off if you don\'t want this to happen.')
+			.setName(t('settings.activateSnippet.name', 'Automatically activate snippet'))
+			.setDesc(t('settings.activateSnippet.desc', 'If true, this will automatically activate the generated CSS snippet "supercharged-links-gen.css". Turn this off if you don\'t want this to happen.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.activateSnippet)
 				toggle.onChange(async value => {
@@ -171,8 +170,8 @@ Styling can be done using the Style Settings plugin.
 		/* Managing predefined values for properties */
 		/* Manage menu options display*/
 		new Setting(containerEl)
-			.setName("Display field options in context menu")
-			.setDesc("This feature has been migrated to metadata-menu plugin https://github.com/mdelobelle/metadatamenu")
+			.setName(t('settings.deprecatedMenu.name', 'Display field options in context menu'))
+			.setDesc(t('settings.deprecatedMenu.desc', 'This feature has been migrated to metadata-menu plugin https://github.com/mdelobelle/metadatamenu'))
 	}
 
 	generateSnippet() {
@@ -199,7 +198,7 @@ Styling can be done using the Style Settings plugin.
 
 					});
 					button.setIcon("down-arrow-with-tail");
-					button.setTooltip("Move selector down");
+					button.setTooltip(t('selectors.tooltip.moveDown', 'Move selector down'));
 					if (i === selectors.length - 1) {
 						button.setDisabled(true);
 					}
@@ -213,7 +212,7 @@ Styling can be done using the Style Settings plugin.
 
 					});
 					button.setIcon("up-arrow-with-tail");
-					button.setTooltip("Move selector up");
+					button.setTooltip(t('selectors.tooltip.moveUp', 'Move selector up'));
 					if (i === 0) {
 						button.setDisabled(true);
 					}
@@ -229,7 +228,7 @@ Styling can be done using the Style Settings plugin.
 						formModal.open();
 					});
 					button.setIcon("pencil");
-					button.setTooltip("Edit selector")
+					button.setTooltip(t('selectors.tooltip.edit', 'Edit selector'))
 				})
 				.addButton(button => {
 					button.onClick(() => {
@@ -238,14 +237,14 @@ Styling can be done using the Style Settings plugin.
 						this.drawSelectors(div);
 					});
 					button.setIcon("cross");
-					button.setTooltip("Remove selector");
+					button.setTooltip(t('selectors.tooltip.remove', 'Remove selector'));
 				});
 			updateDisplay(s.nameEl, selector, this.plugin.settings);
 		});
 
 		new Setting(div)
-			.setName("New selector")
-			.setDesc("Create a new selector to style with Style Settings.")
+			.setName(t('selectors.new.name', 'New selector'))
+			.setDesc(t('selectors.new.desc', 'Create a new selector to style with Style Settings.'))
 			.addButton(button => {
 				button.onClick(() => {
 					const formModal = new CSSBuilderModal(this.plugin, (newSelector) => {
@@ -256,7 +255,7 @@ Styling can be done using the Style Settings plugin.
 					});
 					formModal.open();
 				});
-				button.setButtonText("New");
+				button.setButtonText(t('selectors.button.new', 'New'));
 			});
 	}
 }
