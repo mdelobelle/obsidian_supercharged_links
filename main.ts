@@ -109,6 +109,7 @@ export default class SuperchargedLinks extends Plugin {
 			plugin.registerViewType('markdown', plugin, 'div.bases-table-cell div.multi-select-pill-content');
             plugin.registerViewType('markdown', plugin, 'div.bases-cards-item'); //card
             plugin.registerViewType("markdown", plugin, "div.bases-cards-item .internal-link"); //card property
+            plugin.registerViewType("markdown", plugin, "div.bases-list-item .internal-link"); //list 
 		}
 		if (plugin.app?.plugins?.plugins?.['similar-notes']) {
 			plugin.registerViewType('markdown', plugin, '.similar-notes-pane .tree-item-inner', true)
