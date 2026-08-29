@@ -12,7 +12,10 @@ export function clearExtraAttributes(link: HTMLElement) {
 
 
 export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksSettings, dest: TFile, addDataHref: boolean): Record<string, string> {
-    let new_props: Record<string, string> = { tags: "" }
+    let new_props: Record<string, string> = { tags: "", path: dest.path }
+    if (addDataHref) {
+        new_props['data-href'] = dest.basename;
+    }
     const cache = app.metadataCache.getFileCache(dest)
     if (!cache) return new_props;
 
@@ -33,11 +36,6 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
     if (settings.targetTags) {
         new_props["tags"] += getAllTags(cache).join(' ');
     }
-
-    if (addDataHref) {
-        new_props['data-href'] = dest.basename;
-    }
-    new_props['path'] = dest.path;
     //@ts-ignore
     const getResults = (api) => {
         const page = api.page(dest.path);

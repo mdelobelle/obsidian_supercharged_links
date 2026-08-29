@@ -58,9 +58,23 @@ export default class SuperchargedLinks extends Plugin {
 		// Update when layout changes
 		// @ts-ignore
 		this.registerEvent(this.app.workspace.on("layout-change", debounce(updateLinks, 10, true)));
-		// Update plugin views when layout changes
-		// TODO: This is an expensive operation that seems like it is called fairly frequently. Maybe we can do this more efficiently?
 		this.registerEvent(this.app.workspace.on("layout-change", () => this.initViewObservers(this)));
+		this.registerEvent(this.app.workspace.on("file-open", () => {
+			updateLinks(null);
+			this.app.workspace.iterateAllLeaves(leaf => {
+				if ((leaf.view as any)?.editor?.cm) {
+					try { (leaf.view as any).editor.cm.dispatch({}); } catch(e) {}
+				}
+			});
+		}));
+		this.registerEvent(this.app.workspace.on("active-leaf-change", () => {
+			updateLinks(null);
+			this.app.workspace.iterateAllLeaves(leaf => {
+				if ((leaf.view as any)?.editor?.cm) {
+					try { (leaf.view as any).editor.cm.dispatch({}); } catch(e) {}
+				}
+			});
+		}));
 
 		// DEBUG: When adding a new view, to get the proper id of that view, uncomment this and reload the plugin
 		// this.app.workspace.iterateAllLeaves(leaf => {

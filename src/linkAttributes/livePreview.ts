@@ -2,8 +2,7 @@ import {App, debounce, Debouncer, editorViewField, MarkdownView, TFile} from "ob
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
 import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
 import {RangeSet, RangeSetBuilder} from "@codemirror/state";
-import {syntaxTree} from "@codemirror/language";
-import {tokenClassNodeProp} from "@codemirror/language";
+import {syntaxTree, ensureSyntaxTree, tokenClassNodeProp} from "@codemirror/language";
 import {fetchTargetAttributesSync, processValue} from "./linkAttributes";
 import {DefaultFunctions} from "obsidian-dataview/lib/expression/functions";
 
@@ -59,23 +58,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
             }
 
             update(update: ViewUpdate) {
-                if (update.docChanged) {
-                    this.decorations = this.decorations.map(update.changes);
-
-                    update.changes.iterChanges((fromA, toA, fromB, toB, t) => {
-                        // Update all 'line blocks' between the range changed. Prevents weird graphical bugs
-                        const minFrom = update.view.lineBlockAt(fromB).from;
-                        const maxTo = update.view.lineBlockAt(toB).to;
-                        // remove things within bounds
-                        this.decorations = this.decorations.update({
-                            filter: (from, to) => to < minFrom || from > maxTo});
-
-                        // Update decorations within bounds
-                        this.decorations = RangeSet.join([this.decorations,
-                            this.buildDecorations(update.view, minFrom, maxTo)]);
-                    });
-                }
-                else if (update.viewportChanged) {
+                if (update.docChanged || update.viewportChanged) {
                     this.decorations = this.buildDecorations(update.view);
                 }
             }
@@ -83,22 +66,32 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
             destroy() {
             }
 
-            buildDecorations(view: EditorView, updateFrom: number = -1, updateTo: number=-1) {
+            buildDecorations(view: EditorView) {
                 let builder = new RangeSetBuilder<Decoration>();
                 if (!settings.enableEditor) {
                     return builder.finish();
                 }
-                const mdView = view.state.field(editorViewField) as MarkdownView;
+                const mdView = view.state.field(editorViewField, false) as MarkdownView;
                 let lastAttributes = {};
                 let iconDecoAfter: Decoration = null;
                 let iconDecoAfterWhere: number = null;
 
                 let mdAliasFrom: number = null;
                 let mdAliasTo: number = null;
-                for (let {from, to} of view.visibleRanges) {
-                    // When updating, only changes the range given.
-                    if (updateFrom !== -1 && (to < updateFrom || from > updateTo)) continue;
-                    syntaxTree(view.state).iterate({
+
+                const ranges = view.visibleRanges;
+                if (!ranges || !ranges.length) return builder.finish();
+                const maxTo = Math.min(view.state.doc.length, Math.max(...ranges.map(r => r.to), 1000));
+                const tree = (ensureSyntaxTree ? ensureSyntaxTree(view.state, maxTo, 500) : null) || syntaxTree(view.state);
+                if (!tree || tree.length === 0) {
+                    setTimeout(() => {
+                        try { view.dispatch({}); } catch(e) {}
+                    }, 50);
+                    return builder.finish();
+                }
+
+                for (let {from, to} of ranges) {
+                    tree.iterate({
                         from,
                         to,
                         enter: (node) => {
