@@ -59,21 +59,20 @@ export default class SuperchargedLinks extends Plugin {
 		// @ts-ignore
 		this.registerEvent(this.app.workspace.on("layout-change", debounce(updateLinks, 10, true)));
 		this.registerEvent(this.app.workspace.on("layout-change", () => this.initViewObservers(this)));
-		this.registerEvent(this.app.workspace.on("file-open", () => {
-			updateLinks(null);
+		const updateCMDecorations = debounce(() => {
 			this.app.workspace.iterateAllLeaves(leaf => {
 				if ((leaf.view as any)?.editor?.cm) {
 					try { (leaf.view as any).editor.cm.dispatch({}); } catch(e) {}
 				}
 			});
+		}, 50, true);
+		this.registerEvent(this.app.workspace.on("file-open", () => {
+			updateLinks(null);
+			updateCMDecorations();
 		}));
 		this.registerEvent(this.app.workspace.on("active-leaf-change", () => {
 			updateLinks(null);
-			this.app.workspace.iterateAllLeaves(leaf => {
-				if ((leaf.view as any)?.editor?.cm) {
-					try { (leaf.view as any).editor.cm.dispatch({}); } catch(e) {}
-				}
-			});
+			updateCMDecorations();
 		}));
 
 		// DEBUG: When adding a new view, to get the proper id of that view, uncomment this and reload the plugin
