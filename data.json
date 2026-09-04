@@ -3,19 +3,17 @@
     "tags",
     "category",
     "blob",
-    "Status",
-    ""
+    "Status"
   ],
   "targetTags": true,
+  "classFilesPath": "🗃/",
   "getFromInlineField": true,
-  "enableTabHeader": true,
   "activateSnippet": true,
   "enableEditor": true,
   "enableFileList": true,
   "enableBacklinks": true,
   "enableQuickSwitcher": true,
   "enableSuggestor": true,
-  "enableBases": true,
   "selectors": [
     {
       "type": "tag",
@@ -42,7 +40,6 @@
       "selectBackground": false
     }
   ],
-  "classFilesPath": "🗃/",
   "presetFields": [
     {
       "name": "category",
