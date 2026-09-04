@@ -2,8 +2,7 @@ import {App, debounce, Debouncer, editorViewField, MarkdownView, TFile} from "ob
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
 import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
 import {RangeSet, RangeSetBuilder} from "@codemirror/state";
-import {syntaxTree} from "@codemirror/language";
-import {tokenClassNodeProp} from "@codemirror/language";
+import {syntaxTree, ensureSyntaxTree, tokenClassNodeProp} from "@codemirror/language";
 import {fetchTargetAttributesSync, processValue} from "./linkAttributes";
 import {DefaultFunctions} from "obsidian-dataview/lib/expression/functions";
 
@@ -59,23 +58,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
             }
 
             update(update: ViewUpdate) {
-                if (update.docChanged) {
-                    this.decorations = this.decorations.map(update.changes);
-
-                    update.changes.iterChanges((fromA, toA, fromB, toB, t) => {
-                        // Update all 'line blocks' between the range changed. Prevents weird graphical bugs
-                        const minFrom = update.view.lineBlockAt(fromB).from;
-                        const maxTo = update.view.lineBlockAt(toB).to;
-                        // remove things within bounds
-                        this.decorations = this.decorations.update({
-                            filter: (from, to) => to < minFrom || from > maxTo});
-
-                        // Update decorations within bounds
-                        this.decorations = RangeSet.join([this.decorations,
-                            this.buildDecorations(update.view, minFrom, maxTo)]);
-                    });
-                }
-                else if (update.viewportChanged) {
+                if (update.docChanged || update.viewportChanged) {
                     this.decorations = this.buildDecorations(update.view);
                 }
             }
@@ -83,62 +66,77 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
             destroy() {
             }
 
-            buildDecorations(view: EditorView, updateFrom: number = -1, updateTo: number=-1) {
+            buildDecorations(view: EditorView) {
                 let builder = new RangeSetBuilder<Decoration>();
                 if (!settings.enableEditor) {
                     return builder.finish();
                 }
-                const mdView = view.state.field(editorViewField) as MarkdownView;
+                const mdView = view.state.field(editorViewField, false) as MarkdownView;
                 let lastAttributes = {};
                 let iconDecoAfter: Decoration = null;
                 let iconDecoAfterWhere: number = null;
 
                 let mdAliasFrom: number = null;
                 let mdAliasTo: number = null;
-                for (let {from, to} of view.visibleRanges) {
-                    // When updating, only changes the range given.
-                    if (updateFrom !== -1 && (to < updateFrom || from > updateTo)) continue;
-                    syntaxTree(view.state).iterate({
+
+                const ranges = view.visibleRanges;
+                if (!ranges || !ranges.length) return builder.finish();
+                const maxTo = Math.min(view.state.doc.length, Math.max(...ranges.map(r => r.to), 1000));
+                const stateValues = (view.state as any).values || [];
+                const stateTree = stateValues.find((v: any) => v && v.tree && typeof v.tree.iterate === 'function')?.tree;
+                const tree = stateTree || (ensureSyntaxTree ? ensureSyntaxTree(view.state, maxTo, 500) : null) || syntaxTree(view.state);
+                if (!tree || tree.length === 0) {
+                    setTimeout(() => {
+                        try { view.dispatch({}); } catch(e) {}
+                    }, 50);
+                    return builder.finish();
+                }
+
+                for (let {from, to} of ranges) {
+                    tree.iterate({
                         from,
                         to,
                         enter: (node) => {
-                            if (updateFrom !== -1 && (node.to < updateFrom || node.from > updateTo)) return;
-                            const tokenProps = node.type.prop(tokenClassNodeProp);
-                            if (tokenProps) {
-                                const props = new Set(tokenProps.split(" "));
+                            const name = node.name || (node.type && node.type.name) || "";
+                            const tokenProps = node.type && node.type.prop ? node.type.prop(tokenClassNodeProp) : null;
+                            const props = tokenProps ? new Set(tokenProps.split(" ")) : new Set<string>();
 
-                                // Square Brackets of links both internal (`[[`, `]]`) and md link (`[`, `]`)
-                                const isMDFormatting = props.has('formatting-link') || props.has('formatting-link-string');
-                                if (isMDFormatting) return;
+                            // Square Brackets of links both internal (`[[`, `]]`) and md link (`[`, `]`)
+                            const isMDFormatting = props.has('formatting-link') || props.has('formatting-link-string') || name.includes('formatting-link');
+                            if (isMDFormatting) return;
 
-                                // Parts of internal links
-                                const isLink = props.has("hmd-internal-link"); // [[`Note` or `|` or `Alias`]]
-                                const isAlias = props.has("link-alias"); // [[Note| `Alias`]]
-                                const isPipe = props.has("link-alias-pipe"); // [[Note `|` Alias]]
+                            // Parts of internal links
+                            const isPipe = props.has("link-alias-pipe") || name.includes("link-alias-pipe");
+                            const isAlias = (props.has("link-alias") || name.includes("link-alias")) && !isPipe;
+                            const isLink = (props.has("hmd-internal-link") || name.includes("hmd-internal-link")) && !isAlias && !isPipe;
 
-                                // The 'alias' of the md link (or its brackets)
-                                const isMDLink = props.has('link'); // `[` or `Alias` or `]`(URL)
-                                // The 'internal link' of the md link (or its brackets)
-                                const isMDUrl = props.has('url'); // [Alias]`(` or `URL` or `)`
+                            // The 'alias' of the md link (or its brackets)
+                            const isMDLink = props.has('link') || name === 'link';
+                            // The 'internal link' of the md link (or its brackets)
+                            const isMDUrl = props.has('url') || name === 'url';
 
-                                if (isMDLink) {
-                                    // This catches the alias of md links i.e. [ `Alias` ](URL)
-                                    // We'll apply the styling in the next iteration when we analyze the `URL`
-                                    mdAliasFrom = node.from;
-                                    mdAliasTo = node.to;
+                            if (isMDLink) {
+                                // This catches the alias of md links i.e. [ `Alias` ](URL)
+                                // We'll apply the styling in the next iteration when we analyze the `URL`
+                                mdAliasFrom = node.from;
+                                mdAliasTo = node.to;
+                            }
+
+                            if (!isPipe && !isAlias) {
+                                if (iconDecoAfter) {
+                                    builder.add(iconDecoAfterWhere, iconDecoAfterWhere, iconDecoAfter);
+                                    iconDecoAfter = null;
+                                    iconDecoAfterWhere = null;
                                 }
-
-                                if (!isPipe && !isAlias) {
-                                    if (iconDecoAfter) {
-                                        builder.add(iconDecoAfterWhere, iconDecoAfterWhere, iconDecoAfter);
-                                        iconDecoAfter = null;
-                                        iconDecoAfterWhere = null;
-                                    }
-                                }
-                                if (isLink && !isAlias && !isPipe || isMDUrl) {
-                                    let linkText = view.state.doc.sliceString(node.from, node.to);
-                                    linkText = linkText.split("#")[0];
-                                    let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
+                            }
+                            if (isLink || isMDUrl) {
+                                let linkText = view.state.doc.sliceString(node.from, node.to);
+                                linkText = linkText.split("#")[0];
+                                let sourcePath = (mdView && mdView.file && (mdView.file.path || mdView.file.basename)) || "";
+                                let file = app.metadataCache.getFirstLinkpathDest(linkText, sourcePath) ||
+                                           app.metadataCache.getFirstLinkpathDest(linkText, "") ||
+                                           app.vault.getAbstractFileByPath(linkText) as TFile ||
+                                           app.vault.getAbstractFileByPath(linkText + ".md") as TFile;
                                     if (isMDUrl && !file) {
                                         try {
                                             file = app.vault.getAbstractFileByPath(decodeURIComponent(linkText)) as TFile;
