@@ -9,6 +9,7 @@ import {
 import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
 import { Prec } from "@codemirror/state";
 import { buildCMViewPlugin } from "./src/linkAttributes/livePreview";
+import { initI18n } from "src/i18n";
 
 export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
@@ -19,6 +20,7 @@ export default class SuperchargedLinks extends Plugin {
 	async onload(): Promise<void> {
 		console.log('Supercharged links loaded');
 		await this.loadSettings();
+		initI18n(this.app);
 
 		this.addSettingTab(new SuperchargedLinksSettingTab(this.app, this));
 		this.registerMarkdownPostProcessor((el, ctx) => {
@@ -98,6 +100,8 @@ export default class SuperchargedLinks extends Plugin {
 
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content');
 		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner', false, true);
+		plugin.registerViewType('layer-view', plugin, '.internal-link');
+		plugin.registerViewType('git-view', plugin, '.tree-item-inner');
 		// @ts-ignore
 		if (plugin.app?.internalPlugins?.plugins?.bases?.enabled && plugin.settings.enableBases) {
 			// console.log('Supercharged links: Enabling bases support');

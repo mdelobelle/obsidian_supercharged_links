@@ -3,33 +3,60 @@ import {
     Modal,
     Setting
 } from "obsidian"
-import {matchTypes, matchPreview, CSSLink, matchPreviewPath, selectorType, SelectorTypes, MatchTypes} from './cssLink'
+import {matchTypes, CSSLink, selectorType, SelectorTypes, MatchTypes} from './cssLink'
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
 import { processKey } from "src/linkAttributes/linkAttributes";
+import { t } from "src/i18n";
 
 export function displayText(link: CSSLink, settings: SuperchargedLinksSettings): string {
     if (link.type === 'tag') {
         if (!link.value) {
-            return "<b>Please choose a tag</b>";
+            return `<b>${t('display.chooseTag', 'Please choose a tag')}</b>`;
         }
-        return `<span class="data-link-icon data-link-text data-link-icon-after" data-link-tags="${link.value}">Note</span> has tag <a class="tag">#${link.value}</a>`;
+        return t('display.tagPreview', '{note} has tag {tag}', {
+            note: `<span class="data-link-icon data-link-text data-link-icon-after" data-link-tags="${link.value}">${t('words.note', 'Note')}</span>`,
+            tag: `<a class="tag">#${link.value}</a>`
+        });
     }
     else if (link.type === 'attribute') {
         if (settings.targetAttributes.length === 0) {
-            return `<b>No attributes added to "Target attributes". Go to plugin settings to add them.</b>`
+            return `<b>${t('display.noAttributesAdded', 'No attributes added to "Target attributes". Go to plugin settings to add them.')}</b>`
         }
         if (!link.name) {
-            return "<b>Please choose an attribute name.</b>";
+            return `<b>${t('display.chooseAttributeName', 'Please choose an attribute name.')}</b>`;
         }
         if (!link.value){
-            return "<b>Please choose an attribute value.</b>"
+            return `<b>${t('display.chooseAttributeValue', 'Please choose an attribute value.')}</b>`
         }
-        return `<span class="data-link-icon data-link-text data-link-icon-after" data-link-${link.name}="${link.value}">Note</span> has attribute <b>${link.name.replace(/-/g, ' ')}</b> ${matchPreview[link.match]} <b>${link.value}</b>.`;
+        const value = { value: link.value };
+        const matchPreview: Record<MatchTypes, string> = {
+            'exact': t('matchPreview.exact', "with value <b>{value}</b>", value),
+            'contains': t('matchPreview.contains', "containing <b>{value}</b>", value),
+            'whiteSpace': t('matchPreview.whiteSpace', "containing <b>{value}</b>", value),
+            'startswith': t('matchPreview.startswith', "starting with <b>{value}</b>", value),
+            'endswith': t('matchPreview.endswith', "ending with <b>{value}</b>", value)
+        }
+        return t('display.attributePreview', '{note} has attribute <b>{name}</b> {match}.', {
+            note: `<span class="data-link-icon data-link-text data-link-icon-after" data-link-${link.name}="${link.value}">${t('words.note', 'Note')}</span>`,
+            name: link.name.replace(/-/g, ' '),
+            match: matchPreview[link.match]
+        });
     }
     if (!link.value) {
-        return "<b>Please choose a path.</b>"
+        return `<b>${t('display.choosePath', 'Please choose a path.')}</b>`
     }
-    return `The path of the <span class="data-link-icon data-link-text data-link-icon-after" data-link-path="${link.value}">note</span> ${matchPreviewPath[link.match]} <b>${link.value}</b>`
+    const value = { value: link.value };
+    const matchPreviewPath: Record<MatchTypes, string> = {
+        'exact': t('matchPreviewPath.exact', "is <b>{value}</b>", value),
+        'contains': t('matchPreviewPath.contains', "contains <b>{value}</b>", value),
+        'whiteSpace': t('matchPreviewPath.whiteSpace', "contains <b>{value}</b>", value),
+        'startswith': t('matchPreviewPath.startswith', "starts with <b>{value}</b>", value),
+        'endswith': t('matchPreviewPath.endswith', "ends with <b>{value}</b>", value)
+    }
+    return t('display.pathPreview', 'The path of the {note} {match}', {
+        note: `<span class="data-link-icon data-link-text data-link-icon-after" data-link-path="${link.value}">${t('words.noteLower', 'note')}</span>`,
+        match: matchPreviewPath[link.match]
+    })
 }
 
 export function updateDisplay(textArea: HTMLElement, link: CSSLink, settings: SuperchargedLinksSettings): boolean {
@@ -79,14 +106,14 @@ class CSSBuilderModal extends Modal {
 
 
     onOpen() {
-        this.titleEl.setText(`Select what links to style!`)
+        this.titleEl.setText(t('modal.title', 'Select what links to style!'))
         // is tag
-        const matchAttrPlaceholder = "Attribute value to match.";
-        const matchTagPlaceholder = "Note tag to match (without #).";
-        const matchPathPlaceholder = "File path to match.";
-        const matchAttrTxt = "Attribute value";
-        const matchTagTxt = "Tag";
-        const matchPathTxt = "Path";
+        const matchAttrPlaceholder = t('placeholders.attrValue', "Attribute value to match.");
+        const matchTagPlaceholder = t('placeholders.tagValue', "Note tag to match (without #).");
+        const matchPathPlaceholder = t('placeholders.pathValue', "File path to match.");
+        const matchAttrTxt = t('labels.attrValue', "Attribute value");
+        const matchTagTxt = t('labels.tag', "Tag");
+        const matchPathTxt = t('labels.path', "Path");
 
         const cssLink = this.cssLink;
         const plugin = this.plugin;
@@ -95,12 +122,12 @@ class CSSBuilderModal extends Modal {
 
         // Type
         new Setting(this.contentEl)
-            .setName("Type of selector")
-            .setDesc("Attributes selects YAML and DataView attributes" +
-                ", tags chooses the tags of a note, and path considers the name of the note including in what folder it is.")
+            .setName(t('modal.typeOfSelector.name', "Type of selector"))
+            .setDesc(t('modal.typeOfSelector.desc', "Attributes selects YAML and DataView attributes" +
+                ", tags chooses the tags of a note, and path considers the name of the note including in what folder it is."))
             .addDropdown(dc => {
                 Object.keys(selectorType).forEach((type: SelectorTypes) => {
-                    dc.addOption(type, selectorType[type]);
+                    dc.addOption(type, t(`selectorType.${type}`, selectorType[type]));
                     if (type === this.cssLink.type) {
                         dc.setValue(type);
                     }
@@ -114,8 +141,8 @@ class CSSBuilderModal extends Modal {
 
         // attribute name
         const attrName = new Setting(this.contentEl)
-            .setName("Attribute name")
-            .setDesc("What attribute to target? Make sure to first add target attributes to the settings at the top!")
+            .setName(t('modal.attributeName.name', "Attribute name"))
+            .setDesc(t('modal.attributeName.desc', "What attribute to target? Make sure to first add target attributes to the settings at the top!"))
             .addDropdown(dc => {
                 plugin.settings.targetAttributes.forEach((attribute: string) => {
                     const dom_attribute = processKey(attribute);
@@ -133,24 +160,24 @@ class CSSBuilderModal extends Modal {
 
         // attribute value
         const attrValue = new Setting(this.contentEl)
-            .setName("Value to match")
-            .setDesc("TODO")
-            .addText(t => {
-                t.setValue(cssLink.value);
-                t.onChange(value => {
+            .setName(t('modal.attributeValue.name', "Value to match"))
+            .setDesc(t('modal.attributeValue.desc', "Value to match."))
+            .addText(text => {
+                text.setValue(cssLink.value);
+                text.onChange(value => {
                         cssLink.value = value;
                         saveButton.setDisabled(updateDisplay(preview, cssLink, plugin.settings));
                 });
             });
 
-        this.contentEl.createEl('h4', {text: 'Advanced'});
+        this.contentEl.createEl('h4', {text: t('modal.advanced', 'Advanced')});
         // matching type
         const matchingType = new Setting(this.contentEl)
-            .setName("Matching type")
-            .setDesc("How to compare the attribute or path with the given value.")
+            .setName(t('modal.matchingType.name', "Matching type"))
+            .setDesc(t('modal.matchingType.desc', "How to compare the attribute or path with the given value."))
             .addDropdown(dc => {
                 Object.keys(matchTypes).forEach((key: MatchTypes)=> {
-                    dc.addOption(key, matchTypes[key])
+                    dc.addOption(key, t(`matchTypes.${key}`, matchTypes[key]))
                     if (key == cssLink.match) {
                         dc.setValue(key)
                     }
@@ -164,8 +191,8 @@ class CSSBuilderModal extends Modal {
 
         // case sensitive
         const caseSensitiveTogglerContainer = new Setting(this.contentEl)
-            .setName("Case sensitive matching")
-            .setDesc("Should the matching of the value be case sensitive?")
+            .setName(t('modal.caseSensitive.name', "Case sensitive matching"))
+            .setDesc(t('modal.caseSensitive.desc', "Should the matching of the value be case sensitive?"))
             .addToggle(b => {
                 b.setValue(cssLink.matchCaseSensitive);
                 b.onChange(value => {
@@ -203,46 +230,46 @@ class CSSBuilderModal extends Modal {
         }
 
         new Setting(this.contentEl)
-            .setName("Style options")
-            .setDesc("What styling options are active? " +
-                "Disabling options you won't use can improve performance slightly.")
-            .addToggle(t => {
-                t.onChange(value => {
+            .setName(t('modal.styleOptions.name', "Style options"))
+            .setDesc(t('modal.styleOptions.desc', "What styling options are active? " +
+                "Disabling options you won't use can improve performance slightly."))
+            .addToggle(comp => {
+                comp.onChange(value => {
                     cssLink.selectText = value;
                 })
-                t.setValue(cssLink.selectText);
-                t.setTooltip("Style link text");
+                comp.setValue(cssLink.selectText);
+                comp.setTooltip(t('modal.styleOptions.text.tooltip', "Style link text"));
             })
-            .addToggle(t => {
-                t.onChange(value => {
+            .addToggle(comp => {
+                comp.onChange(value => {
                     cssLink.selectPrepend = value;
                 })
-                t.setValue(cssLink.selectPrepend);
-                t.setTooltip("Add content before link");
+                comp.setValue(cssLink.selectPrepend);
+                comp.setTooltip(t('modal.styleOptions.prepend.tooltip', "Add content before link"));
             })
-            .addToggle(t => {
-                t.onChange(value => {
+            .addToggle(comp => {
+                comp.onChange(value => {
                     cssLink.selectAppend = value;
                 })
-                t.setValue(cssLink.selectAppend);
-                t.setTooltip("Add content after link");
+                comp.setValue(cssLink.selectAppend);
+                comp.setTooltip(t('modal.styleOptions.append.tooltip', "Add content after link"));
             })
-            .addToggle(t => {
-                t.onChange(value => {
+            .addToggle(comp => {
+                comp.onChange(value => {
                     cssLink.selectBackground = value;
                 })
-                t.setValue(cssLink.selectBackground);
-                t.setTooltip("Add optional background or underline to link");
+                comp.setValue(cssLink.selectBackground);
+                comp.setTooltip(t('modal.styleOptions.background.tooltip', "Add optional background or underline to link"));
             });
 
 
-        this.contentEl.createEl('h4', {text: 'Result'});
+        this.contentEl.createEl('h4', {text: t('modal.result', 'Result')});
         const modal = this;
         const saveButton = new Setting(this.contentEl)
-            .setName("Preview")
+            .setName(t('modal.preview', "Preview"))
             .setDesc("")
             .addButton(b => {
-                b.setButtonText("Save")
+                b.setButtonText(t('modal.save', "Save"))
                 b.onClick(() => {
                     modal.saveCallback(cssLink);
                     modal.close();

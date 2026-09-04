@@ -29,21 +29,7 @@ export const matchSign: Record<MatchTypes, string> = {
     'whiteSpace': "~"
 }
 
-export const matchPreview: Record<MatchTypes, string> = {
-    'exact': "with value",
-    'contains': "containing",
-    'whiteSpace': "containing",
-    'startswith': "starting with",
-    'endswith': "ending with"
-}
 
-export const matchPreviewPath: Record<MatchTypes, string> = {
-    'exact': "is",
-    'contains': "contains",
-    'whiteSpace': "contains",
-    'startswith': "starts with",
-    'endswith': "ends with"
-}
 
 export const selectorType: Record<SelectorTypes, string> = {
     'attribute': 'Attribute value',
