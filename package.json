@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
     "build": "rollup --config rollup.config.js --environment BUILD:production",
-    "release": "standard-version"
+    "release": "standard-version",
+    "lint": "eslint ."
   },
   "standard-version": {
     "t": ""
@@ -23,12 +24,15 @@
     "@rollup/plugin-typescript": "^8.2.1",
     "@types/luxon": "^3.7.1",
     "@types/node": "^18.19.123",
+    "eslint": "^9.39.5",
+    "eslint-plugin-obsidianmd": "^0.4.2",
     "obsidian": "^1.8.7",
     "obsidian-dataview": "^0.4.21",
     "rollup": "^2.32.1",
     "standard-version": "^9.5.0",
     "tslib": "^2.2.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.69.0"
   },
   "dependencies": {
     "compare-versions": "^6.1.1"
