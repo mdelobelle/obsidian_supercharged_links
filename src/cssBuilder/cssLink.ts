@@ -1,18 +1,5 @@
 export type MatchTypes = 'exact' | 'contains' | 'startswith' | 'endswith' | 'whiteSpace';
 export type SelectorTypes = 'attribute' | 'tag' | 'path';
-interface CSSLink {
-    type: SelectorTypes
-    name: string
-    value: string
-    matchCaseSensitive: boolean
-    match: MatchTypes
-    uid: string
-    selectText: boolean
-    selectBackground: boolean
-    selectAppend: boolean
-    selectPrepend: boolean
-}
-
 const matchTypes: Record<MatchTypes, string> = {
     'exact': "Exact match",
     'contains': "Contains value",
@@ -38,6 +25,17 @@ export const selectorType: Record<SelectorTypes, string> = {
 }
 
 class CSSLink {
+    type: SelectorTypes
+    name: string
+    value: string
+    matchCaseSensitive: boolean
+    match: MatchTypes
+    uid: string
+    selectText: boolean
+    selectBackground: boolean
+    selectAppend: boolean
+    selectPrepend: boolean
+
     constructor() {
         this.type = 'attribute';
         this.name = "";
