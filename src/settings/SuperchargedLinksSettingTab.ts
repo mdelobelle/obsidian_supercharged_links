@@ -28,7 +28,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 			.setDesc(t('settings.targetAttributes.desc', 'Frontmatter attributes to target, comma separated'))
 			.addTextArea((text) => {
 				text
-					.setPlaceholder('Enter attributes as string, comma separated')
+					.setPlaceholder(t('settings.targetAttributes.placeholder', 'Enter attributes as string, comma separated'))
 					.setValue(this.plugin.settings.targetAttributes.join(', '))
 					.onChange(async (value) => {
 						this.plugin.settings.targetAttributes = value.split(',').map(attr => attr.trim());

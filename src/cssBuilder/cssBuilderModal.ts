@@ -13,7 +13,10 @@ export function displayText(link: CSSLink, settings: SuperchargedLinksSettings):
         if (!link.value) {
             return `<b>${t('display.chooseTag', 'Please choose a tag')}</b>`;
         }
-        return `<span class="data-link-icon data-link-text data-link-icon-after" data-link-tags="${link.value}">${t('words.note', 'Note')}</span> ${t('display.hasTag', 'has tag')} <a class="tag">#${link.value}</a>`;
+        return t('display.tagPreview', '{note} has tag {tag}', {
+            note: `<span class="data-link-icon data-link-text data-link-icon-after" data-link-tags="${link.value}">${t('words.note', 'Note')}</span>`,
+            tag: `<a class="tag">#${link.value}</a>`
+        });
     }
     else if (link.type === 'attribute') {
         if (settings.targetAttributes.length === 0) {
@@ -25,26 +28,35 @@ export function displayText(link: CSSLink, settings: SuperchargedLinksSettings):
         if (!link.value){
             return `<b>${t('display.chooseAttributeValue', 'Please choose an attribute value.')}</b>`
         }
+        const value = { value: link.value };
         const matchPreview: Record<MatchTypes, string> = {
-            'exact': t('matchPreview.exact', "with value"),
-            'contains': t('matchPreview.contains', "containing"),
-            'whiteSpace': t('matchPreview.whiteSpace', "containing"),
-            'startswith': t('matchPreview.startswith', "starting with"),
-            'endswith': t('matchPreview.endswith', "ending with")
+            'exact': t('matchPreview.exact', "with value <b>{value}</b>", value),
+            'contains': t('matchPreview.contains', "containing <b>{value}</b>", value),
+            'whiteSpace': t('matchPreview.whiteSpace', "containing <b>{value}</b>", value),
+            'startswith': t('matchPreview.startswith', "starting with <b>{value}</b>", value),
+            'endswith': t('matchPreview.endswith', "ending with <b>{value}</b>", value)
         }
-        return `<span class="data-link-icon data-link-text data-link-icon-after" data-link-${link.name}="${link.value}">${t('words.note', 'Note')}</span> ${t('display.hasAttribute', 'has attribute')} <b>${link.name.replace(/-/g, ' ')}</b> ${matchPreview[link.match]} <b>${link.value}</b>.`;
+        return t('display.attributePreview', '{note} has attribute <b>{name}</b> {match}.', {
+            note: `<span class="data-link-icon data-link-text data-link-icon-after" data-link-${link.name}="${link.value}">${t('words.note', 'Note')}</span>`,
+            name: link.name.replace(/-/g, ' '),
+            match: matchPreview[link.match]
+        });
     }
     if (!link.value) {
         return `<b>${t('display.choosePath', 'Please choose a path.')}</b>`
     }
+    const value = { value: link.value };
     const matchPreviewPath: Record<MatchTypes, string> = {
-        'exact': t('matchPreviewPath.exact', "is"),
-        'contains': t('matchPreviewPath.contains', "contains"),
-        'whiteSpace': t('matchPreviewPath.whiteSpace', "contains"),
-        'startswith': t('matchPreviewPath.startswith', "starts with"),
-        'endswith': t('matchPreviewPath.endswith', "ends with")
+        'exact': t('matchPreviewPath.exact', "is <b>{value}</b>", value),
+        'contains': t('matchPreviewPath.contains', "contains <b>{value}</b>", value),
+        'whiteSpace': t('matchPreviewPath.whiteSpace', "contains <b>{value}</b>", value),
+        'startswith': t('matchPreviewPath.startswith', "starts with <b>{value}</b>", value),
+        'endswith': t('matchPreviewPath.endswith', "ends with <b>{value}</b>", value)
     }
-    return `${t('display.pathOfNote', 'The path of the')} <span class="data-link-icon data-link-text data-link-icon-after" data-link-path="${link.value}">${t('words.note', 'note')}</span> ${matchPreviewPath[link.match]} <b>${link.value}</b>`
+    return t('display.pathPreview', 'The path of the {note} {match}', {
+        note: `<span class="data-link-icon data-link-text data-link-icon-after" data-link-path="${link.value}">${t('words.noteLower', 'note')}</span>`,
+        match: matchPreviewPath[link.match]
+    })
 }
 
 export function updateDisplay(textArea: HTMLElement, link: CSSLink, settings: SuperchargedLinksSettings): boolean {
@@ -115,10 +127,7 @@ class CSSBuilderModal extends Modal {
                 ", tags chooses the tags of a note, and path considers the name of the note including in what folder it is."))
             .addDropdown(dc => {
                 Object.keys(selectorType).forEach((type: SelectorTypes) => {
-                    const label = type === 'attribute' ? t('labels.attrValue', "Attribute value")
-                        : type === 'tag' ? t('labels.tag', "Tag")
-                        : t('labels.path', "Path");
-                    dc.addOption(type, label);
+                    dc.addOption(type, t(`selectorType.${type}`, selectorType[type]));
                     if (type === this.cssLink.type) {
                         dc.setValue(type);
                     }
@@ -153,9 +162,9 @@ class CSSBuilderModal extends Modal {
         const attrValue = new Setting(this.contentEl)
             .setName(t('modal.attributeValue.name', "Value to match"))
             .setDesc(t('modal.attributeValue.desc', "Value to match."))
-            .addText(t => {
-                t.setValue(cssLink.value);
-                t.onChange(value => {
+            .addText(text => {
+                text.setValue(cssLink.value);
+                text.onChange(value => {
                         cssLink.value = value;
                         saveButton.setDisabled(updateDisplay(preview, cssLink, plugin.settings));
                 });
