@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, debounce } from "obsidian"
+import { App, Debouncer, PluginSettingTab, sanitizeHTMLToDom, Setting, debounce } from "obsidian"
 import SuperchargedLinks from "main"
 import { CSSBuilderModal, updateDisplay } from "../cssBuilder/cssBuilderModal";
 import { buildCSS } from "../cssBuilder/cssBuilder";
@@ -7,14 +7,14 @@ import { t } from "src/i18n";
 
 export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 	plugin: SuperchargedLinks;
-	debouncedGenerate: Function;
+	debouncedGenerate: Debouncer<[], Promise<void>>;
 
 	constructor(app: App, plugin: SuperchargedLinks) {
 		super(app, plugin);
 		this.plugin = plugin;
-		this.debouncedGenerate = debounce(this._generateSnippet, 1000, true);
+		this.debouncedGenerate = debounce(() => this._generateSnippet(), 1000, true);
 		// Generate CSS immediately rather than 1 second - feels laggy
-		this._generateSnippet();
+		void this._generateSnippet();
 	}
 
 	display(): void {
@@ -41,26 +41,30 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 				text.inputEl.cols = 25;
 			});
 
-		containerEl.createEl('h4', { text: t('sections.styling', 'Styling') });
+		new Setting(containerEl)
+			.setName(t('sections.styling', 'Styling'))
+			.setHeading();
 		const styleSettingDescription = containerEl.createDiv();
-		styleSettingDescription.innerHTML = t('styling.helper.html', `Styling can be done using the Style Settings plugin. 
+		styleSettingDescription.appendChild(sanitizeHTMLToDom(t('styling.helper.html', `Styling can be done using the Style Settings plugin. 
  <ol>
  <li>Create selectors down below.</li>
  <li>Go to the Style Settings tab and style your links!</li>
-</ol>`);
+</ol>`)));
 		const selectorDiv = containerEl.createDiv();
 		this.drawSelectors(selectorDiv);
 
 
-		containerEl.createEl('h4', { text: t('sections.settings', 'Settings') });
+		new Setting(containerEl)
+			.setName(t('sections.settings', 'Settings'))
+			.setHeading();
 		new Setting(containerEl)
 			.setName(t('settings.enableEditor.name', 'Enable in Editor'))
 			.setDesc(t('settings.enableEditor.desc', 'If true, this will also supercharge internal links in the editor view of a note.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableEditor)
-				toggle.onChange(value => {
+				toggle.onChange(async value => {
 					this.plugin.settings.enableEditor = value
-					this.plugin.saveSettings()
+					await this.plugin.saveSettings()
 					updateVisibleLinks(this.app, this.plugin);
 				})
 			})
@@ -70,9 +74,9 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 			.setDesc(t('settings.enableTabHeader.desc', 'If true, this will also supercharge the headers of a tab.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableTabHeader)
-				toggle.onChange(value => {
+				toggle.onChange(async value => {
 					this.plugin.settings.enableTabHeader = value
-					this.plugin.saveSettings()
+					await this.plugin.saveSettings()
 					updateVisibleLinks(this.app, this.plugin);
 				})
 			})
@@ -82,9 +86,9 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 			.setDesc(t('settings.enableFileList.desc', 'If true, this will also supercharge the file browser.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableFileList)
-				toggle.onChange(value => {
+				toggle.onChange(async value => {
 					this.plugin.settings.enableFileList = value
-					this.plugin.saveSettings()
+					await this.plugin.saveSettings()
 				})
 			});
 
@@ -93,9 +97,9 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 			.setDesc(t('settings.enableBases.desc', 'If true, this will also supercharge Obsidian Bases.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableBases)
-				toggle.onChange(value => {
+				toggle.onChange(async value => {
 					this.plugin.settings.enableBases = value
-					this.plugin.saveSettings()
+					await this.plugin.saveSettings()
 				});
 			});
 
@@ -104,9 +108,9 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 			.setDesc(t('settings.enableBacklinks.desc', 'If true, this will also supercharge plugins like the backlinks and forward links panels.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableBacklinks)
-				toggle.onChange(value => {
+				toggle.onChange(async value => {
 					this.plugin.settings.enableBacklinks = value
-					this.plugin.saveSettings()
+					await this.plugin.saveSettings()
 				});
 			});
 		new Setting(containerEl)
@@ -114,9 +118,9 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 			.setDesc(t('settings.enableQuickSwitcher.desc', 'If true, this will also supercharge the quick switcher.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableQuickSwitcher)
-				toggle.onChange(value => {
+				toggle.onChange(async value => {
 					this.plugin.settings.enableQuickSwitcher = value
-					this.plugin.saveSettings()
+					await this.plugin.saveSettings()
 				});
 			});
 		new Setting(containerEl)
@@ -124,13 +128,15 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 			.setDesc(t('settings.enableSuggestor.desc', 'If true, this will also supercharge the link autocompleter.'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.enableSuggestor)
-				toggle.onChange(value => {
+				toggle.onChange(async value => {
 					this.plugin.settings.enableSuggestor = value
-					this.plugin.saveSettings()
+					await this.plugin.saveSettings()
 				});
 			});
 
-		containerEl.createEl('h4', { text: t('sections.advanced', 'Advanced') });
+		new Setting(containerEl)
+			.setName(t('sections.advanced', 'Advanced'))
+			.setHeading();
 		// Managing choice wether you want to parse tags both from normal tags and in the frontmatter
 		new Setting(containerEl)
 			.setName(t('settings.targetTags.name', 'Parse all tags in the file'))
@@ -221,7 +227,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 					button.onClick(() => {
 						const formModal = new CSSBuilderModal(this.plugin, (newSelector) => {
 							this.plugin.settings.selectors[i] = newSelector;
-							this.plugin.saveSettings();
+							void this.plugin.saveSettings();
 							updateDisplay(s.nameEl, selector, this.plugin.settings);
 							this.generateSnippet();
 						}, selector);
@@ -233,7 +239,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 				.addButton(button => {
 					button.onClick(() => {
 						this.plugin.settings.selectors.remove(selector);
-						this.plugin.saveSettings();
+						void this.plugin.saveSettings();
 						this.drawSelectors(div);
 					});
 					button.setIcon("cross");
@@ -249,7 +255,7 @@ export default class SuperchargedLinksSettingTab extends PluginSettingTab {
 				button.onClick(() => {
 					const formModal = new CSSBuilderModal(this.plugin, (newSelector) => {
 						this.plugin.settings.selectors.push(newSelector);
-						this.plugin.saveSettings();
+						void this.plugin.saveSettings();
 						this.drawSelectors(div);
 						// TODO: Force redraw somehow?
 					});
