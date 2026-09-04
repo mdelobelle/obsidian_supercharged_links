@@ -2,19 +2,30 @@ import type { App } from "obsidian";
 import en from "./en";
 import zh from "./zh";
 
+type Dictionary = Record<string, string>;
+
+const dictionaries: Record<"en" | "zh", Dictionary> = { en, zh };
+
 let appRef: App | null = null;
 
 export function initI18n(app: App) {
   appRef = app;
 }
 
+/** Obsidian exposes the active locale on undocumented App members. */
+interface LocalizedApp {
+  i18n?: { locale?: string; language?: string };
+  localization?: { language?: string };
+}
+
 function getLang(): "en" | "zh" {
+  const localized = appRef as (App & LocalizedApp) | null;
   const l =
-    ((appRef as any)?.i18n?.locale ||
-      (appRef as any)?.i18n?.language ||
-      (appRef as any)?.localization?.language ||
-      (typeof navigator !== "undefined" ? navigator.language : "en") ||
-      "en") as string;
+    localized?.i18n?.locale ||
+    localized?.i18n?.language ||
+    localized?.localization?.language ||
+    (typeof navigator !== "undefined" ? navigator.language : "en") ||
+    "en";
   const low = l.toLowerCase();
   if (low.startsWith("zh")) return "zh";
   return "en";
@@ -31,9 +42,8 @@ export function t(
   fallback?: string,
   vars?: Record<string, string>,
 ): string {
-  const lang = getLang();
-  const dict = lang === "zh" ? zh : en;
-  const template: string = (dict as any)[key] ?? (en as any)[key] ?? fallback ?? key;
+  const dict = dictionaries[getLang()];
+  const template: string = dict[key] ?? dictionaries.en[key] ?? fallback ?? key;
   if (!vars) return template;
   return template.replace(/\{(\w+)\}/g, (match: string, name: string) =>
     Object.prototype.hasOwnProperty.call(vars, name) ? vars[name] : match,
