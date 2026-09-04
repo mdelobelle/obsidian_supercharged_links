@@ -95,12 +95,9 @@ class CSSBuilderModal extends Modal {
     cssLink: CSSLink
     saveCallback: (cssLink: CSSLink) => void;
 
-    constructor(plugin: SuperchargedLinks, saveCallback: (cssLink: CSSLink) => void, cssLink: CSSLink=null) {
+    constructor(plugin: SuperchargedLinks, saveCallback: (cssLink: CSSLink) => void, cssLink: CSSLink | null = null) {
         super(plugin.app)
-        this.cssLink = cssLink;
-        if (!cssLink) {
-            this.cssLink = new CSSLink();
-        }
+        this.cssLink = cssLink ?? new CSSLink();
         this.plugin = plugin;
         this.saveCallback = saveCallback;
     }

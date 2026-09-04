@@ -6,7 +6,7 @@ type Dictionary = Record<string, string>;
 
 const dictionaries: Record<"en" | "zh", Dictionary> = { en, zh };
 
-let appRef: App | null = null;
+let appRef: (App & LocalizedApp) | null = null;
 
 export function initI18n(app: App) {
   appRef = app;
@@ -19,11 +19,10 @@ interface LocalizedApp {
 }
 
 function getLang(): "en" | "zh" {
-  const localized = appRef as (App & LocalizedApp) | null;
   const l =
-    localized?.i18n?.locale ||
-    localized?.i18n?.language ||
-    localized?.localization?.language ||
+    appRef?.i18n?.locale ||
+    appRef?.i18n?.language ||
+    appRef?.localization?.language ||
     (typeof navigator !== "undefined" ? navigator.language : "en") ||
     "en";
   const low = l.toLowerCase();

@@ -125,7 +125,7 @@ export default class SuperchargedLinks extends Plugin {
 			const observer = new MutationObserver(() =>{ 
 				const file = this.app.workspace.getActiveFile();
 				if (file) {
-					updatePropertiesPane(container, this.app.workspace.getActiveFile(), this.app, plugin);
+					updatePropertiesPane(container, file, this.app, plugin);
 				}
 			});
 			observer.observe(container, {subtree: true, childList: true, attributes: false});
@@ -146,7 +146,7 @@ export default class SuperchargedLinks extends Plugin {
 			attributes: false
 		};
 
-		this.modalObservers.push(new MutationObserver(records => {
+		const modalObserver = new MutationObserver(records => {
 			records.forEach((mutation) => {
 				if (mutation.type === 'childList') {
 					mutation.addedNodes.forEach(n => {
@@ -166,8 +166,9 @@ export default class SuperchargedLinks extends Plugin {
 					});
 				}
 			});
-		}));
-		this.modalObservers.last().observe(doc.body, config);
+		});
+		this.modalObservers.push(modalObserver);
+		modalObserver.observe(doc.body, config);
 	}
 
 	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false, filter_collapsible: boolean = false) {
@@ -214,7 +215,7 @@ export default class SuperchargedLinks extends Plugin {
 		}
 	}
 
-	_watchContainer(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, filter_collapsible: boolean = false) {
+	_watchContainer(viewType: string | null, container: HTMLElement, plugin: SuperchargedLinks, selector: string, filter_collapsible: boolean = false) {
 		const observer = new MutationObserver(() => {
 			plugin.updateContainer(container, plugin, selector, filter_collapsible);
 		});

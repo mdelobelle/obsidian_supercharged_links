@@ -7,6 +7,9 @@
     "target": "ES2018",
     "allowJs": true,
     "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noEmitOnError": true,
+    "skipLibCheck": true,
     "moduleResolution": "node",
     "importHelpers": true,
     "lib": [

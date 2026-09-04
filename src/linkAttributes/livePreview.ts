@@ -89,11 +89,11 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                 }
                 const mdInfo = view.state.field(editorInfoField);
                 let lastAttributes = {};
-                let iconDecoAfter: Decoration = null;
-                let iconDecoAfterWhere: number = null;
+                let iconDecoAfter: Decoration | null = null;
+                let iconDecoAfterWhere: number | null = null;
 
-                let mdAliasFrom: number = null;
-                let mdAliasTo: number = null;
+                let mdAliasFrom: number | null = null;
+                let mdAliasTo: number | null = null;
                 for (let {from, to} of view.visibleRanges) {
                     // When updating, only changes the range given.
                     if (updateFrom !== -1 && (to < updateFrom || from > updateTo)) continue;
@@ -129,7 +129,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
 
                                 if (!isPipe && !isAlias) {
                                     if (iconDecoAfter) {
-                                        builder.add(iconDecoAfterWhere, iconDecoAfterWhere, iconDecoAfter);
+                                        builder.add(iconDecoAfterWhere!, iconDecoAfterWhere!, iconDecoAfter);
                                         iconDecoAfter = null;
                                         iconDecoAfterWhere = null;
                                     }
@@ -174,10 +174,11 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                                 class: "data-link-text"
                                             });
 
-                                            builder.add(mdAliasFrom, mdAliasFrom, iconDecoBefore);
-                                            builder.add(mdAliasFrom, mdAliasTo, deco);
+                                            // A markdown URL is only reached after its alias node set these.
+                                            builder.add(mdAliasFrom!, mdAliasFrom!, iconDecoBefore);
+                                            builder.add(mdAliasFrom!, mdAliasTo!, deco);
                                             if (iconDecoAfter) {
-                                                builder.add(mdAliasTo, mdAliasTo, iconDecoAfter);
+                                                builder.add(mdAliasTo!, mdAliasTo!, iconDecoAfter);
                                                 iconDecoAfter = null;
                                                 iconDecoAfterWhere = null;
                                                 mdAliasFrom = null;
