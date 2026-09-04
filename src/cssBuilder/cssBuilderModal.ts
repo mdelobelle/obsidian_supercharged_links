@@ -1,6 +1,7 @@
 import SuperchargedLinks from "main"
 import {
     Modal,
+    sanitizeHTMLToDom,
     Setting
 } from "obsidian"
 import {matchTypes, CSSLink, selectorType, SelectorTypes, MatchTypes} from './cssLink'
@@ -83,7 +84,8 @@ export function updateDisplay(textArea: HTMLElement, link: CSSLink, settings: Su
             disabled = true;
         }
     }
-    textArea.innerHTML = toDisplay;
+    textArea.empty();
+    textArea.appendChild(sanitizeHTMLToDom(toDisplay));
     return disabled;
 }
 
@@ -264,15 +266,14 @@ class CSSBuilderModal extends Modal {
 
 
         this.contentEl.createEl('h4', {text: t('modal.result', 'Result')});
-        const modal = this;
         const saveButton = new Setting(this.contentEl)
             .setName(t('modal.preview', "Preview"))
             .setDesc("")
             .addButton(b => {
                 b.setButtonText(t('modal.save', "Save"))
                 b.onClick(() => {
-                    modal.saveCallback(cssLink);
-                    modal.close();
+                    this.saveCallback(cssLink);
+                    this.close();
                 });
             });
         // generate button

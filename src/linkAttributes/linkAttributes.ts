@@ -178,7 +178,7 @@ export function updateElLinks(app: App, plugin: SuperchargedLinks, el: HTMLEleme
 
 export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app: App, plugin: SuperchargedLinks) {
     const frontmatter = app.metadataCache.getCache(file.path)?.frontmatter;
-    if(!!frontmatter) {
+    if(frontmatter) {
         const nodes = propertiesEl.querySelectorAll("div.multi-select-pill-content");
         for (let i = 0; i < nodes.length; ++i) {
             const el = nodes[i] as HTMLElement;
@@ -204,7 +204,7 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
                     }
                 }
             }
-            if (!!foundS) {
+            if (foundS) {
                 updateDivExtraAttributes(plugin.app, plugin.settings, el, "", foundS);
             }
         }
@@ -229,7 +229,7 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
                     foundS = split[0];
                 }
             }
-            if (!!foundS) {
+            if (foundS) {
                 updateDivExtraAttributes(plugin.app, plugin.settings, el, "", foundS);
             }
         }
@@ -246,7 +246,7 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
 
             // @ts-ignore
             const metadata = leaf.view?.metadataEditor?.contentEl;
-            if (!!metadata) {
+            if (metadata) {
                 updatePropertiesPane(metadata, file, app, plugin);
             }
 

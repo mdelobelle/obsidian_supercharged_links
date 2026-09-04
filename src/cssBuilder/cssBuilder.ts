@@ -72,7 +72,7 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
     ];
 
 
-    selectors.forEach((selector, i) => {
+    selectors.forEach((selector) => {
         if (selector.selectText) {
             instructions.push(`    --${selector.uid}-color: ${colors[hash(selector.uid) % 36]};`);
             instructions.push(`    --${selector.uid}-weight: initial;`);
@@ -145,7 +145,7 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
         "settings:",
     ]);
 
-    selectors.forEach((selector, i) => {
+    selectors.forEach((selector) => {
         let name = selector.name;
         let value = selector.value;
         if (selector.type === 'tag') {
@@ -228,7 +228,7 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
     instructions.push("*/");
 
     const vault = plugin.app.vault;
-    const configDir = vault.configDir ?? ".obsidian";
+    const configDir = vault.configDir;
     const pathDir = configDir + "/snippets";
     await vault.adapter.mkdir(pathDir);
     const path = pathDir + "/supercharged-links-gen.css";
@@ -239,7 +239,6 @@ export async function buildCSS(selectors: CSSLink[], plugin: SuperchargedLinks) 
 
     // Activate snippet
     if (plugin.settings.activateSnippet) {
-        // @ts-ignore
         const customCss = plugin.app.customCss;
         customCss.enabledSnippets.add('supercharged-links-gen');
         customCss.requestLoadSnippets();
