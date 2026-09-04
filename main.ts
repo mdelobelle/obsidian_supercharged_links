@@ -121,7 +121,7 @@ export default class SuperchargedLinks extends Plugin {
 		const propertyLeaves = this.app.workspace.getLeavesOfType("file-properties");
 		for (let i = 0; i < propertyLeaves.length; i++) {
 			const container = propertyLeaves[i].view.containerEl;
-			let observer = new MutationObserver((records, _) =>{
+			let observer = new MutationObserver((records, _) =>{ 
 				const file = this.app.workspace.getActiveFile();
 				if (!!file) {
 					updatePropertiesPane(container, this.app.workspace.getActiveFile(), this.app, plugin);
@@ -132,9 +132,9 @@ export default class SuperchargedLinks extends Plugin {
 			// TODO: No proper unloading!
 		}
 		plugin.registerViewType('file-properties', plugin, 'div.internal-link > .multi-select-pill-content');
-		if (plugin.app?.plugins?.plugins?.['notebook-navigator']) {
+		if (plugin.app?.plugins?.plugins?.['notebook-navigator'] || plugin.app?.plugins?.plugins?.['notebook-navigator-emile']) {
 			plugin.registerViewType('notebook-navigator', plugin, 'span.nn-shortcut-label');
-			plugin.registerViewType('notebook-navigator', plugin, 'div.nn-file-name');
+			plugin.registerViewType('notebook-navigator', plugin, '.nn-file-name');
 		}
 	}
 
