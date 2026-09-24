@@ -31,7 +31,7 @@ export function fetchTargetAttributesSync(app: App, settings: SuperchargedLinksS
     }
 
     if (settings.targetTags) {
-        new_props["tags"] += getAllTags(cache).join(' ');
+        new_props["tags"] += getAllTags(cache)?.join(' ') ?? '';
     }
 
     if (addDataHref) {
@@ -133,7 +133,7 @@ function updateLinkExtraAttributes(app: App, settings: SuperchargedLinksSettings
 }
 
 export function updateDivExtraAttributes(app: App, settings: SuperchargedLinksSettings, link: HTMLElement, destName: string, linkName?: string, filter_collapsible: boolean = false) {
-    if (filter_collapsible && link.parentElement.getAttribute("class").contains('mod-collapsible')) return; // Bookmarks Folder
+    if (filter_collapsible && link.parentElement?.getAttribute("class")?.contains('mod-collapsible')) return; // Bookmarks Folder
     if (!linkName) {
         linkName = link.textContent;
     }
@@ -178,12 +178,15 @@ export function updateElLinks(app: App, plugin: SuperchargedLinks, el: HTMLEleme
 
 export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app: App, plugin: SuperchargedLinks) {
     const frontmatter = app.metadataCache.getCache(file.path)?.frontmatter;
-    if(!!frontmatter) {
+    if(frontmatter) {
         const nodes = propertiesEl.querySelectorAll("div.multi-select-pill-content");
         for (let i = 0; i < nodes.length; ++i) {
             const el = nodes[i] as HTMLElement;
             const linkText = el.textContent;
-            const keyEl = el.parentElement.parentElement.parentElement.parentElement.children[0].children[1];
+            const keyEl = el.parentElement?.parentElement?.parentElement?.parentElement?.children[0]?.children[1];
+            if (!keyEl) {
+                continue;
+            }
             // @ts-ignore
             const key = keyEl.value;
             const listOfLinks: [string] = frontmatter[key];
@@ -204,7 +207,7 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
                     }
                 }
             }
-            if (!!foundS) {
+            if (foundS) {
                 updateDivExtraAttributes(plugin.app, plugin.settings, el, "", foundS);
             }
         }
@@ -212,14 +215,17 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
         for (let i = 0; i < singleNodes.length; ++i) {
             const el = singleNodes[i] as HTMLElement;
             const linkText = el.textContent;
-            const keyEl = el.parentElement.parentElement.parentElement.children[0].children[1];
+            const keyEl = el.parentElement?.parentElement?.parentElement?.children[0]?.children[1];
+            if (!keyEl) {
+                continue;
+            }
             // @ts-ignore
             const key = keyEl.value;
             const link: string = frontmatter[key];
             if (!link) {
                 continue;
             }
-            let foundS: string = null;
+            let foundS: string | null = null;
             if (link?.length > 4 && link.startsWith("[[") && link.endsWith("]]")) {
                 const slicedS = link.slice(2, -2);
                 const split = slicedS.split("|");
@@ -229,7 +235,7 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
                     foundS = split[0];
                 }
             }
-            if (!!foundS) {
+            if (foundS) {
                 updateDivExtraAttributes(plugin.app, plugin.settings, el, "", foundS);
             }
         }
@@ -246,7 +252,7 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
 
             // @ts-ignore
             const metadata = leaf.view?.metadataEditor?.contentEl;
-            if (!!metadata) {
+            if (metadata) {
                 updatePropertiesPane(metadata, file, app, plugin);
             }
 

@@ -9,6 +9,7 @@ import {
 import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
 import { Prec } from "@codemirror/state";
 import { buildCMViewPlugin } from "./src/linkAttributes/livePreview";
+import { initI18n } from "src/i18n";
 
 export default class SuperchargedLinks extends Plugin {
 	settings: SuperchargedLinksSettings;
@@ -17,21 +18,20 @@ export default class SuperchargedLinks extends Plugin {
 	private modalObservers: MutationObserver[] = [];
 
 	async onload(): Promise<void> {
-		console.log('Supercharged links loaded');
 		await this.loadSettings();
+		initI18n(this.app);
 
 		this.addSettingTab(new SuperchargedLinksSettingTab(this.app, this));
 		this.registerMarkdownPostProcessor((el, ctx) => {
 			updateElLinks(this.app, this, el, ctx)
 		});
 
-		const plugin = this;
-		const updateLinks = function(_file: TFile) {
-			updateVisibleLinks(plugin.app, plugin);
-			plugin.observers.forEach(([observer, type, own_class]) => {
-				const leaves = plugin.app.workspace.getLeavesOfType(type);
+		const updateLinks = (_file: TFile) => {
+			updateVisibleLinks(this.app, this);
+			this.observers.forEach(([, type, own_class]) => {
+				const leaves = this.app.workspace.getLeavesOfType(type);
 				leaves.forEach(leaf => {
-					plugin.updateContainer(leaf.view.containerEl, plugin, own_class);
+					this.updateContainer(leaf.view.containerEl, this, own_class);
 				})
 			});
 		}
@@ -44,12 +44,12 @@ export default class SuperchargedLinks extends Plugin {
 
 		this.app.workspace.onLayoutReady(() => {
 			this.initViewObservers(this);
-			this.initModalObservers(this, document);
+			this.initModalObservers(this, this.app.workspace.containerEl.doc);
 			updateVisibleLinks(this.app, this);
 		});
 
 		// Initialization
-		this.registerEvent(this.app.workspace.on("window-open", (window, win) => this.initModalObservers(this, window.getContainer().doc)));
+		this.registerEvent(this.app.workspace.on("window-open", (window) => this.initModalObservers(this, window.getContainer().doc)));
 
 		// Update when 
 		// Debounced to prevent lag when writing
@@ -70,7 +70,7 @@ export default class SuperchargedLinks extends Plugin {
 
 	initViewObservers(plugin: SuperchargedLinks) {
 		// Reset observers
-		plugin.observers.forEach(([observer, type]) => {
+		plugin.observers.forEach(([observer]) => {
 			observer.disconnect();
 		});
 		plugin.observers = [];
@@ -98,7 +98,8 @@ export default class SuperchargedLinks extends Plugin {
 
 		plugin.registerViewType('recent-files', plugin, '.nav-file-title-content');
 		plugin.registerViewType('bookmarks', plugin, '.tree-item-inner', false, true);
-		// @ts-ignore
+		plugin.registerViewType('layer-view', plugin, '.internal-link');
+		plugin.registerViewType('git-view', plugin, '.tree-item-inner');
 		if (plugin.app?.internalPlugins?.plugins?.bases?.enabled && plugin.settings.enableBases) {
 			// console.log('Supercharged links: Enabling bases support');
 			plugin.registerViewType('bases', plugin, 'span.internal-link');
@@ -116,9 +117,9 @@ export default class SuperchargedLinks extends Plugin {
 		}
 		if (plugin.app?.plugins?.plugins?.['similar-notes']) {
 			plugin.registerViewType('markdown', plugin, '.similar-notes-pane .tree-item-inner', true)
+			plugin.registerViewType('similar-notes-sidebar', plugin, '.similar-notes-pane .tree-item-inner', true)
 		}
 		// If backlinks in editor is on
-		// @ts-ignore
 		if (plugin.app?.internalPlugins?.plugins?.backlink?.enabled && plugin.app?.internalPlugins?.plugins?.backlink?.instance?.options?.backlinkInDocument) {
 			// console.log("Supercharged links: Enabling backlinks in document support");
 			plugin.registerViewType('markdown', plugin, '.embedded-backlinks .tree-item-inner', true);
@@ -126,10 +127,10 @@ export default class SuperchargedLinks extends Plugin {
 		const propertyLeaves = this.app.workspace.getLeavesOfType("file-properties");
 		for (let i = 0; i < propertyLeaves.length; i++) {
 			const container = propertyLeaves[i].view.containerEl;
-			let observer = new MutationObserver((records, _) =>{
+			const observer = new MutationObserver(() =>{ 
 				const file = this.app.workspace.getActiveFile();
-				if (!!file) {
-					updatePropertiesPane(container, this.app.workspace.getActiveFile(), this.app, plugin);
+				if (file) {
+					updatePropertiesPane(container, file, this.app, plugin);
 				}
 			});
 			observer.observe(container, {subtree: true, childList: true, attributes: false});
@@ -137,9 +138,9 @@ export default class SuperchargedLinks extends Plugin {
 			// TODO: No proper unloading!
 		}
 		plugin.registerViewType('file-properties', plugin, 'div.internal-link > .multi-select-pill-content');
-		if (plugin.app?.plugins?.plugins?.['notebook-navigator']) {
+		if (plugin.app?.plugins?.plugins?.['notebook-navigator'] || plugin.app?.plugins?.plugins?.['notebook-navigator-emile']) {
 			plugin.registerViewType('notebook-navigator', plugin, 'span.nn-shortcut-label');
-			plugin.registerViewType('notebook-navigator', plugin, 'div.nn-file-name');
+			plugin.registerViewType('notebook-navigator', plugin, '.nn-file-name');
 		}
 	}
 
@@ -150,7 +151,7 @@ export default class SuperchargedLinks extends Plugin {
 			attributes: false
 		};
 
-		this.modalObservers.push(new MutationObserver(records => {
+		const modalObserver = new MutationObserver(records => {
 			records.forEach((mutation) => {
 				if (mutation.type === 'childList') {
 					mutation.addedNodes.forEach(n => {
@@ -170,8 +171,9 @@ export default class SuperchargedLinks extends Plugin {
 					});
 				}
 			});
-		}));
-		this.modalObservers.last().observe(doc.body, config);
+		});
+		this.modalObservers.push(modalObserver);
+		modalObserver.observe(doc.body, config);
 	}
 
 	registerViewType(viewTypeName: string, plugin: SuperchargedLinks, selector: string, updateDynamic = false, filter_collapsible: boolean = false) {
@@ -205,7 +207,7 @@ export default class SuperchargedLinks extends Plugin {
 		if (!plugin.settings.enableFileList && container.getAttribute("data-type") === "file-explorer") return;
 		const nodes = container.findAll(selector);
 		for (let i = 0; i < nodes.length; ++i) {
-			const el = nodes[i] as HTMLElement;
+			const el = nodes[i];
 			updateDivExtraAttributes(plugin.app, plugin.settings, el, "", undefined, filter_collapsible);
 		}
 	}
@@ -213,13 +215,13 @@ export default class SuperchargedLinks extends Plugin {
 	removeFromContainer(container: HTMLElement, selector: string) {
 		const nodes = container.findAll(selector);
 		for (let i = 0; i < nodes.length; ++i) {
-			const el = nodes[i] as HTMLElement;
+			const el = nodes[i];
 			clearExtraAttributes(el);
 		}
 	}
 
-	_watchContainer(viewType: string, container: HTMLElement, plugin: SuperchargedLinks, selector: string, filter_collapsible: boolean = false) {
-		let observer = new MutationObserver((records, _) => {
+	_watchContainer(viewType: string | null, container: HTMLElement, plugin: SuperchargedLinks, selector: string, filter_collapsible: boolean = false) {
+		const observer = new MutationObserver(() => {
 			plugin.updateContainer(container, plugin, selector, filter_collapsible);
 		});
 		observer.observe(container, { subtree: true, childList: true, attributes: false });
@@ -232,7 +234,7 @@ export default class SuperchargedLinks extends Plugin {
 		// Used for efficient updating of the backlinks panel
 		// Only loops through newly added DOM nodes instead of changing all of them
 		if (!plugin.settings.enableBacklinks) return;
-		let observer = new MutationObserver((records, _) => {
+		const observer = new MutationObserver((records) => {
 			records.forEach((mutation) => {
 				if (mutation.type === 'childList') {
 					mutation.addedNodes.forEach((n) => {
@@ -241,7 +243,7 @@ export default class SuperchargedLinks extends Plugin {
 							if (n.className.includes && typeof n.className.includes === 'function' && n.className.includes(parent_class)) {
 								const fileDivs = (n as HTMLElement).findAll(selector);
 								for (let i = 0; i < fileDivs.length; ++i) {
-									const link = fileDivs[i] as HTMLElement;
+									const link = fileDivs[i];
 									updateDivExtraAttributes(plugin.app, plugin.settings, link, "");
 								}
 							}
@@ -266,7 +268,6 @@ export default class SuperchargedLinks extends Plugin {
 		for (const observer of this.modalObservers) {
 			observer.disconnect();
 		}
-		console.log('Supercharged links unloaded');
 	}
 
 	async loadSettings() {

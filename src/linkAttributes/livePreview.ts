@@ -1,11 +1,10 @@
-import {App, debounce, Debouncer, editorViewField, MarkdownView, TFile} from "obsidian";
+import {App, editorInfoField, TFile} from "obsidian";
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
 import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
 import {RangeSet, RangeSetBuilder} from "@codemirror/state";
 import {syntaxTree} from "@codemirror/language";
 import {tokenClassNodeProp} from "@codemirror/language";
 import {fetchTargetAttributesSync, processValue} from "./linkAttributes";
-import {DefaultFunctions} from "obsidian-dataview/lib/expression/functions";
 
 export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings)
 {
@@ -23,7 +22,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
         }
 
         toDOM() {
-            let headerEl = document.createElement("span");
+            const headerEl = createSpan();
             headerEl.setAttrs(this.attributes);
             for (let key in this.attributes) {
                 
@@ -62,7 +61,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                 if (update.docChanged) {
                     this.decorations = this.decorations.map(update.changes);
 
-                    update.changes.iterChanges((fromA, toA, fromB, toB, t) => {
+                    update.changes.iterChanges((_fromA, _toA, fromB, toB) => {
                         // Update all 'line blocks' between the range changed. Prevents weird graphical bugs
                         const minFrom = update.view.lineBlockAt(fromB).from;
                         const maxTo = update.view.lineBlockAt(toB).to;
@@ -88,13 +87,13 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                 if (!settings.enableEditor) {
                     return builder.finish();
                 }
-                const mdView = view.state.field(editorViewField) as MarkdownView;
+                const mdInfo = view.state.field(editorInfoField);
                 let lastAttributes = {};
-                let iconDecoAfter: Decoration = null;
-                let iconDecoAfterWhere: number = null;
+                let iconDecoAfter: Decoration | null = null;
+                let iconDecoAfterWhere: number | null = null;
 
-                let mdAliasFrom: number = null;
-                let mdAliasTo: number = null;
+                let mdAliasFrom: number | null = null;
+                let mdAliasTo: number | null = null;
                 for (let {from, to} of view.visibleRanges) {
                     // When updating, only changes the range given.
                     if (updateFrom !== -1 && (to < updateFrom || from > updateTo)) continue;
@@ -130,7 +129,7 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
 
                                 if (!isPipe && !isAlias) {
                                     if (iconDecoAfter) {
-                                        builder.add(iconDecoAfterWhere, iconDecoAfterWhere, iconDecoAfter);
+                                        builder.add(iconDecoAfterWhere!, iconDecoAfterWhere!, iconDecoAfter);
                                         iconDecoAfter = null;
                                         iconDecoAfterWhere = null;
                                     }
@@ -138,12 +137,18 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                 if (isLink && !isAlias && !isPipe || isMDUrl) {
                                     let linkText = view.state.doc.sliceString(node.from, node.to);
                                     linkText = linkText.split("#")[0];
-                                    let file = app.metadataCache.getFirstLinkpathDest(linkText, mdView.file.basename);
+                                    let file = app.metadataCache.getFirstLinkpathDest(linkText, mdInfo.file?.basename ?? "");
                                     if (isMDUrl && !file) {
                                         try {
-                                            file = app.vault.getAbstractFileByPath(decodeURIComponent(linkText)) as TFile;
+                                            const target = app.vault.getAbstractFileByPath(decodeURIComponent(linkText));
+                                            if (target instanceof TFile) {
+                                                file = target;
+                                            }
                                         }
-                                        catch(e) {}
+                                        catch {
+                                            // decodeURIComponent throws on malformed escape sequences;
+                                            // such a link simply has no target to supercharge.
+                                        }
                                     }
                                     if (file) {
                                         let _attributes = fetchTargetAttributesSync(app, settings, file, true);
@@ -169,10 +174,11 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                                                 class: "data-link-text"
                                             });
 
-                                            builder.add(mdAliasFrom, mdAliasFrom, iconDecoBefore);
-                                            builder.add(mdAliasFrom, mdAliasTo, deco);
+                                            // A markdown URL is only reached after its alias node set these.
+                                            builder.add(mdAliasFrom!, mdAliasFrom!, iconDecoBefore);
+                                            builder.add(mdAliasFrom!, mdAliasTo!, deco);
                                             if (iconDecoAfter) {
-                                                builder.add(mdAliasTo, mdAliasTo, iconDecoAfter);
+                                                builder.add(mdAliasTo!, mdAliasTo!, iconDecoAfter);
                                                 iconDecoAfter = null;
                                                 iconDecoAfterWhere = null;
                                                 mdAliasFrom = null;
