@@ -74,7 +74,11 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                             this.buildDecorations(update.view, minFrom, maxTo)]);
                     });
                 }
-                else if (update.viewportChanged) {
+                else if (update.viewportChanged || syntaxTree(update.startState) !== syntaxTree(update.state)) {
+                    // The syntax tree only covers the first Work.InitViewport characters when a
+                    // view opens; the rest is parsed in the background. That completing is neither
+                    // a doc nor a viewport change, so rebuild on it too or the tail of a long note
+                    // never gets decorated.
                     this.decorations = this.buildDecorations(update.view);
                 }
             }
@@ -208,6 +212,12 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                         }
                     })
 
+                }
+                // The after-widget is only flushed when a later token node is visited, and link
+                // formatting tokens return early. Nothing countable follows the last link in the
+                // walked range, so flush it here or that link loses its widget.
+                if (iconDecoAfter) {
+                    builder.add(iconDecoAfterWhere!, iconDecoAfterWhere!, iconDecoAfter);
                 }
                 return builder.finish();
             }
