@@ -1,4 +1,4 @@
-import { App, getAllTags, getLinkpath, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile } from "obsidian"
+import { App, getAllTags, getLinkpath, LinkCache, MarkdownPostProcessorContext, MarkdownView, TFile, WorkspaceLeaf } from "obsidian"
 import { SuperchargedLinksSettings } from "src/settings/SuperchargedLinksSettings"
 import SuperchargedLinks from "../../main";
 
@@ -246,6 +246,17 @@ export function updatePropertiesPane(propertiesEl: HTMLElement, file: TFile, app
 export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
     const settings = plugin.settings;
     app.workspace.iterateRootLeaves((leaf) => {
+        const tabHeader = (leaf as WorkspaceLeaf & { tabHeaderInnerTitleEl: HTMLElement }).tabHeaderInnerTitleEl;
+        // Tabs restored at startup stay deferred (no MarkdownView) until first focused,
+        // so take the file path from the view state to supercharge their headers.
+        if (leaf.isDeferred) {
+            const viewState = leaf.getViewState();
+            const path = viewState.state?.file;
+            if (settings.enableTabHeader && viewState.type === "markdown" && typeof path === "string") {
+                updateDivExtraAttributes(app, settings, tabHeader, "", path);
+            }
+            return;
+        }
         if (leaf.view instanceof MarkdownView && leaf.view.file) {
             const file: TFile = leaf.view.file;
             const cachedFile = app.metadataCache.getFileCache(file);
@@ -256,8 +267,6 @@ export function updateVisibleLinks(app: App, plugin: SuperchargedLinks) {
                 updatePropertiesPane(metadata, file, app, plugin);
             }
 
-            //@ts-ignore
-            const tabHeader: HTMLElement = leaf.tabHeaderInnerTitleEl;
             if (settings.enableTabHeader) {
                 // Supercharge tab headers
                 updateDivExtraAttributes(app, settings, tabHeader, "", file.path);
