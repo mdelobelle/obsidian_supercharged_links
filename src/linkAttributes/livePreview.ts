@@ -1,10 +1,24 @@
-import {App, editorInfoField, TFile} from "obsidian";
+import {App, editorInfoField, MarkdownView, TFile} from "obsidian";
 import {SuperchargedLinksSettings} from "../settings/SuperchargedLinksSettings";
 import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
-import {RangeSet, RangeSetBuilder} from "@codemirror/state";
+import {RangeSet, RangeSetBuilder, StateEffect} from "@codemirror/state";
 import {syntaxTree} from "@codemirror/language";
 import {tokenClassNodeProp} from "@codemirror/language";
 import {fetchTargetAttributesSync, processValue} from "./linkAttributes";
+
+// Dispatched to open editors when metadata changes. Live preview decorations
+// otherwise only rebuild on doc or viewport changes, so a property change in a
+// linked file would not show until the note itself was edited.
+const refreshLinkDecorations = StateEffect.define<null>();
+
+export function refreshLivePreviewLinks(app: App) {
+    app.workspace.iterateAllLeaves(leaf => {
+        if (!(leaf.view instanceof MarkdownView)) return;
+        // `cm` is the editor's underlying EditorView; not part of the public API types.
+        const cm = (leaf.view.editor as unknown as { cm?: EditorView }).cm;
+        cm?.dispatch({effects: refreshLinkDecorations.of(null)});
+    });
+}
 
 export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings)
 {
@@ -74,7 +88,8 @@ export function buildCMViewPlugin(app: App, _settings: SuperchargedLinksSettings
                             this.buildDecorations(update.view, minFrom, maxTo)]);
                     });
                 }
-                else if (update.viewportChanged) {
+                else if (update.viewportChanged
+                    || update.transactions.some(tr => tr.effects.some(e => e.is(refreshLinkDecorations)))) {
                     this.decorations = this.buildDecorations(update.view);
                 }
             }
