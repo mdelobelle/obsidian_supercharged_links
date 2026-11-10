@@ -8,7 +8,7 @@ import {
 } from "src/linkAttributes/linkAttributes"
 import { SuperchargedLinksSettings, DEFAULT_SETTINGS } from "src/settings/SuperchargedLinksSettings"
 import { Prec } from "@codemirror/state";
-import { buildCMViewPlugin } from "./src/linkAttributes/livePreview";
+import { buildCMViewPlugin, refreshLivePreviewLinks } from "./src/linkAttributes/livePreview";
 import { initI18n } from "src/i18n";
 
 export default class SuperchargedLinks extends Plugin {
@@ -34,6 +34,7 @@ export default class SuperchargedLinks extends Plugin {
 					this.updateContainer(leaf.view.containerEl, this, own_class);
 				})
 			});
+			refreshLivePreviewLinks(this.app);
 		}
 
 		// Live preview
